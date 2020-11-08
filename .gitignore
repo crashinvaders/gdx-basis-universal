@@ -1,0 +1,8 @@
+/.gradle/
+/.idea/
+
+/native-lib/build/
+/native-lib/libs/
+/native-lib/jni/**/*.*
+!/native-lib/jni/src/*
+!/native-lib/jni/basisu/*

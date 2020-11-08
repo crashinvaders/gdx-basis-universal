@@ -1,0 +1,29 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+        maven { url 'https://plugins.gradle.org/m2/' }
+    }
+    dependencies {
+        classpath "com.badlogicgames.gdx:gdx-jnigen-gradle:2.0.0-SNAPSHOT"
+    }
+}
+
+allprojects {
+    apply plugin: "idea"
+
+    group 'org.example'
+    version '1.0-SNAPSHOT'
+
+    repositories {
+        google()
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+        maven { url "https://repo1.maven.org/maven2/" }
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+    }
+}

@@ -1,0 +1,77 @@
+apply plugin: 'java'
+
+sourceCompatibility = 8.0
+targetCompatibility = 8.0
+compileJava.options.incremental = true
+
+sourceSets.main.java.srcDirs += ['src/']
+sourceSets.main.resources.srcDirs += ['libs/']
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+dependencies {
+    implementation files('libs/my-native-lib-natives.jar')
+
+    implementation 'com.badlogicgames.gdx:gdx-jnigen:1.9.12'
+}
+
+compileJava.options.headerOutputDirectory = file("jni")
+
+//apply plugin: "com.badlogicgames.gdx.gdx-jnigen"
+//
+//jnigen {
+//    sharedLibName = "my-native-lib"
+//
+//    nativeCodeGenerator {
+//        sourceDir = '/src'
+//        excludes = ['JniGenCompiler.java']
+//    }
+//
+//    all {
+//        headerDirs = ["src"]
+//
+//        cFlags += " -fvisibility=hidden "
+//        cppFlags += " -std=c++11 -fvisibility=hidden "
+//        linkerFlags += " -fvisibility=hidden "
+//    }
+//    add(Windows, x32)
+//    add(Windows, x64)
+//    add(Linux, x32)
+//    add(Linux, x64)
+//    add(Linux, x32, ARM)
+//    add(Linux, x64, ARM)
+//    add(MacOsX, x64)
+////    add(Android)
+////    add(IOS)
+//}
+
+//jnigen {
+//    sharedLibName = "my-native-lib"
+//    subProjectDir = "native-lib/"
+////    libsDir = "libs"
+//    temporaryDir = "target"
+//    libsDir = "libs"
+//
+//    nativeCodeGenerator {
+//        sourceDir = '/src'
+//        excludes = ['JniGenCompiler.java']
+//    }
+//
+//    add(Windows, x32) {
+//        cppFlags += " -DWIN32 "
+//    }
+//    add(Windows, x64) {
+//        cppFlags += " -DWIN32 "
+//    }
+//    add(Linux, x32) {
+//    }
+//    add(Linux, x64) {
+//    }
+//    add(Linux, x32, ARM) {
+//    }
+//    add(Linux, x64, ARM) {
+//    }
+//    add(MacOsX, x64) {
+//    }
+//}
