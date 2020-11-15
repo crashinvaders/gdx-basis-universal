@@ -87,6 +87,8 @@ namespace basisuUtils {
             const uint32_t bytesPerLine = origWidth * bytesPerPixel;
             const uint32_t bytesPerSlice = bytesPerLine * origHeight;
 
+            cout << LOG_TAG << "Uncompressed conversion bytes per pixel: " << bytesPerPixel << endl;
+
             out.resize(bytesPerSlice);
 
             status = transcoder.transcode_image_level(
@@ -123,6 +125,8 @@ namespace basisuUtils {
         }
 
         transcoder.stop_transcoding();
+
+        cout << LOG_TAG << "Successfully transcoded!" << endl;
 
         return status;
     }
