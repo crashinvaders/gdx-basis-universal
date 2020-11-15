@@ -9,5 +9,6 @@
 /native-lib/jni/target
 /native-lib/jni/test/build/
 /native-lib/jni/build*.xml
+/native-lib/jni/*.c
 /native-lib/jni/*.cpp
 /native-lib/jni/*.h
