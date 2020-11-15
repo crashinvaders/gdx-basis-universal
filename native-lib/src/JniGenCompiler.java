@@ -4,10 +4,11 @@ import com.badlogic.gdx.jnigen.BuildTarget.TargetOs;
 public class JniGenCompiler {
     private static final String[] HEADERS = {
             "src",
-            "basisu",
     };
-    private static final String[] EXCLUDED_CPP = {
-//            "basisu/basisu_transcoder.cpp",
+    private static final String[] EXCLUDES = {
+            "test/**",
+            ".vscode/**",
+            "build/**"
     };
 
     public static void main(String[] args) throws Exception {
@@ -34,7 +35,8 @@ public class JniGenCompiler {
 
     private static BuildTarget prepare(BuildTarget target) {
         target.headerDirs = HEADERS;
-        target.cppExcludes = EXCLUDED_CPP;
+        target.cExcludes = EXCLUDES;
+        target.cppExcludes = EXCLUDES;
 
         target.cFlags += " -fvisibility=hidden ";
         target.cppFlags += " -std=c++11 -fvisibility=hidden ";
