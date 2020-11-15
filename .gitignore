@@ -3,12 +3,9 @@
 
 /native-lib/build/
 /native-lib/libs/
+/native-lib/jni/*.*
 /native-lib/jni/.vscode
 /native-lib/jni/build
 /native-lib/jni/jni-headers
 /native-lib/jni/target
-/native-lib/jni/test/build/
-/native-lib/jni/build*.xml
-/native-lib/jni/*.c
-/native-lib/jni/*.cpp
-/native-lib/jni/*.h
+/native-lib/jni/test/build
