@@ -9,11 +9,11 @@ include_directories("." "../src")
 
 file(GLOB INCLUDES 
     "./*.h" 
-    "../src/*.h"
+    "../src/basisu*.h"
 )
 file(GLOB SOURCES 
     "./*.cpp"
-    "../src/*.cpp"
+    "../src/basisu*.cpp"
 )
 
 add_executable(jnigen-test ${INCLUDES} ${SOURCES})

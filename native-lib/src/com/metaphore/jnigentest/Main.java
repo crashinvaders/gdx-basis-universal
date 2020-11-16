@@ -57,6 +57,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
 //        new JniGenSharedLibraryLoader("my-native-lib-natives.jar").load("my-native-lib");
         new JniGenSharedLibraryLoader().load("my-native-lib");
+//        System.loadLibrary("windows64/my-native-lib64.dll");
         System.out.println("Add: " + add(1, 2));
 
         byte[] basisBytes;
@@ -93,7 +94,8 @@ public class Main {
 //        BufferedImage bufferedImage = fromRgba4444(rgba, 768, 512);
         BufferedImage bufferedImage = fromRgba8888(rgba, 768, 512);
 
-        File outFile = new File("/home/metaphore/tmp/basis-out0.png");
+//        File outFile = new File("/home/metaphore/tmp/basis-out0.png");
+        File outFile = new File("D:\\basis-out0.png");
         ImageIO.write(bufferedImage, "PNG", outFile);
         System.out.println("Decoded image has been written to " + outFile.getAbsolutePath());
     }

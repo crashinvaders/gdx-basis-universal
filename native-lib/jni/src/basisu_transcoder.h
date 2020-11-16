@@ -112,6 +112,7 @@
 #include <memory.h>
 #include <limits.h>
 #include <stdint.h>
+#include <stddef.h>
 
 #include <algorithm>
 #include <limits>

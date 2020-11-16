@@ -18,18 +18,20 @@ public class JniGenCompiler {
 
         BuildTarget win32 = prepare(BuildTarget.newDefaultTarget(TargetOs.Windows, false));
         win32.compilerPrefix = "mingw32-";
+        win32.compilerSuffix = ".exe";
         BuildTarget win64 = prepare(BuildTarget.newDefaultTarget(TargetOs.Windows, true));
+        win64.compilerSuffix = ".exe";
         BuildTarget linux32 = prepare(BuildTarget.newDefaultTarget(TargetOs.Linux, false));
         BuildTarget linux64 = prepare(BuildTarget.newDefaultTarget(TargetOs.Linux, true));
         BuildTarget mac = prepare(BuildTarget.newDefaultTarget(TargetOs.MacOsX, true));
 
-        new AntScriptGenerator().generate(new BuildConfig("my-native-lib"), linux64);
+        new AntScriptGenerator().generate(new BuildConfig("my-native-lib"), win32, win64);
 
-//        executeAnt("jni/build-windows32.xml", "-v", "-Drelease=true", "clean", "postcompile");
-//        executeAnt("jni/build-windows64.xml", "-v", "-Drelease=true", "clean", "postcompile");
+        executeAnt("jni/build-windows32.xml", "-v", "-Drelease=true", "clean", "postcompile");
+        executeAnt("jni/build-windows64.xml", "-v", "-Drelease=true", "clean", "postcompile");
 //        executeAnt("jni/build-linux32.xml", "-v", "-Drelease=true", "clean", "postcompile");
-        executeAnt("jni/build-linux64.xml", "-v", "-Drelease=true", "clean", "postcompile");
-//         executeAnt("jni/build-macosx32.xml", "-v", "-Drelease=true", "clean", "postcompile");
+//        executeAnt("jni/build-linux64.xml", "-v", "-Drelease=true", "clean", "postcompile");
+//        executeAnt("jni/build-macosx32.xml", "-v", "-Drelease=true", "clean", "postcompile");
         executeAnt("jni/build.xml", "-v", "pack-natives");
     }
 
@@ -46,7 +48,7 @@ public class JniGenCompiler {
     }
 
     private static void executeAnt(String buildFile, String... params) {
-        if (!BuildExecutor.executeAnt(buildFile, params))
+        if (!PatchedBuildExecutor.executeAnt(buildFile, params))
             throw new RuntimeException("Failed to execute " + buildFile + " Ant script.");
     }
 }
