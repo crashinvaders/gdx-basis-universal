@@ -23,15 +23,19 @@ public class JniGenCompiler {
         win64.compilerSuffix = ".exe";
         BuildTarget linux32 = prepare(BuildTarget.newDefaultTarget(TargetOs.Linux, false));
         BuildTarget linux64 = prepare(BuildTarget.newDefaultTarget(TargetOs.Linux, true));
-        BuildTarget mac = prepare(BuildTarget.newDefaultTarget(TargetOs.MacOsX, true));
+        BuildTarget mac64 = prepare(BuildTarget.newDefaultTarget(TargetOs.MacOsX, true));
+        BuildTarget android = prepare(BuildTarget.newDefaultTarget(TargetOs.Android, false));
+        BuildTarget ios = prepare(BuildTarget.newDefaultTarget(TargetOs.IOS, false));
+        ios.cppFlags += " -stdlib=libc++ ";
 
-        new AntScriptGenerator().generate(new BuildConfig("my-native-lib"), win32, win64);
+//        new AntScriptGenerator().generate(new BuildConfig("my-native-lib"), ios);
 
-        executeAnt("jni/build-windows32.xml", "-v", "-Drelease=true", "clean", "postcompile");
-        executeAnt("jni/build-windows64.xml", "-v", "-Drelease=true", "clean", "postcompile");
+//        executeAnt("jni/build-windows32.xml", "-v", "-Drelease=true", "clean", "postcompile");
+//        executeAnt("jni/build-windows64.xml", "-v", "-Drelease=true", "clean", "postcompile");
 //        executeAnt("jni/build-linux32.xml", "-v", "-Drelease=true", "clean", "postcompile");
 //        executeAnt("jni/build-linux64.xml", "-v", "-Drelease=true", "clean", "postcompile");
-//        executeAnt("jni/build-macosx32.xml", "-v", "-Drelease=true", "clean", "postcompile");
+//        executeAnt("jni/build-macosx64.xml", "-v", "-Drelease=true", "clean", "postcompile");
+//        executeAnt("jni/build-ios32.xml", "-v", "-Drelease=true", "clean", "postcompile");
         executeAnt("jni/build.xml", "-v", "pack-natives");
     }
 

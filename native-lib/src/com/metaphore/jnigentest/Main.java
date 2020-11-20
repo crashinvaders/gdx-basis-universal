@@ -95,7 +95,8 @@ public class Main {
         BufferedImage bufferedImage = fromRgba8888(rgba, 768, 512);
 
 //        File outFile = new File("/home/metaphore/tmp/basis-out0.png");
-        File outFile = new File("D:\\basis-out0.png");
+        File outFile = new File("/Users/metaphore/tmp/basis-out0.png");
+//        File outFile = new File("D:\\basis-out0.png");
         ImageIO.write(bufferedImage, "PNG", outFile);
         System.out.println("Decoded image has been written to " + outFile.getAbsolutePath());
     }
