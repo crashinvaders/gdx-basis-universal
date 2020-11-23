@@ -61,6 +61,7 @@ public class MainTest {
         BufferedImage bufferedImage = fromRgba8888(rgba, imageInfo.width, imageInfo.height);
 
         File outFile = new File("output/basis-out0.png");
+        outFile.mkdirs();
         ImageIO.write(bufferedImage, "PNG", outFile);
         System.out.println("Decoded image has been written to " + outFile.getAbsolutePath());
 
