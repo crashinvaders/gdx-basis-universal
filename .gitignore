@@ -1,11 +1,12 @@
 /.gradle/
 /.idea/
 
-/native-lib/build/
-/native-lib/libs/
-/native-lib/jni/*.*
-/native-lib/jni/.vscode
-/native-lib/jni/build
-/native-lib/jni/jni-headers
-/native-lib/jni/target
-/native-lib/jni/test/build
+/basisu/output/
+/basisu/build/
+/basisu/libs/
+/basisu/jni/*.*
+/basisu/jni/.vscode
+/basisu/jni/build
+/basisu/jni/jni-headers
+/basisu/jni/target
+/basisu/jni/test/build

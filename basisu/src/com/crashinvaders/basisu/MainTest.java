@@ -1,25 +1,18 @@
-package com.metaphore.jnigentest;
+package com.crashinvaders.basisu;
 
 import com.badlogic.gdx.jnigen.JniGenSharedLibraryLoader;
 
 import javax.imageio.ImageIO;
-import javax.imageio.ImageWriter;
-import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.Raster;
 import java.io.*;
 import java.nio.Buffer;
+import java.nio.ByteBuffer;
 
-public class Main {
+public class MainTest {
 
     /*JNI
 
     #include <iostream>
-    #include <jni.h>
-
-    #include "jni_utils.h"
-    #include "basisu_transcoder.h"
-    #include "basisu_utils.h"
 
     */
 
@@ -27,42 +20,24 @@ public class Main {
 		return a + b;
 	*/
 
-    public static native boolean validateBasisData(byte[] data, int size); /*
-        std::cout << "Validating basis image..." << std::endl;
+    private static native void printByteBuffer(Buffer buffer, int size); /*
+        std::cout << "printByteBuffer " << size << std::endl;
 
-        return basisuUtils::validateHeader((uint8_t*)data, size);
-    */
-
-    public static native byte[] transcodeBasisData(byte[] data, int size); /*
-        std::cout << "Transcoding basis image into plain RGBA..." << std::endl;
-
-//        jniUtils::throwException(env, "This is an exception from JNI.");
-
-        std::vector<uint8_t> rgba;
-//        basist::transcoder_texture_format format = basist::transcoder_texture_format::cTFRGBA4444;
-        basist::transcoder_texture_format format = basist::transcoder_texture_format::cTFRGBA32;
-
-        if (!basisuUtils::transcode(rgba, (uint8_t*)data, size, 0, 0, format)) {
-            std::cout << "Error during image transcoding!" << std::endl;
-            jniUtils::throwException(env, "Error during image transcoding!");
-            return 0;
+        for (size_t i = 0; i < size; i++) {
+            std::cout << (int)buffer[i] << " ";
         }
-
-        jbyteArray byteArray = env->NewByteArray(rgba.size());
-        env->SetByteArrayRegion(byteArray, (jsize)0, (jsize)rgba.size(), (jbyte*)rgba.data());
-        // env->DeleteLocalRef(byteArray);
-        return byteArray;
+        std::cout << std::endl;
     */
 
     public static void main(String[] args) throws IOException {
 //        new JniGenSharedLibraryLoader("my-native-lib-natives.jar").load("my-native-lib");
-        new JniGenSharedLibraryLoader().load("my-native-lib");
-//        System.loadLibrary("windows64/my-native-lib64.dll");
+        new JniGenSharedLibraryLoader().load("gdx-basisu");
+
         System.out.println("Add: " + add(1, 2));
 
         byte[] basisBytes;
 //        try (InputStream is = new FileInputStream("/home/metaphore/tmp/cosmocat_promo.basis")) {
-        try (InputStream is = Main.class.getClassLoader().getResourceAsStream("kodim3.basis")) {
+        try (InputStream is = MainTest.class.getClassLoader().getResourceAsStream("kodim3.basis")) {
             basisBytes = readToByteArray(is);
         }
 
@@ -71,34 +46,35 @@ public class Main {
 //        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(bytes.length);
 //        byteBuffer.put(bytes, 0, bytes.length);
 
-        if (!validateBasisData(basisBytes, basisBytes.length)) {
+        if (!BasisuWrapper.validateHeader(basisBytes, basisBytes.length)) {
             throw new RuntimeException("Failed to validate basis image!");
         }
 
-        byte[] rgba = transcodeBasisData(basisBytes, basisBytes.length);
+        System.out.println("Data was successfully validated!");
 
-//        BufferedImage bufferedImage = new BufferedImage(768, 512, BufferedImage.TYPE_INT_ARGB);
-//        for (int y = 0; y < bufferedImage.getHeight(); y++) {
-//            final int rowStartIdx = y * bufferedImage.getWidth() * 2;
-//            for (int x = 0; x < bufferedImage.getWidth(); x++) {
-//                int pixelIdx = rowStartIdx + x * 2;
-//                int a = (rgba[pixelIdx + 0] >> 0) & 0x0f; a = a | a << 4;
-//                int b = (rgba[pixelIdx + 0] >> 4) & 0x0f; b = b | b << 4;
-//                int g = (rgba[pixelIdx + 1] >> 0) & 0x0f; g = g | g << 4;
-//                int r = (rgba[pixelIdx + 1] >> 4) & 0x0f; r = r | r << 4;
-//                int argb = a << 24 | r << 16 | g << 8 | b;
-//                bufferedImage.setRGB(x, y, argb);
-//            }
-//        }
+        BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisBytes, basisBytes.length, 0);
+        System.out.println("Image size: " + imageInfo.width + "x" + imageInfo.height);
 
-//        BufferedImage bufferedImage = fromRgba4444(rgba, 768, 512);
-        BufferedImage bufferedImage = fromRgba8888(rgba, 768, 512);
+        byte[] rgba = BasisuWrapper.transcode(basisBytes, basisBytes.length, 0, BasisuTranscoderTextureFormat.RGBA32);
 
-//        File outFile = new File("/home/metaphore/tmp/basis-out0.png");
-        File outFile = new File("/Users/metaphore/tmp/basis-out0.png");
-//        File outFile = new File("D:\\basis-out0.png");
+//        BufferedImage bufferedImage = fromRgba4444(rgba, imageInfo.width, imageInfo.height);
+        BufferedImage bufferedImage = fromRgba8888(rgba, imageInfo.width, imageInfo.height);
+
+        File outFile = new File("output/basis-out0.png");
         ImageIO.write(bufferedImage, "PNG", outFile);
         System.out.println("Decoded image has been written to " + outFile.getAbsolutePath());
+
+
+
+        // Byte buffer test.
+        {
+            ByteBuffer buffer = ByteBuffer.allocateDirect(8);
+            for (int i = 0; i < 8; i++) {
+                buffer.put((byte) (23 + i));
+            }
+            buffer.position(0);
+            printByteBuffer(buffer, buffer.capacity());
+        }
     }
 
     private static byte[] readToByteArray(InputStream is) throws IOException {

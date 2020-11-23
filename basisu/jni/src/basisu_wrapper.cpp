@@ -1,65 +1,77 @@
 #include <iostream>
 #include <cstdio>
 
-#include "basisu_utils.h"
+#include "basisu_wrapper.h"
 #include "basisu_transcoder.h"
 
 using namespace std;
 using namespace basist;
 
-namespace basisuUtils {
+namespace basisuWrapper {
 
     static etc1_global_selector_codebook codebook;
 
+    void reportError(const char *message) {
+        cout << LOG_TAG << "ERROR: " << message << endl;
+    }
+
     void initBasisu() {
         static bool basisuInitialized;
-        if (basisuInitialized) return;
+        if (basisuInitialized)
+            return;
 
-        cout << LOG_TAG << "initializing global basisu parser." << endl;
-        
+        cout << LOG_TAG << "Version: " << BASISD_VERSION_STRING << endl;
+        cout << LOG_TAG << "Initializing global basisu parser." << endl;
+
         basisuInitialized = true;
 
         basisu_transcoder_init();
-        
+
         codebook.init(g_global_selector_cb_size, g_global_selector_cb);
     }
 
-    //TODO Simplify it.
-    bool validateHeader(uint8_t* data, size_t size) {
+    bool validateHeader(uint8_t *data, uint32_t dataSize) {
         initBasisu();
-
-        // basisu_transcoder_init();
-        // etc1_global_selector_codebook codebook(g_global_selector_cb_size, g_global_selector_cb);
-
         basisu_transcoder transcoder(&codebook);
+        return transcoder.validate_header(data, dataSize);
+    }
 
-        if (transcoder.validate_header(data, size)) {
-            cout << LOG_TAG << "Header is valid.\n";
+    bool validateChecksum(uint8_t *data, uint32_t dataSize, bool fullValidation) {
+        initBasisu();
+        basisu_transcoder transcoder(&codebook);
+        return transcoder.validate_file_checksums(data, dataSize, fullValidation);
+    }
 
-            basisu_file_info fileInfo;
-            if (transcoder.get_file_info(data, size, fileInfo)) {
-                cout << LOG_TAG << "File info retrieved successfully.\n";
+    int getTotalMipMapLevels(uint8_t *data, uint32_t dataSize) {
+        initBasisu();
+        basisu_transcoder transcoder(&codebook);
+        return transcoder.get_total_image_levels(data, dataSize, 0);
+    }
 
-                basisu_image_info imageInfo;
-                if (transcoder.get_image_info(data, size, imageInfo, 0))
-                cout << LOG_TAG << "Image info retrieved successfully.\n";
-
-                cout << LOG_TAG << "Width: " << imageInfo.m_width << endl;
-                cout << LOG_TAG << "Height: " << imageInfo.m_height << endl;
-                cout << LOG_TAG << "Alpha: " << imageInfo.m_alpha_flag << endl;
-
-                return true;
-            }
+    bool getFileInfo(basisu_file_info &fileInfo, uint8_t *data, uint32_t dataSize)  {
+        initBasisu();
+        basisu_transcoder transcoder(&codebook);
+        bool successful = transcoder.get_file_info(data, dataSize, fileInfo);
+        if (!successful) {
+            reportError("Failed to obtain file info.");
         }
+        return successful;
+    }
 
-        return false;
+    bool getImageInfo(basisu_image_info &imageInfo, uint8_t *data, uint32_t dataSize, uint32_t imageIndex) {
+        initBasisu();
+        basisu_transcoder transcoder(&codebook);
+        bool successful = transcoder.get_image_info(data, dataSize, imageInfo, imageIndex);
+        if (!successful) {
+            reportError("Failed to obtain image info.");
+        }
+        return successful;
     }
 
     // Based on https://github.com/BinomialLLC/basis_universal/blob/master/webgl/transcoder/basis_wrappers.cpp
-    bool transcode(std::vector<uint8_t> &out, uint8_t* basisuData, size_t basisuDataSize,
-                   uint32_t imageIndex, uint32_t levelIndex, transcoder_texture_format format) {
+    bool transcode(std::vector<uint8_t> &out, uint8_t *data, uint32_t dataSize,
+                   uint32_t levelIndex, transcoder_texture_format format) {
         initBasisu();
-
         basisu_transcoder transcoder(&codebook);
 
         const int formatOrdinal = static_cast<int>(format);
@@ -68,17 +80,17 @@ namespace basisuUtils {
         }
 
         uint32_t origWidth, origHeight, totalBlocks;
-        if (!transcoder.get_image_level_desc(basisuData, basisuDataSize, 0, 0, origWidth, origHeight, totalBlocks)) {
+        if (!transcoder.get_image_level_desc(data, dataSize, 0, 0, origWidth, origHeight, totalBlocks)) {
             return false;
         }
 
-        // uint32_t flags = get_alpha_for_opaque_formats ? cDecodeFlagsTranscodeAlphaDataToOpaqueFormats : 0;
+        uint32_t imageIndex = 0;
         uint32_t flags = 0;
 
         bool status;
 
-        if (!transcoder.start_transcoding(basisuData, basisuDataSize)) {
-            return 0;
+        if (!transcoder.start_transcoding(data, dataSize)) {
+            return false;
         }
 
         if (basis_transcoder_format_is_uncompressed(format)) {
@@ -92,7 +104,7 @@ namespace basisuUtils {
             out.resize(bytesPerSlice);
 
             status = transcoder.transcode_image_level(
-                basisuData, basisuDataSize, imageIndex, levelIndex,
+                data, dataSize, 0, levelIndex,
                 out.data(), origWidth * origHeight,
                 format,
                 flags,
@@ -118,7 +130,7 @@ namespace basisuUtils {
             out.resize(requiredSize);
 
             status = transcoder.transcode_image_level(
-                basisuData, basisuDataSize, imageIndex, levelIndex,
+                data, dataSize, imageIndex, levelIndex,
                 out.data(), out.size() / bytesPerBlock,
                 static_cast<basist::transcoder_texture_format>(format),
                 flags);
@@ -130,4 +142,4 @@ namespace basisuUtils {
 
         return status;
     }
-}
+} // namespace basisuWrapper

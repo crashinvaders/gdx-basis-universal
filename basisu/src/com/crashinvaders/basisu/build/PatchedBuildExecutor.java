@@ -1,4 +1,4 @@
-/*******************************************************************************
+package com.crashinvaders.basisu.build; /*******************************************************************************
  * Copyright 2011 See AUTHORS file.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,8 +27,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/** Executes an ant script and its targets or an Android NDK build. See {@link AntScriptGenerator}.
- * @author mzechner */
+/**
+ * Executes an ant script and its targets or an Android NDK build. See {@link AntScriptGenerator}.
+ *
+ *
+ *
+ * @author mzechner
+ */
 public class PatchedBuildExecutor {
 	/** Execute the Ant script file with the given parameters.
 	 * @param buildFile

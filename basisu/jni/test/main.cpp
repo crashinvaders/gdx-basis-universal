@@ -2,7 +2,7 @@
 
 #include "file_utils.h"
 #include "basisu_transcoder.h"
-#include "basisu_utils.h"
+#include "basisu_wrapper.h"
 
 using namespace std;
 
@@ -15,13 +15,13 @@ int main(int, char**) {
 
     cout << "File was successfully read. Size: " << basisData.size() << endl;
     
-    if (!basisuUtils::validateHeader(basisData.data(), basisData.size())) {
+    if (!basisuWrapper::validateHeader(basisData.data(), basisData.size())) {
         cout << "File is not a valid basis universal image!" << endl;
         return 2;
     }
 
     vector<uint8_t> rgba;
-    if (!basisuUtils::transcode(rgba, basisData.data(), basisData.size(), 0, 0, basist::transcoder_texture_format::cTFRGBA4444)) {
+    if (!basisuWrapper::transcode(rgba, basisData.data(), basisData.size(), 0, 0, basist::transcoder_texture_format::cTFRGBA4444)) {
         cout << "Error during image transcoding!" << endl;
         return 3;
     }

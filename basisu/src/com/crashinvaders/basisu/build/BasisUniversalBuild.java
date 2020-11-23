@@ -1,19 +1,13 @@
+package com.crashinvaders.basisu.build;
+
 import com.badlogic.gdx.jnigen.*;
 import com.badlogic.gdx.jnigen.BuildTarget.TargetOs;
 
-public class JniGenCompiler {
-    private static final String[] HEADERS = {
-            "src",
-    };
-    private static final String[] EXCLUDES = {
-            "test/**",
-            ".vscode/**",
-            "build/**"
-    };
+public class BasisUniversalBuild {
 
     public static void main(String[] args) throws Exception {
         PatchedNativeCodeGenerator jnigen = new PatchedNativeCodeGenerator();
-        jnigen.generate("src", "jni", new String[]{"**/Main.java"}, null);
+        jnigen.generate("src", "jni", new String[]{"**/com/crashinvaders/basisu/*.java"}, null);
 
 
         BuildTarget win32 = prepare(BuildTarget.newDefaultTarget(TargetOs.Windows, false));
@@ -28,10 +22,10 @@ public class JniGenCompiler {
         BuildTarget ios = prepare(BuildTarget.newDefaultTarget(TargetOs.IOS, false));
         ios.cppFlags += " -stdlib=libc++ ";
 
-//        new AntScriptGenerator().generate(new BuildConfig("my-native-lib"), ios);
+        new AntScriptGenerator().generate(new BuildConfig("gdx-basisu"), win64);
 
 //        executeAnt("jni/build-windows32.xml", "-v", "-Drelease=true", "clean", "postcompile");
-//        executeAnt("jni/build-windows64.xml", "-v", "-Drelease=true", "clean", "postcompile");
+        executeAnt("jni/build-windows64.xml", "-v", "-Drelease=true", "clean", "postcompile");
 //        executeAnt("jni/build-linux32.xml", "-v", "-Drelease=true", "clean", "postcompile");
 //        executeAnt("jni/build-linux64.xml", "-v", "-Drelease=true", "clean", "postcompile");
 //        executeAnt("jni/build-macosx64.xml", "-v", "-Drelease=true", "clean", "postcompile");
@@ -40,9 +34,18 @@ public class JniGenCompiler {
     }
 
     private static BuildTarget prepare(BuildTarget target) {
-        target.headerDirs = HEADERS;
-        target.cExcludes = EXCLUDES;
-        target.cppExcludes = EXCLUDES;
+        final String[] headers = {
+                "src",
+        };
+        final String[] excludes = {
+                "test/**",
+                ".vscode/**",
+                "build/**",
+        };
+
+        target.headerDirs = headers;
+        target.cExcludes = excludes;
+        target.cppExcludes = excludes;
 
         target.cFlags += " -fvisibility=hidden ";
         target.cppFlags += " -std=c++11 -fvisibility=hidden ";
