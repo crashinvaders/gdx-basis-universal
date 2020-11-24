@@ -1,0 +1,12 @@
+apply plugin: 'java-library'
+
+sourceCompatibility = 8.0
+targetCompatibility = 8.0
+compileJava.options.incremental = true
+
+sourceSets.main.java.srcDirs += ['src/']
+
+dependencies {
+    api project(':basisu-wrapper')
+    api "com.badlogicgames.gdx:gdx:$gdxVersion"
+}

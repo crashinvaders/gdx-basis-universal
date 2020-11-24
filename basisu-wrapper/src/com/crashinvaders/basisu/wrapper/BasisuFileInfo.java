@@ -1,4 +1,4 @@
-package com.crashinvaders.basisu;
+package com.crashinvaders.basisu.wrapper;
 
 /**
  * Direct mapping of <code>basist::transcoder_texture_format</code> struct.

@@ -21,7 +21,7 @@ int main(int, char**) {
     }
 
     vector<uint8_t> rgba;
-    if (!basisuWrapper::transcode(rgba, basisData.data(), basisData.size(), 0, 0, basist::transcoder_texture_format::cTFRGBA4444)) {
+    if (!basisuWrapper::transcode(rgba, basisData.data(), basisData.size(), 0, basist::transcoder_texture_format::cTFRGBA4444)) {
         cout << "Error during image transcoding!" << endl;
         return 3;
     }

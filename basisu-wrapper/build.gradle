@@ -1,4 +1,4 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
 
 sourceCompatibility = 8.0
 targetCompatibility = 8.0
@@ -7,12 +7,11 @@ compileJava.options.incremental = true
 sourceSets.main.java.srcDirs += ['src/']
 sourceSets.main.resources.srcDirs += ['libs/', 'resources/']
 
-group 'org.example'
-version '1.0-SNAPSHOT'
+group 'com.crashinvaders.gdx-basis-universal'
+version '0.1.0-SNAPSHOT'
 
 dependencies {
-    implementation files('libs/gdx-basisu-natives.jar')
-
+    implementation files('libs/gdx-basis-universal-natives.jar')
     implementation 'com.badlogicgames.gdx:gdx-jnigen:2.0.0-SNAPSHOT'
 }
 

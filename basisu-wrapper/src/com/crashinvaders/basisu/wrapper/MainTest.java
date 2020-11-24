@@ -1,4 +1,4 @@
-package com.crashinvaders.basisu;
+package com.crashinvaders.basisu.wrapper;
 
 import com.badlogic.gdx.jnigen.JniGenSharedLibraryLoader;
 
@@ -10,30 +10,9 @@ import java.nio.ByteBuffer;
 
 public class MainTest {
 
-    /*JNI
-
-    #include <iostream>
-
-    */
-
-    public static native int add(int a, int b); /*
-		return a + b;
-	*/
-
-    private static native void printByteBuffer(Buffer buffer, int size); /*
-        std::cout << "printByteBuffer " << size << std::endl;
-
-        for (size_t i = 0; i < size; i++) {
-            std::cout << (int)buffer[i] << " ";
-        }
-        std::cout << std::endl;
-    */
-
     public static void main(String[] args) throws IOException {
 //        new JniGenSharedLibraryLoader("my-native-lib-natives.jar").load("my-native-lib");
-        new JniGenSharedLibraryLoader().load("gdx-basisu");
-
-        System.out.println("Add: " + add(1, 2));
+        new JniGenSharedLibraryLoader().load("gdx-basis-universal");
 
         byte[] basisBytes;
 //        try (InputStream is = new FileInputStream("/home/metaphore/tmp/cosmocat_promo.basis")) {
@@ -64,18 +43,6 @@ public class MainTest {
         outFile.mkdirs();
         ImageIO.write(bufferedImage, "PNG", outFile);
         System.out.println("Decoded image has been written to " + outFile.getAbsolutePath());
-
-
-
-        // Byte buffer test.
-        {
-            ByteBuffer buffer = ByteBuffer.allocateDirect(8);
-            for (int i = 0; i < 8; i++) {
-                buffer.put((byte) (23 + i));
-            }
-            buffer.position(0);
-            printByteBuffer(buffer, buffer.capacity());
-        }
     }
 
     private static byte[] readToByteArray(InputStream is) throws IOException {

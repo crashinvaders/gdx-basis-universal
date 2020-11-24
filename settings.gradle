@@ -1,3 +1,4 @@
 rootProject.name = 'gdx-basis-universal'
-include 'basisu'
+include 'basisu-wrapper'
+include 'basisu-gdx'
 

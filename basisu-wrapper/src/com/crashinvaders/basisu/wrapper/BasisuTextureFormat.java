@@ -1,4 +1,4 @@
-package com.crashinvaders.basisu;
+package com.crashinvaders.basisu.wrapper;
 
 /** Direct mapping of <code>basist::basis_tex_format</code> enum constants. */
 public enum BasisuTextureFormat implements UniqueIdValue {

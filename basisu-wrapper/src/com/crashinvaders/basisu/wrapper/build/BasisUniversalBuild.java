@@ -1,4 +1,4 @@
-package com.crashinvaders.basisu.build;
+package com.crashinvaders.basisu.wrapper.build;
 
 import com.badlogic.gdx.jnigen.*;
 import com.badlogic.gdx.jnigen.BuildTarget.TargetOs;
@@ -7,7 +7,7 @@ public class BasisUniversalBuild {
 
     public static void main(String[] args) throws Exception {
         PatchedNativeCodeGenerator jnigen = new PatchedNativeCodeGenerator();
-        jnigen.generate("src", "jni", new String[]{"**/com/crashinvaders/basisu/*.java"}, null);
+        jnigen.generate("src", "jni", new String[]{"**/com/crashinvaders/basisu/wrapper/*.java"}, null);
 
 
         BuildTarget win32 = prepare(BuildTarget.newDefaultTarget(TargetOs.Windows, false));
@@ -22,12 +22,14 @@ public class BasisUniversalBuild {
         BuildTarget ios = prepare(BuildTarget.newDefaultTarget(TargetOs.IOS, false));
         ios.cppFlags += " -stdlib=libc++ ";
 
-        new AntScriptGenerator().generate(new BuildConfig("gdx-basisu"), win64);
+//        new AntScriptGenerator().generate(new BuildConfig("gdx-basis-universal"), win64);
+//        new AntScriptGenerator().generate(new BuildConfig("gdx-basis-universal"), mac64);
+        new AntScriptGenerator().generate(new BuildConfig("gdx-basis-universal"), linux64);
 
 //        executeAnt("jni/build-windows32.xml", "-v", "-Drelease=true", "clean", "postcompile");
-        executeAnt("jni/build-windows64.xml", "-v", "-Drelease=true", "clean", "postcompile");
+//        executeAnt("jni/build-windows64.xml", "-v", "-Drelease=true", "clean", "postcompile");
 //        executeAnt("jni/build-linux32.xml", "-v", "-Drelease=true", "clean", "postcompile");
-//        executeAnt("jni/build-linux64.xml", "-v", "-Drelease=true", "clean", "postcompile");
+        executeAnt("jni/build-linux64.xml", "-v", "-Drelease=true", "clean", "postcompile");
 //        executeAnt("jni/build-macosx64.xml", "-v", "-Drelease=true", "clean", "postcompile");
 //        executeAnt("jni/build-ios32.xml", "-v", "-Drelease=true", "clean", "postcompile");
         executeAnt("jni/build.xml", "-v", "pack-natives");

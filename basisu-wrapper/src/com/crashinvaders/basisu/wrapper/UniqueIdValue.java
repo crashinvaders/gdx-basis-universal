@@ -1,4 +1,4 @@
-package com.crashinvaders.basisu;
+package com.crashinvaders.basisu.wrapper;
 
 public interface UniqueIdValue {
     int getId();

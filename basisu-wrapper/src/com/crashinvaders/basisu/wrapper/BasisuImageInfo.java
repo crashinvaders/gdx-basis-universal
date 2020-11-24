@@ -1,4 +1,4 @@
-package com.crashinvaders.basisu;
+package com.crashinvaders.basisu.wrapper;
 
 /**
  * Direct mapping of <code>basist::basisu_image_info</code> struct.

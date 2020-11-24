@@ -1,12 +1,11 @@
-/.gradle/
-/.idea/
+.gradle
+.idea
+.vscode
+build
+output
 
-/basisu/output/
-/basisu/build/
-/basisu/libs/
-/basisu/jni/*.*
-/basisu/jni/.vscode
-/basisu/jni/build
-/basisu/jni/jni-headers
-/basisu/jni/target
-/basisu/jni/test/build
+/basisu-wrapper/libs/
+/basisu-wrapper/out/
+/basisu-wrapper/jni/*.*
+/basisu-wrapper/jni/jni-headers
+/basisu-wrapper/jni/target

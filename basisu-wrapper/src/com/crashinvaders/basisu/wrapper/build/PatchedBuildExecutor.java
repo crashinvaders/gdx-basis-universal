@@ -1,4 +1,4 @@
-package com.crashinvaders.basisu.build; /*******************************************************************************
+package com.crashinvaders.basisu.wrapper.build; /*******************************************************************************
  * Copyright 2011 See AUTHORS file.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
