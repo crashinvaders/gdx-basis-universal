@@ -34,7 +34,7 @@ public class MainTest {
         BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisBytes, basisBytes.length, 0);
         System.out.println("Image size: " + imageInfo.width + "x" + imageInfo.height);
 
-        byte[] rgba = BasisuWrapper.transcode(basisBytes, basisBytes.length, 0, BasisuTranscoderTextureFormat.RGBA32);
+        byte[] rgba = BasisuWrapper.transcode(basisBytes, basisBytes.length, 0, 0, BasisuTranscoderTextureFormat.RGBA32);
 
 //        BufferedImage bufferedImage = fromRgba4444(rgba, imageInfo.width, imageInfo.height);
         BufferedImage bufferedImage = fromRgba8888(rgba, imageInfo.width, imageInfo.height);

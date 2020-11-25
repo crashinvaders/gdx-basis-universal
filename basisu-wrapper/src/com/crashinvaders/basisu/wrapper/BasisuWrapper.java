@@ -26,9 +26,9 @@ public class BasisuWrapper {
         return imageInfo;
     }
 
-    public static byte[] transcode(byte[] data, int dataSize, int levelIndex, BasisuTranscoderTextureFormat textureFormat) {
+    public static byte[] transcode(byte[] data, int dataSize, int imageIndex, int levelIndex, BasisuTranscoderTextureFormat textureFormat) {
         int format = textureFormat.getId();
-        return transcodeNative(data, dataSize, levelIndex, format);
+        return transcodeNative(data, dataSize, imageIndex, levelIndex, format);
     }
 
     /*JNI
@@ -108,13 +108,11 @@ public class BasisuWrapper {
         env->SetBooleanField(target, env->GetFieldID(targetClazz, "iframeFlag",      "Z"), imageInfo.m_iframe_flag);
     */
 
-    private static native byte[] transcodeNative(byte[] data, int dataSize, int levelIndex, int textureFormatId); /*
-        std::cout << "Transcoding basis image into plain RGBA..." << std::endl;
-
+    private static native byte[] transcodeNative(byte[] data, int dataSize, int imageIndex, int levelIndex, int textureFormatId); /*
         std::vector<uint8_t> rgba;
         basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
 
-        if (!basisuWrapper::transcode(rgba, (uint8_t*)data, dataSize, levelIndex, format)) {
+        if (!basisuWrapper::transcode(rgba, (uint8_t*)data, dataSize, imageIndex, levelIndex, format)) {
             std::cout << "Error during image transcoding!" << std::endl;
             jniUtils::throwException(env, "Error during image transcoding!");
             return 0;

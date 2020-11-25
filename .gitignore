@@ -2,10 +2,13 @@
 .idea
 .vscode
 build
-output
 
-/basisu-wrapper/libs/
-/basisu-wrapper/out/
+/basisu-wrapper/libs
+/basisu-wrapper/out
+/basisu-wrapper/testOutput
 /basisu-wrapper/jni/*.*
 /basisu-wrapper/jni/jni-headers
 /basisu-wrapper/jni/target
+
+
+/basisu-gdx/out

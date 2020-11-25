@@ -5,7 +5,8 @@
 
 #include "basisu_transcoder.h"
 
-#define LOG_TAG "[BASISU_WRAPPER] "
+#define LOG_INFO "[BASISU_WRAPPER] INFO: "
+#define LOG_ERROR "[BASISU_WRAPPER] ERROR: "
 
 using namespace basist;
 
@@ -22,5 +23,5 @@ namespace basisuWrapper {
     bool getImageInfo(basisu_image_info &imageInfo, uint8_t *data, uint32_t dataSize, uint32_t imageIndex);
 
     bool transcode(std::vector<uint8_t> &out, uint8_t *data, uint32_t dataSize,
-                   uint32_t levelIndex, transcoder_texture_format format);
+                   uint32_t imageIndex, uint32_t levelIndex, transcoder_texture_format format);
 } // namespace basisuWrapper

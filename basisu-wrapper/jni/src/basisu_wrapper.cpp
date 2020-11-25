@@ -12,7 +12,7 @@ namespace basisuWrapper {
     static etc1_global_selector_codebook codebook;
 
     void reportError(const char *message) {
-        cout << LOG_TAG << "ERROR: " << message << endl;
+        cout << LOG_ERROR << message << endl;
     }
 
     void initBasisu() {
@@ -20,8 +20,8 @@ namespace basisuWrapper {
         if (basisuInitialized)
             return;
 
-        cout << LOG_TAG << "Version: " << BASISD_VERSION_STRING << endl;
-        cout << LOG_TAG << "Initializing global basisu parser." << endl;
+        cout << LOG_INFO << "Version: " << BASISD_VERSION_STRING << endl;
+        cout << LOG_INFO << "Initializing global basisu parser." << endl;
 
         basisuInitialized = true;
 
@@ -70,21 +70,22 @@ namespace basisuWrapper {
 
     // Based on https://github.com/BinomialLLC/basis_universal/blob/master/webgl/transcoder/basis_wrappers.cpp
     bool transcode(std::vector<uint8_t> &out, uint8_t *data, uint32_t dataSize,
-                   uint32_t levelIndex, transcoder_texture_format format) {
+                   uint32_t imageIndex, uint32_t levelIndex, transcoder_texture_format format) {
         initBasisu();
         basisu_transcoder transcoder(&codebook);
 
-        const int formatOrdinal = static_cast<int>(format);
-        if (formatOrdinal >= (int)transcoder_texture_format::cTFTotalTextureFormats) {
-            return false;
-        }
+        std::cout << LOG_INFO 
+        << "Transcoding basis image (image index: " 
+        << imageIndex << ", level index: " << levelIndex 
+        << ") into texture format with ID: " << (int)format 
+        << std::endl;
 
         uint32_t origWidth, origHeight, totalBlocks;
-        if (!transcoder.get_image_level_desc(data, dataSize, 0, 0, origWidth, origHeight, totalBlocks)) {
+        if (!transcoder.get_image_level_desc(data, dataSize, imageIndex, levelIndex, origWidth, origHeight, totalBlocks)) {
+            reportError("Failed to retrieve image level description.");
             return false;
         }
 
-        uint32_t imageIndex = 0;
         uint32_t flags = 0;
 
         bool status;
@@ -98,8 +99,6 @@ namespace basisuWrapper {
             const uint32_t bytesPerPixel = basis_get_uncompressed_bytes_per_pixel(format);
             const uint32_t bytesPerLine = origWidth * bytesPerPixel;
             const uint32_t bytesPerSlice = bytesPerLine * origHeight;
-
-            cout << LOG_TAG << "Uncompressed conversion bytes per pixel: " << bytesPerPixel << endl;
 
             out.resize(bytesPerSlice);
 
@@ -137,8 +136,6 @@ namespace basisuWrapper {
         }
 
         transcoder.stop_transcoding();
-
-        cout << LOG_TAG << "Successfully transcoded!" << endl;
 
         return status;
     }
