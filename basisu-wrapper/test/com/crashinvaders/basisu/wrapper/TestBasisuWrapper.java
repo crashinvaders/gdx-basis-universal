@@ -1,6 +1,6 @@
 package com.crashinvaders.basisu.wrapper;
 
-import com.badlogic.gdx.jnigen.JniGenSharedLibraryLoader;
+import com.badlogic.gdx.utils.SharedLibraryLoader;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -18,7 +18,7 @@ public class TestBasisuWrapper {
 
     @Before
     public void init() throws IOException {
-        new JniGenSharedLibraryLoader().load("gdx-basis-universal");
+        new SharedLibraryLoader().load("gdx-basis-universal");
 
         System.out.println("Loading " + IMAGE_FILE);
         try (InputStream is = TestBasisuWrapper.class.getClassLoader().getResourceAsStream(IMAGE_FILE)) {
