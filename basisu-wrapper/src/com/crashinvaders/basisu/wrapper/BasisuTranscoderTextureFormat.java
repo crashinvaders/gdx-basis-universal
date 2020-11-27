@@ -9,8 +9,8 @@ public enum BasisuTranscoderTextureFormat implements UniqueIdValue {
     ETC2_RGBA(1),				// Opaque+alpha, ETC2_EAC_A8 block followed by a ETC1 block, alpha channel will be opaque for opaque .basis files
 
     // BC1-5, BC7 (desktop, some mobile devices)
-    BC1_RGB(2),					// Opaque only, no punchthrough alpha support yet, transcodes alpha slice if cDecodeFlagsTranscodeAlphaDataToOpaqueFormats flag is specified
-    BC3_RGBA(3), 				// Opaque+alpha, BC4 followed by a BC1 block, alpha channel will be opaque for opaque .basis files
+    BC1_RGB(2),					// aka DXT1. Opaque only, no punchthrough alpha support yet, transcodes alpha slice if cDecodeFlagsTranscodeAlphaDataToOpaqueFormats flag is specified
+    BC3_RGBA(3), 				// aka DXT5. Opaque+alpha, BC4 followed by a BC1 block, alpha channel will be opaque for opaque .basis files
     BC4_R(4),					// Red only, alpha slice is transcoded to output if cDecodeFlagsTranscodeAlphaDataToOpaqueFormats flag is specified
     BC5_RG(5),					// XY: Two BC4 blocks, X=R and Y=Alpha, .basis file should have alpha data (if not Y will be all 255's)
     BC7_RGBA(6),				// RGB or RGBA, mode 5 for ETC1S, modes (1,2,3,5,6,7) for UASTC
@@ -40,7 +40,7 @@ public enum BasisuTranscoderTextureFormat implements UniqueIdValue {
 // Uncompressed (raw pixel) formats
     RGBA32(13),					// 32bpp RGBA image stored in raster (not block) order in memory, R is first byte, A is last byte.
     RGB565(14),					// 166pp RGB image stored in raster (not block) order in memory, R at bit position 11
-    BGR565(15),					// 16bpp RGB image stored in raster (not block) order in memory, R at bit position 0
+//    BGR565(15),					// 16bpp RGB image stored in raster (not block) order in memory, R at bit position 0
     RGBA4444(16),				// 16bpp RGBA image stored in raster (not block) order in memory, R at bit position 12, A at bit position 0
     ;
 
@@ -53,5 +53,9 @@ public enum BasisuTranscoderTextureFormat implements UniqueIdValue {
     @Override
     public int getId() {
         return id;
+    }
+
+    public boolean isCompressedFormat() {
+        return this != RGBA32 && this != RGB565 && this != RGBA4444;
     }
 }

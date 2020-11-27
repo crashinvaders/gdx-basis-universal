@@ -2,33 +2,33 @@ package com.crashinvaders.basisu.wrapper;
 
 public class BasisuWrapper {
 
-    public static boolean validateHeader(byte[] data, int dataSize) {
-        return validateHeaderNative(data, dataSize);
+    public static boolean validateHeader(byte[] data) {
+        return validateHeaderNative(data, data.length);
     }
 
-    public static boolean validateChecksum(byte[] data, int dataSize, boolean fullValidation) {
-        return validateChecksumNative(data, dataSize, fullValidation);
+    public static boolean validateChecksum(byte[] data, boolean fullValidation) {
+        return validateChecksumNative(data, data.length, fullValidation);
     }
 
-    public static int getTotalMipMapLevels(byte[] data, int dataSize) {
-        return getTotalMipMapLevelsNative(data, dataSize);
+    public static int getTotalMipMapLevels(byte[] data) {
+        return getTotalMipMapLevelsNative(data, data.length);
     }
 
-//    public static BasisuFileInfo getFileInfo(byte[] data, int dataSize) {
+//    public static BasisuFileInfo getFileInfo(byte[] data) {
 //        BasisuFileInfo fileInfo = new BasisuFileInfo();
-//        getFileInfoNative(data, dataSize, fileInfo);
+//        getFileInfoNative(data, data.length, fileInfo);
 //        return fileInfo;
 //    }
 
-    public static BasisuImageInfo getImageInfo(byte[] data, int dataSize, int imageIndex) {
+    public static BasisuImageInfo getImageInfo(byte[] data, int imageIndex) {
         BasisuImageInfo imageInfo = new BasisuImageInfo();
-        getImageInfoNative(data, dataSize, imageIndex, imageInfo);
+        getImageInfoNative(data, data.length, imageIndex, imageInfo);
         return imageInfo;
     }
 
-    public static byte[] transcode(byte[] data, int dataSize, int imageIndex, int levelIndex, BasisuTranscoderTextureFormat textureFormat) {
+    public static byte[] transcode(byte[] data, int imageIndex, int levelIndex, BasisuTranscoderTextureFormat textureFormat) {
         int format = textureFormat.getId();
-        return transcodeNative(data, dataSize, imageIndex, levelIndex, format);
+        return transcodeNative(data, data.length, imageIndex, levelIndex, format);
     }
 
     /*JNI

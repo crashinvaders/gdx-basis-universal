@@ -20,7 +20,7 @@ namespace basisuWrapper {
         if (basisuInitialized)
             return;
 
-        cout << LOG_INFO << "Version: " << BASISD_VERSION_STRING << endl;
+        cout << LOG_INFO << "Basis Universal " << BASISD_VERSION_STRING << endl;
         cout << LOG_INFO << "Initializing global basisu parser." << endl;
 
         basisuInitialized = true;

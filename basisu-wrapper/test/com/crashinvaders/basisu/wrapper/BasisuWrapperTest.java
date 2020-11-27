@@ -10,7 +10,7 @@ import java.io.InputStream;
 
 import static org.junit.Assert.*;
 
-public class TestBasisuWrapper {
+public class BasisuWrapperTest {
 
     private static final String IMAGE_FILE = "kodim3.basis";
 
@@ -18,24 +18,22 @@ public class TestBasisuWrapper {
 
     @Before
     public void init() throws IOException {
-//        new SharedLibraryLoader("gdx-basis-universal-natives.jar").load("gdx-basis-universal");
         new SharedLibraryLoader().load("gdx-basis-universal");
-//        System.loadLibrary("linux64/libgdx-basis-universal64.so");
 
         System.out.println("Loading " + IMAGE_FILE);
-        try (InputStream is = TestBasisuWrapper.class.getClassLoader().getResourceAsStream(IMAGE_FILE)) {
+        try (InputStream is = BasisuWrapperTest.class.getClassLoader().getResourceAsStream(IMAGE_FILE)) {
             basisBytes = TestUtils.readToByteArray(is);
         }
     }
 
     @Test
     public void testValidateHeader() {
-        assertTrue(BasisuWrapper.validateHeader(basisBytes, basisBytes.length));
+        assertTrue(BasisuWrapper.validateHeader(basisBytes));
     }
 
     @Test
     public void testGetImageInfo() {
-        BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisBytes, basisBytes.length, 0);
+        BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisBytes, 0);
 
         assertEquals(imageInfo.imageIndex, 0);
         assertEquals(imageInfo.totalLevels, 1);
@@ -53,9 +51,9 @@ public class TestBasisuWrapper {
 
     @Test
     public void testTranscodeRgba32() {
-        BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisBytes, basisBytes.length, 0);
+        BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisBytes, 0);
 
-        byte[] rgba8888 = BasisuWrapper.transcode(basisBytes, basisBytes.length, 0, 0, BasisuTranscoderTextureFormat.RGBA32);
+        byte[] rgba8888 = BasisuWrapper.transcode(basisBytes, 0, 0, BasisuTranscoderTextureFormat.RGBA32);
 
         // Check if encoding is correct.
         assertEquals(rgba8888.length, imageInfo.getWidth() * imageInfo.getHeight() * 4);
@@ -66,9 +64,9 @@ public class TestBasisuWrapper {
 
     @Test
     public void testTranscodeEtc2Rgba() {
-        BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisBytes, basisBytes.length, 0);
+        BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisBytes, 0);
 
-        byte[] etc2Rgba = BasisuWrapper.transcode(basisBytes, basisBytes.length, 0, 0, BasisuTranscoderTextureFormat.ETC2_RGBA);
+        byte[] etc2Rgba = BasisuWrapper.transcode(basisBytes, 0, 0, BasisuTranscoderTextureFormat.ETC2_RGBA);
 
         // Check if encoding is correct.
         assertEquals(etc2Rgba.length, imageInfo.totalBlocks * 16);

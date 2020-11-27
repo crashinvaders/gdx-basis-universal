@@ -7,9 +7,17 @@ java {
 
 compileJava.options.incremental = true
 
-sourceSets.main.java.srcDirs += ['src/']
+sourceSets.main.java.srcDirs += ['src']
+sourceSets.test.java.srcDirs += ['test']
 
 dependencies {
     api project(':basisu-wrapper')
-    api "com.badlogicgames.gdx:gdx:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
+
+    testImplementation "junit:junit:$junitVersion"
+}
+
+test {
+    useJUnit()
+    maxHeapSize = '1G'
 }

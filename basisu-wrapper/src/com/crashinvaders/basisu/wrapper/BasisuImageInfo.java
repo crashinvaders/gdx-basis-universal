@@ -63,7 +63,7 @@ public class BasisuImageInfo {
     }
 
     /** True if the image has alpha data. */
-    public boolean isAlphaFlag() {
+    public boolean hasAlphaFlag() {
         return alphaFlag;
     }
 

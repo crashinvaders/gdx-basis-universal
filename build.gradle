@@ -7,15 +7,12 @@ buildscript {
         maven { url 'https://plugins.gradle.org/m2/' }
     }
     dependencies {
-        classpath "com.badlogicgames.gdx:gdx-jnigen-gradle:2.0.0-SNAPSHOT"
+        classpath "com.badlogicgames.gdx:gdx-jnigen-gradle:$jnigenVersion"
     }
 }
 
 allprojects {
     apply plugin: "idea"
-
-    group 'org.example'
-    version '1.0-SNAPSHOT'
 
     repositories {
         google()
