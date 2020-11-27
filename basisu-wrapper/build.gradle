@@ -4,16 +4,15 @@ sourceCompatibility = 8.0
 targetCompatibility = 8.0
 compileJava.options.incremental = true
 
-sourceSets.main.java.srcDirs += ['src/']
-sourceSets.main.resources.srcDirs += ['libs/', 'resources/']
-sourceSets.test.java.srcDirs += ['test/']
+sourceSets.main.java.srcDirs += ['src']
+sourceSets.test.java.srcDirs += ['test']
+sourceSets.test.resources.srcDirs += ['test-resources']
 
 group 'com.crashinvaders.gdx-basis-universal'
 version '0.1.0-SNAPSHOT'
 
 dependencies {
-    implementation files('libs/gdx-basis-universal-natives.jar')
-
+    testRuntimeOnly files('libs/gdx-basis-universal-natives.jar')
     testImplementation 'junit:junit:4.13'
     testImplementation 'com.badlogicgames.gdx:gdx-jnigen-loader:2.0.0-SNAPSHOT'
 }
@@ -23,29 +22,17 @@ test {
     maxHeapSize = '1G'
 }
 
+//region jnigen configuration
 compileJava.options.headerOutputDirectory.set(file('jni'))
 
-//gradle.taskGraph.whenReady {taskGraph ->
-//    println "Found task graph: " + taskGraph
-//    println "Found " + taskGraph.allTasks.size() + " tasks."
-//    taskGraph.allTasks.forEach { task ->
-//        println task
-//        task.dependsOn.forEach { dep ->
-//            println "  - " + dep
-//        }
-//    }
-//}
-
-//apply plugin: "com.badlogicgames.gdx.gdx-jnigen"
-apply plugin: com.badlogic.gdx.jnigen.gradle.JnigenPlugin
+apply plugin: "com.badlogicgames.gdx.gdx-jnigen"
 
 jnigen {
     sharedLibName = 'gdx-basis-universal'
 
     nativeCodeGenerator {
         sourceDir = '/src'
-        excludes = ['JniGenCompiler.java']
-        includes = ['**/com/crashinvaders/basisu/wrapper/*.java']
+//        includes = ['**/com/crashinvaders/basisu/wrapper/*.java']
     }
 
     all {
@@ -73,3 +60,22 @@ jnigen {
         cppFlags += " -stdlib=libc++ "
     }
 }
+
+//FIXME Remove this once "jnigen" task creates "libs" under the respected module (currently it writes to the root project dir).
+getTasksByName('jnigen', false).first().doLast {
+    if (file("${rootDir}/libs").exists()) {
+        println "Applying libs dir fix..."
+        ant.move file: "${rootDir}/libs",
+                todir: "${projectDir}"
+    }
+}
+
+//if (file('jni/build.xml').exists()) {
+//    println 'Importing ANT tasks from \"jni/build.xml\"'
+//    ant.importBuild('jni/build.xml') { antTargetName ->
+//        def taskName = 'jnigen-build-' + antTargetName
+//        println "\"$taskName\" ANT task has been imported."
+//        taskName
+//    }
+//}
+//endregion

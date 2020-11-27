@@ -18,7 +18,9 @@ public class TestBasisuWrapper {
 
     @Before
     public void init() throws IOException {
+//        new SharedLibraryLoader("gdx-basis-universal-natives.jar").load("gdx-basis-universal");
         new SharedLibraryLoader().load("gdx-basis-universal");
+//        System.loadLibrary("linux64/libgdx-basis-universal64.so");
 
         System.out.println("Loading " + IMAGE_FILE);
         try (InputStream is = TestBasisuWrapper.class.getClassLoader().getResourceAsStream(IMAGE_FILE)) {
