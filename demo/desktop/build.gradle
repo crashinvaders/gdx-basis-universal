@@ -1,4 +1,4 @@
-apply plugin: "java-library"
+apply plugin: "java"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -18,4 +18,16 @@ dependencies {
 
 //    runtimeOnly files("$rootDir/basisu-wrapper/libs/gdx-basis-universal-natives.jar")
     runtimeOnly files("../../basisu-wrapper/libs/gdx-basis-universal-natives.jar")
+}
+
+task run(dependsOn: classes, type: JavaExec) {
+    main = "com.crashinvaders.basisu.demo.desktop.DesktopLauncher"
+    classpath(sourceSets.main.runtimeClasspath)
+    classpath(sourceSets.main.resources)
+    standardInput = System.in
+    ignoreExitValue = true
+
+    if (org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+        jvmArgs '-XstartOnFirstThread'
+    }
 }
