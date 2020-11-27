@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.crashinvaders.basisu.gdx.BasisuTextureData;
+import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
 
 public class App implements ApplicationListener {
 
@@ -17,6 +18,7 @@ public class App implements ApplicationListener {
     private SpriteBatch batch;
 
     private Texture texture0;
+    private Texture texture1;
 
     public App(PlatformLauncher launcher) {
         this.launcher = launcher;
@@ -29,17 +31,22 @@ public class App implements ApplicationListener {
         viewport = new ExtendViewport(800f, 480f);
         batch = new SpriteBatch();
 
-        BasisuTextureData basisuData = new BasisuTextureData(Gdx.files.internal("kodim3.basis"), 0, 0);
-//        basisuData.setFormatSelector(BasisuTranscoderTextureFormat.RGBA32);
-//        basisuData.setFormatSelector(BasisuTranscoderTextureFormat.ETC1_RGB);
-//        basisuData.setFormatSelector(BasisuTranscoderTextureFormat.BC3_RGBA);
-//        basisuData.setFormatSelector(BasisuTranscoderTextureFormat.BC7_RGBA);
-        texture0 = new Texture(basisuData);
+        BasisuTextureData basisuData0 = new BasisuTextureData(Gdx.files.internal("kodim3.basis"));
+//        basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.RGBA32);
+//        basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.ETC1_RGB);
+//        basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.BC3_RGBA);
+//        basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.BC7_RGBA);
+        texture0 = new Texture(basisuData0);
+
+        BasisuTextureData basisuData1 = new BasisuTextureData(Gdx.files.internal("cosmocat_promo.basis"));
+        basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.RGBA32);
+        texture1 = new Texture(basisuData1);
     }
 
     @Override
     public void dispose() {
         texture0.dispose();
+        texture1.dispose();
         batch.dispose();
     }
 
@@ -65,7 +72,8 @@ public class App implements ApplicationListener {
 
         batch.setProjectionMatrix(viewport.getCamera().combined);
         batch.begin();
-        batch.draw(texture0, 0f, 0f, viewport.getMinWorldWidth(), viewport.getMinWorldHeight());
+        batch.draw(texture0, 0f, 0f, viewport.getMinWorldWidth() * 0.5f, viewport.getMinWorldHeight() * 0.5f);
+        batch.draw(texture1, viewport.getMinWorldWidth(), 0f, viewport.getMinWorldWidth() * 0.5f, viewport.getMinWorldHeight() * 0.5f);
         batch.end();
     }
 }

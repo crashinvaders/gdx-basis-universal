@@ -30,12 +30,28 @@ public class BasisuTextureData implements TextureData {
 
     private boolean isPrepared = false;
 
+    public BasisuTextureData(FileHandle file) {
+        this(file, 0, 0);
+    }
+
+    public BasisuTextureData(FileHandle file, int imageIndex) {
+        this(file, imageIndex, 0);
+    }
+
     public BasisuTextureData(FileHandle file, int imageIndex, int mipmapLevel) {
         this.file = file;
         this.imageIndex = imageIndex;
         this.mipmapLevel = mipmapLevel;
 
         this.basisuData = null;
+    }
+
+    public BasisuTextureData(BasisuData basisuData) {
+        this(basisuData, 0);
+    }
+
+    public BasisuTextureData(BasisuData basisuData, int imageIndex) {
+        this(basisuData, imageIndex, 0);
     }
 
     public BasisuTextureData(BasisuData basisuData, int imageIndex, int mipmapLevel) {
