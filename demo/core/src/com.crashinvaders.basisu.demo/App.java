@@ -7,9 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.crashinvaders.basisu.gdx.BasisuGdxUtils;
 import com.crashinvaders.basisu.gdx.BasisuTextureData;
-import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
 
 public class App implements ApplicationListener {
 
@@ -37,8 +35,6 @@ public class App implements ApplicationListener {
 //        basisuData.setFormatSelector(BasisuTranscoderTextureFormat.BC3_RGBA);
 //        basisuData.setFormatSelector(BasisuTranscoderTextureFormat.BC7_RGBA);
         texture0 = new Texture(basisuData);
-
-        BasisuGdxUtils.printCompressedTextureFormats();
     }
 
     @Override

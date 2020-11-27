@@ -1,11 +1,11 @@
 package com.crashinvaders.basisu.gdx;
 
-import com.badlogic.gdx.Application;
-import com.badlogic.gdx.Gdx;
 import com.crashinvaders.basisu.wrapper.BasisuImageInfo;
 import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
 
-import static com.crashinvaders.basisu.gdx.BasisuGdxUtils.isGlExtensionSupported;
+import static com.crashinvaders.basisu.gdx.BasisuGdxUtils.isBasisuFormatSupported;
+import static com.crashinvaders.basisu.gdx.BasisuGdxUtils.isSquareAndPowerOfTwo;
+import static com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat.*;
 
 /**
  * <b>Useful Links</b>
@@ -16,110 +16,85 @@ import static com.crashinvaders.basisu.gdx.BasisuGdxUtils.isGlExtensionSupported
  * <p/>
  */
 public interface BasisuTextureFormatSelector {
+    /**
+     * Resolves the texture format that intermediate Basis Universal texture (ETC1S)
+     * will be transcoded to based on the OpenGL compressed texture support.
+     */
     BasisuTranscoderTextureFormat resolveTextureFormat(BasisuData data, BasisuImageInfo imageInfo);
 
+    /**
+     * The priority and comments are based on the Basis Universal
+     * <a href="https://github.com/BinomialLLC/basis_universal#how-to-use-the-system">official GitHub repo documentation</a>.
+     */
     class Default implements BasisuTextureFormatSelector {
-        public static BasisuTextureFormatSelector desktop = new Desktop();
-        public static BasisuTextureFormatSelector android = new Android();
-        public static BasisuTextureFormatSelector iOS = new IOS();
-        public static BasisuTextureFormatSelector webGl = new WebGl();
-
         @Override
         public BasisuTranscoderTextureFormat resolveTextureFormat(BasisuData data, BasisuImageInfo imageInfo) {
-            Application.ApplicationType type = Gdx.app.getType();
-            switch (type) {
-                case Desktop:
-                    return desktop.resolveTextureFormat(data, imageInfo);
-                case Android:
-                    return android.resolveTextureFormat(data, imageInfo);
-                case iOS:
-                    return iOS.resolveTextureFormat(data, imageInfo);
-                case WebGL:
-                    return webGl.resolveTextureFormat(data, imageInfo);
-                case HeadlessDesktop:
-                case Applet:
-                default:
-                    throw new BasisuGdxException("Unsupported LibGDX platform type: " + type);
-            }
-        }
-    }
-
-    class Desktop implements BasisuTextureFormatSelector {
-//        public static BasisuTextureFormatSelector windows = new Windows();
-//        public static BasisuTextureFormatSelector macOS = new MacOS();
-//        public static BasisuTextureFormatSelector android = new Android();
-
-        @Override
-        public BasisuTranscoderTextureFormat resolveTextureFormat(BasisuData data, BasisuImageInfo imageInfo) {
+            //TODO Implement selectors for R and RG formats.
 
             if (imageInfo.hasAlphaFlag()) {
-                if (isGlExtensionSupported("GL_ARB_texture_compression_bptc")) {
-                    return BasisuTranscoderTextureFormat.BC7_RGBA;
+                // The color block will be ETC1S, and the alpha block is EAC.
+                // Conversion from ETC1S->EAC is very fast and nearly lossless.
+                if (isBasisuFormatSupported(ETC2_RGBA)) {
+                    return ETC2_RGBA;
                 }
-                if (isGlExtensionSupported("GL_EXT_texture_compression_s3tc")) {
-                    return BasisuTranscoderTextureFormat.BC3_RGBA;
+                // Transcoding to BC7 mode 5 is very fast.
+                if (isBasisuFormatSupported(BC7_RGBA)) {
+                    return BC7_RGBA;
                 }
-                if (isGlExtensionSupported("GL_ARB_ES3_compatibility")) {
-                    return BasisuTranscoderTextureFormat.ETC2_RGBA;
+                // Conversion is nearly lossless and very fast.
+                if (isBasisuFormatSupported(BC3_RGBA)) {
+                    return BC3_RGBA;
                 }
-                return BasisuTranscoderTextureFormat.RGBA32;
+                // Quality is very similar to BC1/BC3.
+                if (isBasisuFormatSupported(ATC_RGBA)) {
+                    return ATC_RGBA;
+                }
+                if (isBasisuFormatSupported(ASTC_4x4_RGBA)) {
+                    return ASTC_4x4_RGBA;
+                }
+                // PVRTC1 transcoder requires that the ETC1S texture's dimensions both be equal
+                // (at least on iOS) and a power of two.
+                if (isBasisuFormatSupported(PVRTC1_4_RGBA) &&
+                        isSquareAndPowerOfTwo(imageInfo.getWidth(), imageInfo.getHeight())) {
+                    return PVRTC1_4_RGBA;
+                }
+                // This format is slower and much more complex than PVRTC2 RGB.
+                // It will only work well with textures using premultiplied alpha.
+                // The alpha channel should be relatively simple (like opacity maps).
+                if (isBasisuFormatSupported(PVRTC2_4_RGBA)) {
+                    return PVRTC2_4_RGBA;
+                }
+                return RGBA32;
+
             } else {
-                if (isGlExtensionSupported("GL_EXT_texture_compression_s3tc")) {
-                    return BasisuTranscoderTextureFormat.BC1_RGB;
+                // ETC1 - The system's internal texture format is ETC1S, so outputting ETC1 texture data is a no-op.
+                if (isBasisuFormatSupported(ETC1_RGB)) {
+                    return ETC1_RGB;
                 }
-                //TODO Check if ETC1 is supported and use it.
-//                return BasisuTranscoderTextureFormat.ETC1_RGB;
-
-                return BasisuTranscoderTextureFormat.RGB565;
+                // Conversion to BC1 is very fast.
+                // Conversion loses approx. .3-.5 dB Y PSNR relative to the source ETC1S data.
+                if (isBasisuFormatSupported(BC1_RGB)) {
+                    return BC1_RGB;
+                }
+                // Conversion is nearly lossless and very fast.
+                if (isBasisuFormatSupported(ATC_RGB)) {
+                    return ATC_RGB;
+                }
+                // Fast and almost as high quality as BC1.
+                if (isBasisuFormatSupported(PVRTC2_4_RGB)) {
+                    return PVRTC2_4_RGB;
+                }
+                // Fast and almost as high quality as BC1.
+                if (isBasisuFormatSupported(FXT1_RGB)) {
+                    return FXT1_RGB;
+                }
+                // This conversion loses the most quality - several Y dB PSNR.
+                if (isBasisuFormatSupported(PVRTC1_4_RGB) &&
+                        isSquareAndPowerOfTwo(imageInfo.getWidth(), imageInfo.getHeight())) {
+                    return PVRTC1_4_RGB;
+                }
+                return RGB565;
             }
-        }
-    }
-
-//    class Linux implements BasisuTextureFormatSelector {
-//
-//        @Override
-//        public BasisuTranscoderTextureFormat resolveTextureFormat(BasisuData data) {
-//            return null;
-//        }
-//    }
-//
-//    class Windows implements BasisuTextureFormatSelector {
-//
-//        @Override
-//        public BasisuTranscoderTextureFormat resolveTextureFormat(BasisuData data) {
-//            return null;
-//        }
-//    }
-//
-//    class MacOS implements BasisuTextureFormatSelector {
-//
-//        @Override
-//        public BasisuTranscoderTextureFormat resolveTextureFormat(BasisuData data) {
-//            return null;
-//        }
-//    }
-
-    class Android implements BasisuTextureFormatSelector {
-
-        @Override
-        public BasisuTranscoderTextureFormat resolveTextureFormat(BasisuData data, BasisuImageInfo imageInfo) {
-            throw new BasisuGdxException(new UnsupportedOperationException("Not implemented yet."));
-        }
-    }
-
-    class WebGl implements BasisuTextureFormatSelector {
-
-        @Override
-        public BasisuTranscoderTextureFormat resolveTextureFormat(BasisuData data, BasisuImageInfo imageInfo) {
-            throw new BasisuGdxException(new UnsupportedOperationException("Not implemented yet."));
-        }
-    }
-
-    class IOS implements BasisuTextureFormatSelector {
-
-        @Override
-        public BasisuTranscoderTextureFormat resolveTextureFormat(BasisuData data, BasisuImageInfo imageInfo) {
-            throw new BasisuGdxException(new UnsupportedOperationException("Not implemented yet."));
         }
     }
 }
