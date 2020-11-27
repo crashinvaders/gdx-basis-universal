@@ -67,8 +67,10 @@ public interface BasisuTextureFormatSelector {
                 if (isGlExtensionSupported("GL_EXT_texture_compression_s3tc")) {
                     return BasisuTranscoderTextureFormat.BC1_RGB;
                 }
-                // ETC1 should be supported on any desktop OpenGL (...right?).
-                return BasisuTranscoderTextureFormat.ETC1_RGB;
+                //TODO Check if ETC1 is supported and use it.
+//                return BasisuTranscoderTextureFormat.ETC1_RGB;
+
+                return BasisuTranscoderTextureFormat.RGB565;
             }
         }
     }

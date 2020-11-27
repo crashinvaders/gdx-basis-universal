@@ -41,8 +41,8 @@ public class BasisuGdxUtils {
                 return 0x9278;
             case BC1_RGB:
                 return 0x83F0;
-//            case BC3_RGBA:
-//                return 0x83F3;
+            case BC3_RGBA:
+                return 0x83F3;
 //            case BC4_R:
 //                return ;
 //            case BC5_RG:
