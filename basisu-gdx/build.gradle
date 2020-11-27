@@ -1,7 +1,10 @@
 apply plugin: 'java-library'
 
-sourceCompatibility = 8.0
-targetCompatibility = 8.0
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 compileJava.options.incremental = true
 
 sourceSets.main.java.srcDirs += ['src/']

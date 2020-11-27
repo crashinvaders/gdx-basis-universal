@@ -1,15 +1,19 @@
 apply plugin: 'java-library'
 
-sourceCompatibility = 8.0
-targetCompatibility = 8.0
+group 'com.crashinvaders.gdx-basis-universal'
+version '0.1.0-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 compileJava.options.incremental = true
+compileJava.options.headerOutputDirectory.set(file('jni'))
 
 sourceSets.main.java.srcDirs += ['src']
 sourceSets.test.java.srcDirs += ['test']
 sourceSets.test.resources.srcDirs += ['test-resources']
-
-group 'com.crashinvaders.gdx-basis-universal'
-version '0.1.0-SNAPSHOT'
 
 dependencies {
     testRuntimeOnly files('libs/gdx-basis-universal-natives.jar')
@@ -23,8 +27,6 @@ test {
 }
 
 //region jnigen configuration
-compileJava.options.headerOutputDirectory.set(file('jni'))
-
 apply plugin: "com.badlogicgames.gdx.gdx-jnigen"
 
 jnigen {
