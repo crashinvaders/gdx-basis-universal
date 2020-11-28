@@ -26,12 +26,10 @@ public enum BasisuTranscoderTextureFormat implements UniqueIdUtils.UniqueIdValue
     BC7_RGBA(6),
 
 // PVRTC1-2 4bpp (mobile, PowerVR devices)
-    //TODO Restore once it works in native transcoder.
-//    /** Opaque only, RGB or alpha if cDecodeFlagsTranscodeAlphaDataToOpaqueFormats flag is specified, nearly lowest quality of any texture format. */
-//    PVRTC1_4_RGB(8),
-    //TODO Restore once it works in native transcoder.
-//    /** Opaque+alpha, most useful for simple opacity maps. If .basis file doesn't have alpha PVRTC1_4_RGB(ll) be used instead. Lowest quality of any supported texture format. */
-//    PVRTC1_4_RGBA(9),
+    /** Opaque only, RGB or alpha if cDecodeFlagsTranscodeAlphaDataToOpaqueFormats flag is specified, nearly lowest quality of any texture format. */
+    PVRTC1_4_RGB(8),
+    /** Opaque+alpha, most useful for simple opacity maps. If .basis file doesn't have alpha PVRTC1_4_RGB(ll) be used instead. Lowest quality of any supported texture format. */
+    PVRTC1_4_RGBA(9),
     /** Opaque-only, almost BC1 quality, much faster to transcode and supports arbitrary texture dimensions (unlike PVRTC1 RGB). */
     PVRTC2_4_RGB(18),
     /** Opaque+alpha, slower to encode than cTFPVRTC2_4_RGB. Premultiplied alpha is highly recommended, otherwise the color channel can leak into the alpha channel on transparent blocks. */

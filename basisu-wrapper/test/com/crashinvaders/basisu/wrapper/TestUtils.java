@@ -88,4 +88,9 @@ public class TestUtils {
 
         return buffer.toByteArray();
     }
+
+    /** Checks if the dimensions are equal and are power of two. */
+    public static boolean isSquareAndPowerOfTwo(int width, int height) {
+        return width == height && (width != 0 && (width & width - 1) == 0);
+    }
 }

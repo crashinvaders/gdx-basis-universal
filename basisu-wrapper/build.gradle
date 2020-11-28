@@ -37,7 +37,7 @@ def nativeSrcFiles = [
         'src/basisu_transcoder.cpp',
         'src/basisu_wrapper.cpp',
         'src/basisu_utils.cpp',
-        'memcpy_wrap.c',
+//        'memcpy_wrap.c',
 ]
 
 jnigen {
@@ -56,6 +56,8 @@ jnigen {
         cFlags += ' -fvisibility=hidden '
         cppFlags += ' -std=c++11 -fvisibility=hidden '
         linkerFlags += ' -fvisibility=hidden '
+
+//        cppFlags += ' -DBASISU_FORCE_DEVEL_MESSAGES=1 '
     }
     add(Windows, x32) {
         compilerPrefix = "mingw32-"

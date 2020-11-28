@@ -110,6 +110,11 @@ public class BasisuWrapperTest {
         BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisBytes, 0);
 
         for (BasisuTranscoderTextureFormat format : BasisuTranscoderTextureFormat.values()) {
+            if ((format == BasisuTranscoderTextureFormat.PVRTC1_4_RGB || format == BasisuTranscoderTextureFormat.PVRTC1_4_RGBA)
+                    && !TestUtils.isSquareAndPowerOfTwo(imageInfo.getWidth(), imageInfo.getHeight())) {
+                System.out.println("Format " + format + " requires the image to be square and has POW dimensions. Skipped...");
+                continue;
+            }
             System.out.println("Transcoding to " + format);
             BasisuWrapper.transcode(basisBytes, 0, 0, format);
         }
