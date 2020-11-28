@@ -1,3 +1,17 @@
+buildscript {
+    repositories {
+        google()
+        jcenter()
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+    }
+
+    dependencies {
+        classpath "com.android.tools.build:gradle:$androidPluginVersion"
+        classpath "org.wisepersist:gwt-gradle-plugin:$gwtPluginVersion"
+        classpath "com.mobidevelop.robovm:robovm-gradle-plugin:$roboVmVersion"
+    }
+}
+
 //subprojects {
 //    ext.appName = 'gdx-basis-universal-demo'
 //    ext.appVersion = '0.1.0'

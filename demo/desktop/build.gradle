@@ -9,6 +9,7 @@ compileJava.options.incremental = true
 
 sourceSets.main.java.srcDirs += ['src']
 sourceSets.main.resources.srcDirs += ['../assets']
+sourceSets.main.resources.srcDirs += ['../../basisu-wrapper/libs']
 
 dependencies {
     implementation project(':demo:core')

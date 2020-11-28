@@ -1,0 +1,36 @@
+apply plugin: 'java'
+apply plugin: 'robovm'
+
+sourceSets.main.java.srcDirs = [ 'src' ]
+sourceSets.main.resources.srcDirs = [ '../assets' ]
+
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+ext {
+	mainClassName = "com.crashinvaders.basisu.demo.ios.IOSLauncher"
+}
+
+dependencies {
+    implementation project(":demo:core")
+    implementation "com.mobidevelop.robovm:robovm-rt:$roboVmVersion"
+    implementation "com.mobidevelop.robovm:robovm-cocoatouch:$roboVmVersion"
+    implementation "com.badlogicgames.gdx:gdx-backend-robovm:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-ios"
+}
+
+launchIPhoneSimulator.dependsOn build
+launchIPadSimulator.dependsOn build
+launchIOSDevice.dependsOn build
+createIPA.dependsOn build
+
+robovm {
+    if (project.hasProperty('iosSignIdentityValue')) {
+        iosSignIdentity = iosSignIdentityValue
+    }
+    if (project.hasProperty('iosProvisioningProfileValue')) {
+        iosProvisioningProfile = iosProvisioningProfileValue
+    }
+//    archs = "thumbv7:arm64"
+//    arch = "arm64"
+    arch = "thumbv7"
+}
