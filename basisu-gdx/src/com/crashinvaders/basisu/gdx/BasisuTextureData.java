@@ -22,12 +22,13 @@ public class BasisuTextureData implements TextureData {
     private final int imageIndex;
     private final int mipmapLevel;
 
-    private BasisuImageInfo imageInfo;
     private BasisuData basisuData;
 
     private ByteBuffer transcodedData = null;
     private BasisuTranscoderTextureFormat transcodeFormat = null;
 
+    private int width = 0;
+    private int height = 0;
     private boolean isPrepared = false;
 
     public BasisuTextureData(FileHandle file) {
@@ -74,11 +75,6 @@ public class BasisuTextureData implements TextureData {
         this.formatSelector = (data, imageInfo) -> format;
     }
 
-    public BasisuImageInfo getImageInfo() {
-        if (imageInfo == null) throw new IllegalStateException("Call #prepare() before accessing an ImageInfo instance.");
-        return imageInfo;
-    }
-
     @Override
     public TextureDataType getType() {
         return TextureDataType.Custom;
@@ -109,7 +105,9 @@ public class BasisuTextureData implements TextureData {
                     "the total number of mipmap levels (" + mipmapLevels + ") in the basis file.");
         }
 
-        this.imageInfo = basisuData.getImageInfo(imageIndex);
+        BasisuImageInfo imageInfo = basisuData.getImageInfo(imageIndex);
+        width = imageInfo.getWidth();
+        height = imageInfo.getHeight();
 
         transcodeFormat = formatSelector.resolveTextureFormat(basisuData, imageInfo);
         Gdx.app.debug(TAG, "Transcoding " + (file != null ? file.path() : "a texture") + " to the " + transcodeFormat + " format.");
@@ -132,13 +130,13 @@ public class BasisuTextureData implements TextureData {
 
         if (transcodeFormat.isCompressedFormat()) {
             Gdx.gl.glCompressedTexImage2D(target, 0, glInternalFormatCode,
-                    imageInfo.getWidth(), imageInfo.getHeight(), 0,
+                    width, height, 0,
                     transcodedData.capacity(), transcodedData);
         } else {
             int textureType = BasisuGdxUtils.toUncompressedGlTextureType(transcodeFormat);
 
             Gdx.gl.glTexImage2D(target, 0, glInternalFormatCode,
-                    imageInfo.getWidth(), imageInfo.getHeight(), 0,
+                    width, height, 0,
                     glInternalFormatCode, textureType, transcodedData);
         }
 
@@ -161,12 +159,12 @@ public class BasisuTextureData implements TextureData {
 
     @Override
     public int getWidth() {
-        return imageInfo != null ? imageInfo.getWidth() : 0;
+        return width;
     }
 
     @Override
     public int getHeight() {
-        return imageInfo != null ? imageInfo.getHeight() : 0;
+        return height;
     }
 
     @Override

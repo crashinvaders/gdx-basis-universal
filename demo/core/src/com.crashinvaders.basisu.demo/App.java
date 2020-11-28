@@ -6,6 +6,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.crashinvaders.basisu.gdx.BasisuTextureData;
 import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
@@ -19,6 +24,7 @@ public class App implements ApplicationListener {
 
     private Texture texture0;
     private Texture texture1;
+    private Stage stage;
 
     public App(PlatformLauncher launcher) {
         this.launcher = launcher;
@@ -30,6 +36,7 @@ public class App implements ApplicationListener {
 
         viewport = new ExtendViewport(800f, 480f);
         batch = new SpriteBatch();
+        stage = new Stage(viewport, batch);
 
         BasisuTextureData basisuData0 = new BasisuTextureData(Gdx.files.internal("kodim3.basis"));
 //        basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.RGBA32);
@@ -41,6 +48,18 @@ public class App implements ApplicationListener {
         BasisuTextureData basisuData1 = new BasisuTextureData(Gdx.files.internal("cosmocat_promo.basis"));
         basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.RGBA32);
         texture1 = new Texture(basisuData1);
+
+        // UI actors.
+        {
+            Table rootTable = new Table();
+            rootTable.setFillParent(true);
+            rootTable.center();
+
+            rootTable.add(new Image(new TextureRegionDrawable(texture0), Scaling.fit)).growX();
+            rootTable.add(new Image(new TextureRegionDrawable(texture1), Scaling.fit)).growX();
+
+            stage.addActor(rootTable);
+        }
     }
 
     @Override
@@ -48,6 +67,7 @@ public class App implements ApplicationListener {
         texture0.dispose();
         texture1.dispose();
         batch.dispose();
+        stage.dispose();
     }
 
     @Override
@@ -70,10 +90,7 @@ public class App implements ApplicationListener {
         Gdx.gl.glClearColor(0.0f, 0.0f, 0.2f, 1.0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        batch.setProjectionMatrix(viewport.getCamera().combined);
-        batch.begin();
-        batch.draw(texture0, 0f, 0f, viewport.getMinWorldWidth() * 0.5f, viewport.getMinWorldHeight() * 0.5f);
-        batch.draw(texture1, viewport.getMinWorldWidth(), 0f, viewport.getMinWorldWidth() * 0.5f, viewport.getMinWorldHeight() * 0.5f);
-        batch.end();
+        stage.act();
+        stage.draw();
     }
 }
