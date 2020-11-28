@@ -5,5 +5,4 @@ namespace jniUtils {
     jint throwException(JNIEnv *env, const char *message) {
         return env->ThrowNew(env->FindClass("com/crashinvaders/basisu/wrapper/BasisuWrapperException"), message);
     }
-
 }

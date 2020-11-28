@@ -1,7 +1,7 @@
 package com.crashinvaders.basisu.wrapper;
 
 /** Direct mapping of <code>basist::transcoder_texture_format</code> enum constants. */
-public enum BasisuTranscoderTextureFormat implements UniqueIdValue {
+public enum BasisuTranscoderTextureFormat implements UniqueIdUtils.UniqueIdValue {
 
 // ETC1-2
     /** Opaque only, returns RGB or alpha data if cDecodeFlagsTranscodeAlphaDataToOpaqueFormats flag is specified. */
@@ -26,10 +26,12 @@ public enum BasisuTranscoderTextureFormat implements UniqueIdValue {
     BC7_RGBA(6),
 
 // PVRTC1-2 4bpp (mobile, PowerVR devices)
-    /** Opaque only, RGB or alpha if cDecodeFlagsTranscodeAlphaDataToOpaqueFormats flag is specified, nearly lowest quality of any texture format. */
-    PVRTC1_4_RGB(8),
-    /** Opaque+alpha, most useful for simple opacity maps. If .basis file doesn't have alpha PVRTC1_4_RGB(ll) be used instead. Lowest quality of any supported texture format. */
-    PVRTC1_4_RGBA(9),
+    //TODO Restore once it works in native transcoder.
+//    /** Opaque only, RGB or alpha if cDecodeFlagsTranscodeAlphaDataToOpaqueFormats flag is specified, nearly lowest quality of any texture format. */
+//    PVRTC1_4_RGB(8),
+    //TODO Restore once it works in native transcoder.
+//    /** Opaque+alpha, most useful for simple opacity maps. If .basis file doesn't have alpha PVRTC1_4_RGB(ll) be used instead. Lowest quality of any supported texture format. */
+//    PVRTC1_4_RGBA(9),
     /** Opaque-only, almost BC1 quality, much faster to transcode and supports arbitrary texture dimensions (unlike PVRTC1 RGB). */
     PVRTC2_4_RGB(18),
     /** Opaque+alpha, slower to encode than cTFPVRTC2_4_RGB. Premultiplied alpha is highly recommended, otherwise the color channel can leak into the alpha channel on transparent blocks. */
@@ -45,13 +47,14 @@ public enum BasisuTranscoderTextureFormat implements UniqueIdValue {
     /** Opaque+alpha, alpha channel will be opaque for opaque .basis files. ATI ATC (GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD). */
     ATC_RGBA(12),
 
-// FXT1 (desktop, Intel devices, this is a super obscure format)
-    /**
-     * Opaque only, uses exclusively CC_MIXED blocks. Notable for having a 8x4 block size. GL_3DFX_texture_compression_FXT1 is supported on Intel integrated GPU's (such as HD 630).
-     * Punch-through alpha is relatively easy to support, but full alpha is harder. This format is only here for completeness so opaque-only is fine for now.
-     * See the BASISU_USE_ORIGINAL_3DFX_FXT1_ENCODING macro in basisu_transcoder_internal.h.
-     */
-    FXT1_RGB(17),
+    //TODO Restore once it works in native transcoder.
+//// FXT1 (desktop, Intel devices, this is a super obscure format)
+//    /**
+//     * Opaque only, uses exclusively CC_MIXED blocks. Notable for having a 8x4 block size. GL_3DFX_texture_compression_FXT1 is supported on Intel integrated GPU's (such as HD 630).
+//     * Punch-through alpha is relatively easy to support, but full alpha is harder. This format is only here for completeness so opaque-only is fine for now.
+//     * See the BASISU_USE_ORIGINAL_3DFX_FXT1_ENCODING macro in basisu_transcoder_internal.h.
+//     */
+//    FXT1_RGB(17),
 
 // Uncompressed (raw pixel) formats
     /** 32bpp RGBA image stored in raster (not block) order in memory, R is first byte, A is last byte. */

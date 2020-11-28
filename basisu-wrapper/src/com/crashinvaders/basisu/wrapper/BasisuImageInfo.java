@@ -4,71 +4,96 @@ package com.crashinvaders.basisu.wrapper;
  * Direct mapping of <code>basist::basisu_image_info</code> struct.
  */
 public class BasisuImageInfo {
-    int imageIndex;
-    int totalLevels;
+	/*JNI
+        #include "basisu_transcoder.h"
 
-    int origWidth;
-    int origHeight;
+        static basist::basisu_image_info* getWrapped(jlong addr) {
+            return (basist::basisu_image_info*)addr;
+        }
+	 */
 
-    int width;
-    int height;
+    final long addr;
 
-    int numBlocksX;
-    int numBlocksY;
-    int totalBlocks;
-
-    int firstSliceIndex;
-
-    boolean alphaFlag;
-    boolean iframeFlag;
-
-    public int getImageIndex() {
-        return imageIndex;
+    public BasisuImageInfo() {
+        this.addr = jniCreate();
     }
 
-    public int getTotalLevels() {
-        return totalLevels;
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        jniDispose(addr);
     }
 
-    public int getOrigWidth() {
-        return origWidth;
-    }
 
-    public int getOrigHeight() {
-        return origHeight;
-    }
+    public int getImageIndex() { return jniGetImageIndex(addr); }
+    private native int jniGetImageIndex(long addr); /*
+        return getWrapped(addr)->m_image_index;
+    */
 
-    public int getWidth() {
-        return width;
-    }
+    public int getTotalLevels() { return jniGetTotalLevels(addr); }
+    private native int jniGetTotalLevels(long addr); /*
+        return getWrapped(addr)->m_total_levels;
+    */
 
-    public int getHeight() {
-        return height;
-    }
+    public int getOrigWidth() { return jniGetOrigWidth(addr); }
+    private native int jniGetOrigWidth(long addr); /*
+        return getWrapped(addr)->m_orig_width;
+    */
 
-    public int getNumBlocksX() {
-        return numBlocksX;
-    }
+    public int getOrigHeight() { return jniGetOrigHeight(addr); }
+    private native int jniGetOrigHeight(long addr); /*
+        return getWrapped(addr)->m_orig_height;
+    */
 
-    public int getNumBlocksY() {
-        return numBlocksY;
-    }
+    public int getWidth() { return jniGetWidth(addr); }
+    private native int jniGetWidth(long addr); /*
+        return getWrapped(addr)->m_width;
+    */
 
-    public int getTotalBlocks() {
-        return totalBlocks;
-    }
+    public int getHeight() { return jniGetHeight(addr); }
+    private native int jniGetHeight(long addr); /*
+        return getWrapped(addr)->m_height;
+    */
 
-    public int getFirstSliceIndex() {
-        return firstSliceIndex;
-    }
+    public int getNumBlocksX() { return jniGetNumBlocksX(addr); }
+    private native int jniGetNumBlocksX(long addr); /*
+        return getWrapped(addr)->m_num_blocks_x;
+    */
+
+    public int getNumBlocksY() { return jniGetNumBlocksY(addr); }
+    private native int jniGetNumBlocksY(long addr); /*
+        return getWrapped(addr)->m_num_blocks_y;
+    */
+
+    public int getTotalBlocks() { return jniGetTotalBlocks(addr); }
+    private native int jniGetTotalBlocks(long addr); /*
+        return getWrapped(addr)->m_total_blocks;
+    */
+
+    public int getFirstSliceIndex() { return jniGetFirstSliceIndex(addr); }
+    private native int jniGetFirstSliceIndex(long addr); /*
+        return getWrapped(addr)->m_first_slice_index;
+    */
 
     /** True if the image has alpha data. */
-    public boolean hasAlphaFlag() {
-        return alphaFlag;
-    }
+    public boolean hasAlphaFlag() { return jniHasAlphaFlag(addr); }
+    private native boolean jniHasAlphaFlag(long addr); /*
+        return getWrapped(addr)->m_alpha_flag;
+    */
 
     /** True if the image is an I-Frame. */
-    public boolean isIframeFlag() {
-        return iframeFlag;
-    }
+    public boolean hasIframeFlag() { return jniHasIframeFlag(addr); }
+    private native boolean jniHasIframeFlag(long addr); /*
+        return getWrapped(addr)->m_iframe_flag;
+    */
+
+    private static native long jniCreate(); /*
+       basist::basisu_image_info* imageInfo = new basist::basisu_image_info();
+       return reinterpret_cast<intptr_t>(imageInfo);
+    */
+
+    private static native void jniDispose (long addr); /*
+		basist::basisu_image_info* imageInfo = (basist::basisu_image_info*)addr;
+		delete imageInfo;
+	*/
 }

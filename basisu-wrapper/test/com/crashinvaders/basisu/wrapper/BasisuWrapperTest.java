@@ -2,6 +2,7 @@ package com.crashinvaders.basisu.wrapper;
 
 import com.badlogic.gdx.utils.SharedLibraryLoader;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.awt.image.BufferedImage;
@@ -14,10 +15,10 @@ public class BasisuWrapperTest {
 
     private static final String IMAGE_FILE = "kodim3.basis";
 
-    private byte[] basisBytes;
+    private static byte[] basisBytes;
 
-    @Before
-    public void init() throws IOException {
+    @BeforeClass
+    public static void init() throws IOException {
         new SharedLibraryLoader().load("gdx-basis-universal");
 
         System.out.println("Loading " + IMAGE_FILE);
@@ -32,21 +33,46 @@ public class BasisuWrapperTest {
     }
 
     @Test
+    public void testGetFileInfo() {
+        BasisuFileInfo fileInfo = BasisuWrapper.getFileInfo(basisBytes);
+
+        assertEquals(fileInfo.getTextureType(), BasisuTextureType.REGULAR_2D);
+        assertEquals(fileInfo.getTextureFormat(), BasisuTextureFormat.ETC1S);
+        assertEquals(fileInfo.getVersion(), 19);
+        assertEquals(fileInfo.getTotalHeaderSize(), 100);
+        assertEquals(fileInfo.getTotalSelectors(), 14720);
+        assertEquals(fileInfo.getSelectorCodebookSize(), 27491);
+        assertEquals(fileInfo.getTotalEndpoints(), 2584);
+        assertEquals(fileInfo.getEndpointCodebookSize(), 4272);
+        assertEquals(fileInfo.getTablesSize(), 2051);
+        assertEquals(fileInfo.getSlicesSize(), 51390);
+        assertEquals(fileInfo.getUsPerFrame(), 0);
+        assertEquals(fileInfo.getTotalImages(), 1);
+        assertEquals(fileInfo.getImageMipmapLevels().length, 1);
+        assertEquals(fileInfo.getImageMipmapLevels()[0], 1);
+        assertEquals(fileInfo.getUserdata0(), 0);
+        assertEquals(fileInfo.getUserdata1(), 0);
+        assertFalse(fileInfo.isFlippedY());
+        assertTrue(fileInfo.isEtc1s());
+        assertFalse(fileInfo.hasAlphaSlices());
+    }
+
+    @Test
     public void testGetImageInfo() {
         BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisBytes, 0);
 
-        assertEquals(imageInfo.imageIndex, 0);
-        assertEquals(imageInfo.totalLevels, 1);
-        assertEquals(imageInfo.origWidth, 768);
-        assertEquals(imageInfo.origHeight, 512);
-        assertEquals(imageInfo.width, 768);
-        assertEquals(imageInfo.height, 512);
-        assertEquals(imageInfo.numBlocksX, 192);
-        assertEquals(imageInfo.numBlocksY, 128);
-        assertEquals(imageInfo.totalBlocks, 24576);
-        assertEquals(imageInfo.firstSliceIndex, 0);
-        assertFalse(imageInfo.alphaFlag);
-        assertFalse(imageInfo.iframeFlag);
+        assertEquals(imageInfo.getImageIndex(), 0);
+        assertEquals(imageInfo.getTotalLevels(), 1);
+        assertEquals(imageInfo.getOrigWidth(), 768);
+        assertEquals(imageInfo.getOrigHeight(), 512);
+        assertEquals(imageInfo.getWidth(), 768);
+        assertEquals(imageInfo.getHeight(), 512);
+        assertEquals(imageInfo.getNumBlocksX(), 192);
+        assertEquals(imageInfo.getNumBlocksY(), 128);
+        assertEquals(imageInfo.getTotalBlocks(), 24576);
+        assertEquals(imageInfo.getFirstSliceIndex(), 0);
+        assertFalse(imageInfo.hasAlphaFlag());
+        assertFalse(imageInfo.hasIframeFlag());
     }
 
     @Test
@@ -69,10 +95,23 @@ public class BasisuWrapperTest {
         byte[] etc2Rgba = BasisuWrapper.transcode(basisBytes, 0, 0, BasisuTranscoderTextureFormat.ETC2_RGBA);
 
         // Check if encoding is correct.
-        assertEquals(etc2Rgba.length, imageInfo.totalBlocks * 16);
+        assertEquals(etc2Rgba.length, imageInfo.getTotalBlocks() * 16);
 
         TestUtils.saveFile(etc2Rgba, IMAGE_FILE + ".etc2rgba");
     }
 
+    /**
+     * Transcode to all supported formats for quick stability check (the result texture data is not validated!).
+     * This is a valid test as desktops should be able to transcode to any supported texture format
+     * listed in BasisuTranscoderTextureFormat enum.
+     */
+    @Test
+    public void testTranscodeAll() {
+        BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisBytes, 0);
 
+        for (BasisuTranscoderTextureFormat format : BasisuTranscoderTextureFormat.values()) {
+            System.out.println("Transcoding to " + format);
+            BasisuWrapper.transcode(basisBytes, 0, 0, format);
+        }
+    }
 }

@@ -29,17 +29,28 @@ test {
 //region jnigen configuration
 apply plugin: "com.badlogicgames.gdx.gdx-jnigen"
 
+def nativeSrcFiles = [
+        'com_crashinvaders_basisu_wrapper_BasisuWrapper.cpp',
+        'com_crashinvaders_basisu_wrapper_BasisuFileInfo.cpp',
+        'com_crashinvaders_basisu_wrapper_BasisuImageInfo.cpp',
+        'src/jni_utils.cpp',
+        'src/basisu_transcoder.cpp',
+        'src/basisu_wrapper.cpp',
+        'src/basisu_utils.cpp',
+]
+
 jnigen {
     sharedLibName = 'gdx-basis-universal'
 
     nativeCodeGenerator {
         sourceDir = '/src'
-//        includes = ['**/com/crashinvaders/basisu/wrapper/*.java']
     }
 
     all {
-        headerDirs = ['src']
-        cExcludes = cppExcludes = ['test/**', '.vscode/**', 'build/**',]
+        headerDirs = ['include']
+//        cExcludes = cppExcludes = ['test/**', '.vscode/**', 'build/**',]
+
+        cppIncludes = nativeSrcFiles
 
         cFlags += ' -fvisibility=hidden '
         cppFlags += ' -std=c++11 -fvisibility=hidden '
@@ -63,12 +74,32 @@ jnigen {
     }
 }
 
-//FIXME Remove this once "jnigen" task creates "libs" under the respected module (currently it writes to the root project dir).
 getTasksByName('jnigen', false).first().doLast {
+    //FIXME Remove this once "jnigen" task creates "libs" under the respected module (currently it writes to the root project dir).
     if (file("${rootDir}/libs").exists()) {
         println "Applying libs dir fix..."
         ant.move file: "${rootDir}/libs",
                 todir: "${projectDir}"
+    }
+
+    // Update "ndkSuffix" Android build property with platform specific file suffix.
+    if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+        ant.replaceregexp(
+                match: '<property name="ndkSuffix" value="" />',
+                replace: '<property name="ndkSuffix" value=".cmd" />',
+                flags: 'g',
+                byline: true) {
+            fileset(dir: 'jni', includes: 'build-android32.xml')
+        }
+    }
+
+    // Fix missing source files in Android.mk.
+    ant.replaceregexp(
+            match: 'LOCAL_SRC_FILES :=  ',
+            replace: "LOCAL_SRC_FILES := ${String.join(' ', nativeSrcFiles)}\n",
+            flags: 'g',
+            byline: true) {
+        fileset(dir: 'jni', includes: 'Android.mk')
     }
 }
 

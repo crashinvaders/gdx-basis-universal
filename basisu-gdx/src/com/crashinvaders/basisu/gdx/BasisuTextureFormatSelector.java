@@ -52,12 +52,13 @@ public interface BasisuTextureFormatSelector {
                 if (isBasisuFormatSupported(ASTC_4x4_RGBA)) {
                     return ASTC_4x4_RGBA;
                 }
-                // PVRTC1 transcoder requires that the ETC1S texture's dimensions both be equal
-                // (at least on iOS) and a power of two.
-                if (isBasisuFormatSupported(PVRTC1_4_RGBA) &&
-                        isSquareAndPowerOfTwo(imageInfo.getWidth(), imageInfo.getHeight())) {
-                    return PVRTC1_4_RGBA;
-                }
+                //TODO Restore once it works in native transcoder.
+//                // PVRTC1 transcoder requires that the ETC1S texture's dimensions both be equal
+//                // (at least on iOS) and a power of two.
+//                if (isBasisuFormatSupported(PVRTC1_4_RGBA) &&
+//                        isSquareAndPowerOfTwo(imageInfo.getWidth(), imageInfo.getHeight())) {
+//                    return PVRTC1_4_RGBA;
+//                }
                 // This format is slower and much more complex than PVRTC2 RGB.
                 // It will only work well with textures using premultiplied alpha.
                 // The alpha channel should be relatively simple (like opacity maps).
@@ -84,15 +85,18 @@ public interface BasisuTextureFormatSelector {
                 if (isBasisuFormatSupported(PVRTC2_4_RGB)) {
                     return PVRTC2_4_RGB;
                 }
-                // Fast and almost as high quality as BC1.
-                if (isBasisuFormatSupported(FXT1_RGB)) {
-                    return FXT1_RGB;
-                }
-                // This conversion loses the most quality - several Y dB PSNR.
-                if (isBasisuFormatSupported(PVRTC1_4_RGB) &&
-                        isSquareAndPowerOfTwo(imageInfo.getWidth(), imageInfo.getHeight())) {
-                    return PVRTC1_4_RGB;
-                }
+                //TODO Restore once it works in native transcoder.
+//                // Fast and almost as high quality as BC1.
+//                if (isBasisuFormatSupported(FXT1_RGB)) {
+//                    return FXT1_RGB;
+//                }
+                //TODO Restore once it works in native transcoder.
+//                // Nearly lowest quality of any texture format
+//                // This conversion loses the most quality - several Y dB PSNR.
+//                if (isBasisuFormatSupported(PVRTC1_4_RGB) &&
+//                        isSquareAndPowerOfTwo(imageInfo.getWidth(), imageInfo.getHeight())) {
+//                    return PVRTC1_4_RGB;
+//                }
                 return RGB565;
             }
         }

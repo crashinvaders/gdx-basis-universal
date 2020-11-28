@@ -111,12 +111,12 @@ public class BasisuGdxUtils {
                 return GL_TEX_ARC_RGB;
             case ATC_RGBA:
                 return GL_TEX_ARC_RGBA_INTERPOLATED;
-            case FXT1_RGB:
-                return GL_TEX_FXT1_RGB;
-            case PVRTC1_4_RGB:
-                return GL_TEX_PVRTC1_4BPP_RGB;
-            case PVRTC1_4_RGBA:
-                return GL_TEX_PVRTC1_4BPP_RGBA;
+//            case FXT1_RGB:
+//                return GL_TEX_FXT1_RGB;
+//            case PVRTC1_4_RGB:
+//                return GL_TEX_PVRTC1_4BPP_RGB;
+//            case PVRTC1_4_RGBA:
+//                return GL_TEX_PVRTC1_4BPP_RGBA;
             case PVRTC2_4_RGB:
             case PVRTC2_4_RGBA:
                 return GL_TEX_PVRTC2_4BPP_RGBA;

@@ -7,7 +7,7 @@
 using namespace std;
 
 int main(int, char**) {
-    vector<uint8_t> basisData = fileUtils::readFile("../../resources/kodim3.basis");
+    vector<uint8_t> basisData = fileUtils::readFile("../test-resources/kodim3.basis");
     if (basisData.size() == 0) {
         cout << "An error occured during reading the file." << endl;
         return 1;
@@ -21,7 +21,7 @@ int main(int, char**) {
     }
 
     vector<uint8_t> rgba;
-    if (!basisuWrapper::transcode(rgba, basisData.data(), basisData.size(), 0, basist::transcoder_texture_format::cTFRGBA4444)) {
+    if (!basisuWrapper::transcode(rgba, basisData.data(), basisData.size(), 0, 0, basist::transcoder_texture_format::cTFRGBA4444)) {
         cout << "Error during image transcoding!" << endl;
         return 3;
     }

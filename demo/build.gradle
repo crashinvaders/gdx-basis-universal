@@ -1,0 +1,4 @@
+//subprojects {
+//    ext.appName = 'gdx-basis-universal-demo'
+//    ext.appVersion = '0.1.0'
+//}

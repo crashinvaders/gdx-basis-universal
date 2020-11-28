@@ -25,9 +25,9 @@
 #if TARGET_OS_IPHONE || defined(__EMSCRIPTEN__) || defined(__ANDROID__)
 	#define BASISD_SUPPORT_BC7 0
 	#define BASISD_SUPPORT_ATC 0
-	#ifndef __ANDROID__
+	// #ifndef __ANDROID__
 		#define BASISD_SUPPORT_PVRTC2 0
-	#endif
+	// #endif
 #else
 	#define BASISD_SUPPORT_BC7_MODE6_OPAQUE_ONLY 0
 #endif

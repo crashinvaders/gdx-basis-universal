@@ -7,7 +7,7 @@ package com.crashinvaders.basisu.wrapper;
  * The encoder library doesn't really do anything special or different with these texture types, this is mostly here for the benefit of the user.
  * We do make sure the various constraints are followed (2DArray/cubemap/videoframes/volume implies that each image has the same resolution and # of mipmap levels, etc., cubemap implies that the # of image slices is a multiple of 6)
  */
-public enum BasisuTextureType implements UniqueIdValue {
+public enum BasisuTextureType implements UniqueIdUtils.UniqueIdValue {
     REGULAR_2D(0),          // An arbitrary array of 2D RGB or RGBA images with optional mipmaps, array size = # images, each image may have a different resolution and # of mipmap levels
     REGULAR_2D_ARRAY(1),    // An array of 2D RGB or RGBA images with optional mipmaps, array size = # images, each image has the same resolution and mipmap levels
     CUBEMAP_ARRAY(2),       // an array of cubemap levels, total # of images must be divisable by 6, in X+, X-, Y+, Y-, Z+, Z- order, with optional mipmaps

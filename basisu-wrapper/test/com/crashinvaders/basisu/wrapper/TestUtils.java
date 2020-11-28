@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 
 public class TestUtils {
-    private static final String OUTPUT_ROOT = "testOutput/";
+    private static final String OUTPUT_ROOT = "test-output/";
 
     public static void saveImagePng(BufferedImage image, String fileName) {
         File outFile = new File(OUTPUT_ROOT + fileName + ".png");

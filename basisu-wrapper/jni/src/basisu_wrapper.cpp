@@ -1,27 +1,25 @@
-#include <iostream>
 #include <cstdio>
+#include <cstring>
 
 #include "basisu_wrapper.h"
 #include "basisu_transcoder.h"
+#include "basisu_utils.h"
 
-using namespace std;
 using namespace basist;
 
 namespace basisuWrapper {
 
-    static etc1_global_selector_codebook codebook;
+#define LOG_TAG "basisu_wrapper.cpp"
 
-    void reportError(const char *message) {
-        cout << LOG_ERROR << message << endl;
-    }
+    static etc1_global_selector_codebook codebook;
 
     void initBasisu() {
         static bool basisuInitialized;
         if (basisuInitialized)
             return;
 
-        cout << LOG_INFO << "Basis Universal " << BASISD_VERSION_STRING << endl;
-        cout << LOG_INFO << "Initializing global basisu parser." << endl;
+        basisuUtils::logInfo(LOG_TAG, (std::string("Basis Universal ") + BASISD_VERSION_STRING).c_str());
+        basisuUtils::logInfo(LOG_TAG, "Initializing global basisu parser.");
 
         basisuInitialized = true;
 
@@ -53,7 +51,7 @@ namespace basisuWrapper {
         basisu_transcoder transcoder(&codebook);
         bool successful = transcoder.get_file_info(data, dataSize, fileInfo);
         if (!successful) {
-            reportError("Failed to obtain file info.");
+            basisuUtils::logInfo(LOG_TAG, "Failed to obtain file info.");
         }
         return successful;
     }
@@ -63,7 +61,7 @@ namespace basisuWrapper {
         basisu_transcoder transcoder(&codebook);
         bool successful = transcoder.get_image_info(data, dataSize, imageInfo, imageIndex);
         if (!successful) {
-            reportError("Failed to obtain image info.");
+            basisuUtils::logError(LOG_TAG, "Failed to obtain image info.");
         }
         return successful;
     }
@@ -74,15 +72,15 @@ namespace basisuWrapper {
         initBasisu();
         basisu_transcoder transcoder(&codebook);
 
-        std::cout << LOG_INFO 
-        << "Transcoding basis image (image index: " 
-        << imageIndex << ", level index: " << levelIndex 
-        << ") into texture format with ID: " << (int)format 
-        << std::endl;
+        // std::cout << LOG_INFO 
+        // << "Transcoding basis image (image index: " 
+        // << imageIndex << ", level index: " << levelIndex 
+        // << ") into texture format with ID: " << (int)format 
+        // << std::endl;
 
         uint32_t origWidth, origHeight, totalBlocks;
         if (!transcoder.get_image_level_desc(data, dataSize, imageIndex, levelIndex, origWidth, origHeight, totalBlocks)) {
-            reportError("Failed to retrieve image level description.");
+            basisuUtils::logError(LOG_TAG, "Failed to retrieve image level description.");
             return false;
         }
 

@@ -3,9 +3,13 @@
 .vscode
 build
 out
+/local.properties
 
 /basisu-wrapper/libs
-/basisu-wrapper/testOutput
+/basisu-wrapper/obj
+/basisu-wrapper/test-output
 /basisu-wrapper/jni/*.*
 /basisu-wrapper/jni/jni-headers
 /basisu-wrapper/jni/target
+
+/demo/android/libs

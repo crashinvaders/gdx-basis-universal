@@ -34,7 +34,7 @@ public class BasisuData {
         }
 
         //FIXME Replace this the commented code once BasisuFileInfo is fully nativally mapped.
-//        this.fileInfo = BasisuWrapper.getFileInfo(encodedData, encodedData.length, 0);
+//        this.fileInfo = BasisuWrapper.getFileInfo(encodedData);
         this.fileInfo = new BasisuFileInfoExtension();
     }
 
