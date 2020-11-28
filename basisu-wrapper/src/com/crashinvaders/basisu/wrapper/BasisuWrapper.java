@@ -38,6 +38,9 @@ public class BasisuWrapper {
     #include "basisu_wrapper.h"
     #include "basisu_utils.h"
 
+
+
+
     #define LOG_TAG "BasisuWrapper.java"
     #define BASE_PACKAGE com/crashinvaders/basisu/wrapper
 

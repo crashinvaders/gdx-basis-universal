@@ -31,6 +31,7 @@ public class BasisuFileInfo {
         this.addr = jniCreate();
     }
 
+    //TODO Finalizers are deprecated since Java 9. Figure how to handle native resource release properly.
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
