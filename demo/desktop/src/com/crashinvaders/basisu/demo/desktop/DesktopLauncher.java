@@ -21,4 +21,5 @@ public class DesktopLauncher implements PlatformLauncher {
 
         this.app = new Lwjgl3Application(new App(this), config);
     }
+
 }

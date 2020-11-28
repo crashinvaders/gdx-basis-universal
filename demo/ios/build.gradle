@@ -1,16 +1,23 @@
 apply plugin: 'java'
 apply plugin: 'robovm'
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 sourceSets.main.java.srcDirs = [ 'src' ]
 sourceSets.main.resources.srcDirs = [ '../assets' ]
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-ext {
-	mainClassName = "com.crashinvaders.basisu.demo.ios.IOSLauncher"
-}
+//ext {
+//	mainClassName = "com.crashinvaders.basisu.demo.ios.IOSLauncher"
+//}
 
 dependencies {
+    // Natives jar should be available after :jnigenJarNativesIOS
+    implementation files("../../basisu-wrapper/build/libs/basisu-wrapper-$project.appVersion-natives-ios.jar")
     implementation project(":demo:core")
     implementation "com.mobidevelop.robovm:robovm-rt:$roboVmVersion"
     implementation "com.mobidevelop.robovm:robovm-cocoatouch:$roboVmVersion"
@@ -23,14 +30,14 @@ launchIPadSimulator.dependsOn build
 launchIOSDevice.dependsOn build
 createIPA.dependsOn build
 
-robovm {
-    if (project.hasProperty('iosSignIdentityValue')) {
-        iosSignIdentity = iosSignIdentityValue
-    }
-    if (project.hasProperty('iosProvisioningProfileValue')) {
-        iosProvisioningProfile = iosProvisioningProfileValue
-    }
-//    archs = "thumbv7:arm64"
+//robovm {
+//    if (project.hasProperty('iosSignIdentityValue')) {
+//        iosSignIdentity = iosSignIdentityValue
+//    }
+//    if (project.hasProperty('iosProvisioningProfileValue')) {
+//        iosProvisioningProfile = iosProvisioningProfileValue
+//    }
+////    archs = "thumbv7:arm64"
 //    arch = "arm64"
-    arch = "thumbv7"
-}
+////    arch = "thumbv7"
+//}

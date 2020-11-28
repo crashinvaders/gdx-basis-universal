@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.crashinvaders.basisu.wrapper.BasisuImageInfo;
 import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 public class BasisuTextureData implements TextureData {
@@ -115,8 +116,7 @@ public class BasisuTextureData implements TextureData {
         byte[] transcodedData = basisuData.transcode(imageIndex, mipmapLevel, transcodeFormat);
         ByteBuffer buffer = BufferUtils.newByteBuffer(transcodedData.length);
         buffer.put(transcodedData);
-        buffer.limit(buffer.capacity());
-        buffer.position(0);
+        ((Buffer)buffer).position(0);
         this.transcodedData = buffer;
 
         isPrepared = true;

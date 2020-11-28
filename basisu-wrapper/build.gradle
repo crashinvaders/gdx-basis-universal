@@ -37,6 +37,7 @@ def nativeSrcFiles = [
         'src/basisu_transcoder.cpp',
         'src/basisu_wrapper.cpp',
         'src/basisu_utils.cpp',
+        'memcpy_wrap.c',
 ]
 
 jnigen {

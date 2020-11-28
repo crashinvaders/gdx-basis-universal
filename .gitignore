@@ -4,6 +4,8 @@
 build
 out
 /local.properties
+robovm-build
+.DS-Store
 
 /basisu-wrapper/libs
 /basisu-wrapper/obj

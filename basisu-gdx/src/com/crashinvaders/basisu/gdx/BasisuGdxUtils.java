@@ -174,7 +174,9 @@ public class BasisuGdxUtils {
         }
         Gdx.gl.glGetIntegerv(GL20.GL_COMPRESSED_TEXTURE_FORMATS, buffer);
         for (int i = 0; i < formatAmount; i++) {
-            supportedGlTextureFormats.add(buffer.get(i));
+            int code = buffer.get(i);
+            supportedGlTextureFormats.add(code);
+//            Gdx.app.log("GL_TEX_FORMAT", Integer.toHexString(code));
         }
     }
 

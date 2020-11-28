@@ -87,7 +87,7 @@ public class App implements ApplicationListener {
 
     @Override
     public void render() {
-        Gdx.gl.glClearColor(0.0f, 0.0f, 0.2f, 1.0f);
+        Gdx.gl.glClearColor(0.4f, 0.0f, 0.6f, 1.0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         stage.act();
