@@ -1,32 +1,36 @@
+#include <string>
 #include <iostream>
 
 #include "file_utils.h"
 #include "basisu_transcoder.h"
 #include "basisu_wrapper.h"
+#include "basisu_native_utils.h"
 
-using namespace std;
+#define LOG_TAG "jni-test"
 
 int main(int, char**) {
-    vector<uint8_t> basisData = fileUtils::readFile("../test-resources/kodim3.basis");
+    std::vector<uint8_t> basisData = fileUtils::readFile("../test-resources/kodim3.basis");
     if (basisData.size() == 0) {
-        cout << "An error occured during reading the file." << endl;
+        basisuUtils::logError(LOG_TAG, "An error occured during reading the file.");
         return 1;
     }
 
-    cout << "File was successfully read. Size: " << basisData.size() << endl;
+    basisuUtils::logInfo(LOG_TAG, (std::string("File was successfully read. Size: ") += basisData.size()).c_str());
+
     
     if (!basisuWrapper::validateHeader(basisData.data(), basisData.size())) {
-        cout << "File is not a valid basis universal image!" << endl;
+        basisuUtils::logError(LOG_TAG, "File is not a valid basis universal image!");
         return 2;
     }
 
-    vector<uint8_t> rgba;
+    std::vector<uint8_t> rgba;
     if (!basisuWrapper::transcode(rgba, basisData.data(), basisData.size(), 0, 0, basist::transcoder_texture_format::cTFRGBA4444)) {
-        cout << "Error during image transcoding!" << endl;
+        basisuUtils::logError(LOG_TAG, "Error during image transcoding!");
         return 3;
     }
+    basisuUtils::logInfo(LOG_TAG, "The test finished successfully!");
 
-    cout << "rgba[0] = [" << (int)rgba[0] << " " << (int)rgba[1] << " " << (int)rgba[2] << " " << (int)rgba[3] << "] size: " << rgba.size() << endl;
-
+    basisuUtils::throwException(nullptr, "TEST EXCEPTION!");
+    
     return 0;
 }

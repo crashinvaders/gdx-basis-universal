@@ -33,10 +33,9 @@ public class BasisuWrapper {
 
     /*JNI
 
-    #include "jni_utils.h"
     #include "basisu_transcoder.h"
     #include "basisu_wrapper.h"
-    #include "basisu_utils.h"
+    #include "basisu_native_utils.h"
 
 
 
@@ -61,7 +60,7 @@ public class BasisuWrapper {
     private static native void getFileInfoNative(byte[] data, int dataSize, long fileInfoAddr); /*
         basist::basisu_file_info* fileInfo = (basist::basisu_file_info*)fileInfoAddr;
         if (!basisuWrapper::getFileInfo(*fileInfo, (uint8_t*)data, dataSize)) {
-            jniUtils::throwException(env, "Failed to obtain file info.");
+            basisuUtils::throwException(env, "Failed to obtain file info.");
             return;
         }
     */
@@ -69,7 +68,7 @@ public class BasisuWrapper {
     private static native void getImageInfoNative(byte[] data, int dataSize, int imageIndex, long imageInfoAddr); /*
         basist::basisu_image_info* imageInfo = (basist::basisu_image_info*)imageInfoAddr;
         if (!basisuWrapper::getImageInfo(*imageInfo, (uint8_t*)data, dataSize, imageIndex)) {
-            jniUtils::throwException(env, "Failed to obtain image info.");
+            basisuUtils::throwException(env, "Failed to obtain image info.");
             return;
         }
     */
@@ -82,7 +81,7 @@ public class BasisuWrapper {
 
         if (!basisuWrapper::transcode(rgba, (uint8_t*)data, dataSize, imageIndex, levelIndex, format)) {
             basisuUtils::logError(LOG_TAG, "Error during image transcoding!");
-            jniUtils::throwException(env, "Error during image transcoding!");
+            basisuUtils::throwException(env, "Error during image transcoding!");
             return 0;
         }
 

@@ -3,7 +3,7 @@
 
 #include "basisu_wrapper.h"
 #include "basisu_transcoder.h"
-#include "basisu_utils.h"
+#include "basisu_native_utils.h"
 
 using namespace basist;
 
