@@ -47,7 +47,7 @@ jnigen {
 
     all {
         headerDirs = ['include']
-//        cExcludes = cppExcludes = ['test/**', '.vscode/**', 'build/**',]
+        cExcludes = cppExcludes = ['build/**',]
 
         cppIncludes = nativeSrcFiles
 
@@ -55,7 +55,8 @@ jnigen {
         cppFlags += ' -std=c++11 -fvisibility=hidden '
         linkerFlags += ' -fvisibility=hidden '
 
-//        cppFlags += ' -DBASISU_FORCE_DEVEL_MESSAGES=1 '
+        // Enable for Basis Universal debug messages.
+        //  cppFlags += ' -DBASISU_FORCE_DEVEL_MESSAGES=1 '
     }
     add(Windows, x32) {
         compilerPrefix = "mingw32-"
