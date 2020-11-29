@@ -1,7 +1,6 @@
 package com.crashinvaders.basisu.gdx;
 
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.utils.SharedLibraryLoader;
 import com.crashinvaders.basisu.wrapper.BasisuFileInfo;
 import com.crashinvaders.basisu.wrapper.BasisuImageInfo;
 import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
@@ -11,21 +10,12 @@ public class BasisuData {
     private final byte[] encodedData;
     private final BasisuFileInfo fileInfo;
 
-    private static boolean nativeLibLoaded = false;
-
-    public static void loadNativeLib() {
-        if (!nativeLibLoaded) {
-            new SharedLibraryLoader().load("gdx-basis-universal");
-            nativeLibLoaded = true;
-        }
-    }
-
     public BasisuData(FileHandle fileHandle) {
         this(fileHandle.readBytes());
     }
 
     public BasisuData(byte[] encodedData) {
-        loadNativeLib();
+        BasisuNativeLibLoader.loadIfNeeded();
 
         this.encodedData = encodedData;
 

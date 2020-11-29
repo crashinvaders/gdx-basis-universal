@@ -7,7 +7,7 @@ import com.crashinvaders.basisu.demo.PlatformLauncher;
 
 public class DesktopLauncher implements PlatformLauncher {
 
-    private final Lwjgl3Application app;
+    private final App app;
 
     public static void main(String[] args) {
         new DesktopLauncher();
@@ -19,7 +19,8 @@ public class DesktopLauncher implements PlatformLauncher {
         config.setResizable(true);
         config.setWindowedMode(800, 480);
 
-        this.app = new Lwjgl3Application(new App(this), config);
+        this.app = new App(this);
+        new Lwjgl3Application(app, config);
     }
 
 }

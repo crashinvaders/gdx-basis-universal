@@ -1,5 +1,7 @@
 package com.crashinvaders.basisu.wrapper;
 
+import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
+
 public class BasisuWrapper {
 
     public static boolean validateHeader(byte[] data) {

@@ -1,5 +1,8 @@
 package com.crashinvaders.basisu.wrapper;
 
+import com.crashinvaders.basisu.wrapper.BasisuTextureFormat;
+import com.crashinvaders.basisu.wrapper.BasisuTextureType;
+
 public class BasisuFileInfo {
 
     public BasisuTextureType getTextureType() {

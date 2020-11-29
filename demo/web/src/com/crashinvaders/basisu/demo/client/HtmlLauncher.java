@@ -5,11 +5,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.gwt.GwtApplication;
 import com.badlogic.gdx.backends.gwt.GwtApplicationConfiguration;
 import com.crashinvaders.basisu.demo.App;
+import com.crashinvaders.basisu.demo.PlatformLauncher;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
 
-public class HtmlLauncher extends GwtApplication {
+public class HtmlLauncher extends GwtApplication implements PlatformLauncher {
 
     private static final int PADDING = 0;
     private GwtApplicationConfiguration cfg;
@@ -23,7 +24,6 @@ public class HtmlLauncher extends GwtApplication {
         int w = Window.getClientWidth() - PADDING;
         int h = Window.getClientHeight() - PADDING;
         cfg = new GwtApplicationConfiguration(w, h);
-        cfg.preferFlash = false;
         cfg.disableAudio = true;
 //        cfg.useDebugGL = true;  //TODO Remove it.
         return cfg;
@@ -50,11 +50,11 @@ public class HtmlLauncher extends GwtApplication {
 
             @Override
             public void afterSetup() {
-                Gdx.app.setApplicationLogger(new GwtConsoleLogger());
+//                Gdx.app.setApplicationLogger(new GwtConsoleLogger());
                 Gdx.app.setLogLevel(LOG_DEBUG);
             }
         });
 
-        return new App();
+        return new App(this);
     }
 }
