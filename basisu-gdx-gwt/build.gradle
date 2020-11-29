@@ -1,0 +1,8 @@
+apply plugin: 'java-library'
+
+sourceSets.main.java.srcDirs = [ 'src' ]
+
+dependencies {
+    implementation project(':basisu-gdx')
+    implementation "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion"
+}
