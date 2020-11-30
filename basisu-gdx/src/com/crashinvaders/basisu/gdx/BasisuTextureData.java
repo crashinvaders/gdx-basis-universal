@@ -96,13 +96,13 @@ public class BasisuTextureData implements TextureData {
 
         int totalImages = basisuData.getFileInfo().getTotalImages();
         if (imageIndex < 0 || imageIndex >= totalImages) {
-            throw new IllegalStateException("imageIndex " + imageIndex + " doesn't fall into " +
+            throw new IllegalStateException("imageIndex " + imageIndex + " exceeds " +
                     "the total number of images (" + totalImages + ") in the basis file.");
         }
 
         int mipmapLevels = basisuData.getFileInfo().getImageMipmapLevels()[imageIndex];
         if (mipmapLevel < 0 || mipmapLevel >= mipmapLevels) {
-            throw new IllegalStateException("mipmapLevel " + mipmapLevel + " doesn't fall into " +
+            throw new IllegalStateException("mipmapLevel " + mipmapLevel + " exceeds " +
                     "the total number of mipmap levels (" + mipmapLevels + ") in the basis file.");
         }
 

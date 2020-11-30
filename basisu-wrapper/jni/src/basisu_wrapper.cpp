@@ -72,12 +72,6 @@ namespace basisuWrapper {
         initBasisu();
         basisu_transcoder transcoder(&codebook);
 
-        // std::cout << LOG_INFO 
-        // << "Transcoding basis image (image index: " 
-        // << imageIndex << ", level index: " << levelIndex 
-        // << ") into texture format with ID: " << (int)format 
-        // << std::endl;
-
         uint32_t origWidth, origHeight, totalBlocks;
         if (!transcoder.get_image_level_desc(data, dataSize, imageIndex, levelIndex, origWidth, origHeight, totalBlocks)) {
             basisuUtils::logError(LOG_TAG, "Failed to retrieve image level description.");
@@ -138,3 +132,94 @@ namespace basisuWrapper {
         return status;
     }
 } // namespace basisuWrapper
+
+
+// Emscripten Embind bindings.
+#ifdef __EMSCRIPTEN__
+
+#include <vector>
+#include <iostream>
+#include <emscripten/bind.h>
+#include <emscripten/val.h>
+
+using namespace emscripten;
+
+// From https://github.com/emscripten-core/emscripten/issues/5519#issuecomment-624775352
+template <typename T>
+std::vector<T> vecFromTypedArray(const val &jsValue) {
+    const unsigned length = jsValue["length"].as<unsigned>();
+    std::vector<T> vec(length);
+    val memoryView{typed_memory_view(length, vec.data())};
+    memoryView.call<void>("set", jsValue);
+    return vec;
+}
+
+bool validateHeader_wrap(std::vector<uint8_t> &data) {
+    return basisuWrapper::validateHeader(data.data(), data.size());
+}
+
+bool validateChecksum_wrap(std::vector<uint8_t> &data, bool fullValidation) {
+    return basisuWrapper::validateChecksum(data.data(), data.size(), fullValidation);
+}
+
+int getTotalMipMapLevels_wrap(std::vector<uint8_t> &data) {
+    return basisuWrapper::getTotalMipMapLevels(data.data(), data.size());
+}
+
+// uintptr_t
+void getFileInfo_wrap(int fileInfoAddr, std::vector<uint8_t> &data) {
+    basist::basisu_file_info* fileInfo = (basist::basisu_file_info*)fileInfoAddr;
+    if (basisuWrapper::getFileInfo(*fileInfo, data.data(), data.size())) {
+            basisuUtils::throwException(nullptr, "Failed to obtain file info.");
+            return;
+    }
+}
+
+// uintptr_t
+void getImageInfo_wrap(int imageInfoAddr, std::vector<uint8_t> &data, uint32_t imageIndex) {
+    basist::basisu_image_info* imageInfo = (basist::basisu_image_info*)imageInfoAddr;
+    if (basisuWrapper::getImageInfo(*imageInfo, data.data(), data.size(), imageIndex)) {
+        basisuUtils::throwException(nullptr, "Failed to obtain image info.");
+        return;
+    }
+}
+
+std::vector<uint8_t> transcode_wrap(std::vector<uint8_t> &data, uint32_t imageIndex, uint32_t levelIndex, uint32_t textureFormatId) {
+    std::vector<uint8_t> rgba;
+    basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
+
+    if (!basisuWrapper::transcode(rgba, data.data(), data.size(), imageIndex, levelIndex, format)) {
+        basisuUtils::logError(LOG_TAG, "Error during image transcoding!");
+        basisuUtils::throwException(nullptr, "Error during image transcoding!");
+        return rgba;
+    }
+
+    return rgba;
+}
+
+int main(int, char**) {
+    basisuUtils::logInfo(LOG_TAG, "LibGDX Basis Universal native library is loaded.");
+    return 0;
+}
+
+//FIXME This is really ugly. Find a way to pass data arrays more easily. Look into GWT types that LibGDX uses.
+bool validateHeader_wrap_wrap(const val &jsData) {
+    std::vector<uint8_t> data = vecFromTypedArray<uint8_t>(jsData);
+    return validateHeader_wrap(data);
+}
+
+EMSCRIPTEN_BINDINGS(my_module) {
+
+	register_vector<uint8_t>("Uint8Vector");
+
+    function("validateHeader", &validateHeader_wrap);
+    function("validateChecksum", &validateChecksum_wrap);
+    function("getTotalMipMapLevels", &getTotalMipMapLevels_wrap);
+    function("getFileInfo", &getFileInfo_wrap);
+    function("getImageInfo", &getImageInfo_wrap);
+    function("transcode", &transcode_wrap);
+
+    function("validateHeaderWrapWrap", &validateHeader_wrap_wrap);
+}
+
+#endif // __EMSCRIPTEN__

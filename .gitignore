@@ -13,6 +13,7 @@ robovm-build
 /basisu-wrapper/jni/*.*
 /basisu-wrapper/jni/jni-headers
 /basisu-wrapper/jni/target
+!/basisu-wrapper/jni/CMakeLists.txt
 
 /demo/android/libs
 /demo/web/war
