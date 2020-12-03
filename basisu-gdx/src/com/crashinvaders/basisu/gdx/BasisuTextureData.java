@@ -129,7 +129,7 @@ public class BasisuTextureData implements TextureData {
         final int glInternalFormatCode = BasisuGdxUtils.toGlTextureFormat(transcodeFormat);
 
         if (transcodeFormat.isCompressedFormat()) {
-            Gdx.gl.glCompressedTexImage2D(target, 0, glInternalFormatCode,
+            BasisuGdxGl.glCompressedTexImage2D(target, 0, glInternalFormatCode,
                     width, height, 0,
                     transcodedData.capacity(), transcodedData);
         } else {

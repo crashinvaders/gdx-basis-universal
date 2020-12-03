@@ -163,21 +163,10 @@ public class BasisuGdxUtils {
 
     private static synchronized void initSupportedGlTextureFormats() {
         if (supportedGlTextureFormatsInitialized) return;
-
         supportedGlTextureFormatsInitialized = true;
 
-        IntBuffer buffer = BufferUtils.newIntBuffer(64);
-        Gdx.gl.glGetIntegerv(GL20.GL_NUM_COMPRESSED_TEXTURE_FORMATS, buffer);
-        int formatAmount = buffer.get(0);
-        if (buffer.capacity() < formatAmount) {
-            buffer = BufferUtils.newIntBuffer(formatAmount);
-        }
-        Gdx.gl.glGetIntegerv(GL20.GL_COMPRESSED_TEXTURE_FORMATS, buffer);
-        for (int i = 0; i < formatAmount; i++) {
-            int code = buffer.get(i);
-            supportedGlTextureFormats.add(code);
-//            Gdx.app.log("GL_TEX_FORMAT", Integer.toHexString(code));
-        }
+        int[] formats = BasisuGdxGl.getSupportedTextureFormats();
+        supportedGlTextureFormats.addAll(formats);
     }
 
     /**
