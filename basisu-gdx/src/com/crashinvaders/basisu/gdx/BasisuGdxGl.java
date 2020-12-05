@@ -23,7 +23,7 @@ public class BasisuGdxGl {
         Gdx.gl.glGetIntegerv(GL20.GL_COMPRESSED_TEXTURE_FORMATS, buffer);
         for (int i = 0; i < formatAmount; i++) {
             int code = buffer.get(i);
-            result[0] = code;
+            result[i] = code;
         }
         return result;
     }

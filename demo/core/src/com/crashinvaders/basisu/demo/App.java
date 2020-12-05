@@ -39,10 +39,10 @@ public class App implements ApplicationListener {
         batch = new SpriteBatch();
         stage = new Stage(viewport, batch);
 
-//        int[] supportedTextureFormats = BasisuGdxGl.getSupportedTextureFormats();
-//        for (int i = 0; i < supportedTextureFormats.length; i++) {
-//            Gdx.app.log("App", "Supported Texture Format: " + supportedTextureFormats[i]);
-//        }
+        int[] supportedTextureFormats = BasisuGdxGl.getSupportedTextureFormats();
+        for (int i = 0; i < supportedTextureFormats.length; i++) {
+            Gdx.app.log("App", "Supported texture format: " + supportedTextureFormats[i]);
+        }
 
         BasisuTextureData basisuData0 = new BasisuTextureData(Gdx.files.internal("kodim3.basis"));
 //        basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.RGBA32);
