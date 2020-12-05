@@ -3,8 +3,7 @@ package com.crashinvaders.basisu.gdx;
 import com.crashinvaders.basisu.wrapper.BasisuImageInfo;
 import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
 
-import static com.crashinvaders.basisu.gdx.BasisuGdxUtils.isBasisuFormatSupported;
-import static com.crashinvaders.basisu.gdx.BasisuGdxUtils.isSquareAndPowerOfTwo;
+import static com.crashinvaders.basisu.gdx.BasisuGdxUtils.*;
 import static com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat.*;
 
 /**
@@ -42,7 +41,8 @@ public interface BasisuTextureFormatSelector {
                     return BC7_RGBA;
                 }
                 // Conversion is nearly lossless and very fast.
-                if (isBasisuFormatSupported(BC3_RGBA)) {
+                if (isBasisuFormatSupported(BC3_RGBA) &&
+                        isMultipleOfFour(imageInfo.getWidth(), imageInfo.getHeight())) {
                     return BC3_RGBA;
                 }
                 // Quality is very similar to BC1/BC3.
@@ -72,7 +72,8 @@ public interface BasisuTextureFormatSelector {
                 }
                 // Conversion to BC1 is very fast.
                 // Conversion loses approx. .3-.5 dB Y PSNR relative to the source ETC1S data.
-                if (isBasisuFormatSupported(BC1_RGB)) {
+                if (isBasisuFormatSupported(BC1_RGB) &&
+                        isMultipleOfFour(imageInfo.getWidth(), imageInfo.getHeight())) {
                     return BC1_RGB;
                 }
                 // Conversion is nearly lossless and very fast.

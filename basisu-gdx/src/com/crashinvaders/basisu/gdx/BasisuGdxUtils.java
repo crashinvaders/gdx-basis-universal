@@ -1,5 +1,6 @@
 package com.crashinvaders.basisu.gdx;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.math.MathUtils;
@@ -86,9 +87,13 @@ public class BasisuGdxUtils {
     public static int toGlTextureFormat(BasisuTranscoderTextureFormat basisuFormat) {
         switch (basisuFormat) {
             case ETC1_RGB:
-                // Since OpenGL doesn't return ETC1 code upon GL_COMPRESSED_TEXTURE_FORMATS request,
-                // we replace it with the compatible ETC2_RGB8 format.
-                return GL_TEX_ETC2_RGB8;
+                if (Gdx.app.getType() == Application.ApplicationType.Desktop) {
+                    // Since OpenGL doesn't return ETC1 code upon GL_COMPRESSED_TEXTURE_FORMATS request,
+                    // we replace it with the compatible ETC2_RGB8 format.
+                    return GL_TEX_ETC2_RGB8;
+                } else {
+                    return GL_TEX_ETC1_RGB8;
+                }
             case ETC2_RGBA:
                 return GL_TEX_ETC2_RGBA8;
             case ETC2_EAC_R11:
@@ -174,5 +179,12 @@ public class BasisuGdxUtils {
      */
     public static boolean isSquareAndPowerOfTwo(int width, int height) {
         return width == height && MathUtils.isPowerOfTwo(width);
+    }
+
+    /**
+     * Checks if the dimensions are multiple of 4.
+     */
+    public static boolean isMultipleOfFour(int width, int height) {
+        return width % 4 == 0 && height % 4 == 0;
     }
 }

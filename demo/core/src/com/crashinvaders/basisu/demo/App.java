@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.crashinvaders.basisu.gdx.BasisuGdxGl;
 import com.crashinvaders.basisu.gdx.BasisuTextureData;
 import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
 
@@ -37,6 +38,11 @@ public class App implements ApplicationListener {
         viewport = new ExtendViewport(800f, 480f);
         batch = new SpriteBatch();
         stage = new Stage(viewport, batch);
+
+//        int[] supportedTextureFormats = BasisuGdxGl.getSupportedTextureFormats();
+//        for (int i = 0; i < supportedTextureFormats.length; i++) {
+//            Gdx.app.log("App", "Supported Texture Format: " + supportedTextureFormats[i]);
+//        }
 
         BasisuTextureData basisuData0 = new BasisuTextureData(Gdx.files.internal("kodim3.basis"));
 //        basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.RGBA32);
