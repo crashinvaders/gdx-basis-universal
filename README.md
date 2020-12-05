@@ -1,8 +1,8 @@
-##Build requirements
+## Build requirements
 
 Some things besides JDK and Gradle to build the project. 
 
-###Windows
+### Windows
 - Install ant
     1. `choco install ant`
     2. Add ant's bin dir to the PATH (chocolatey creates an `ant.exe` shortcut file, but jnigen expects `ant.bat` to be on the PATH).
@@ -10,6 +10,6 @@ Some things besides JDK and Gradle to build the project.
     1. `choco install msys64`
 
 
-##Notes
+## Notes
 
 `basis_transcoder.h` requires `#include <stddef.h>` on Win32 for some reason.
