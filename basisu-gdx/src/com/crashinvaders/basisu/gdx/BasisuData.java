@@ -23,7 +23,7 @@ public class BasisuData {
             throw new BasisuGdxException("Cannot validate header of the basis universal data.");
         }
 
-        //FIXME Replace this the commented code once BasisuFileInfo is fully nativally mapped.
+        //FIXME Replace this the commented code once BasisuFileInfo is fully natively mapped.
 //        this.fileInfo = BasisuWrapper.getFileInfo(encodedData);
         this.fileInfo = new BasisuFileInfoExtension();
     }

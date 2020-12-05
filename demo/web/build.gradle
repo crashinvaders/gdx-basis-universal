@@ -23,15 +23,18 @@ gwt {
     compiler.strict = true
     compiler.disableCastChecking = true
 
-    logLevel = 'INFO'
+    logLevel = 'DEBUG'
 }
 
 dependencies {
-    implementation project(":demo:core")
-    implementation project(":basisu-gdx-gwt")
+    implementation project(':demo:core')
+    implementation project(':basisu-gdx-gwt')
     implementation "com.badlogicgames.gdx:gdx:$gdxVersion:sources"
     implementation "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion"
     implementation "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion:sources"
+
+    //TODO Replace it with Jar dependency.
+    implementation files('../../basisu-wrapper/libs/web')
 }
 
 def HttpFileServer server = null

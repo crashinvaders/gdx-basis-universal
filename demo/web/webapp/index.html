@@ -6,6 +6,8 @@
               <meta id="gameViewport" name="viewport" content="width=device-width initial-scale=1">
               <link rel="icon" type="image/png" href="icon32.png">
 
+              <script type="text/javascript" src="html/gdx-basis-universal.js"></script>
+
               <style>
                      canvas {
                          cursor: default;
@@ -41,5 +43,14 @@
               }
               document.getElementById('embed-html').addEventListener('mousedown', handleMouseDown, false);
               document.getElementById('embed-html').addEventListener('mouseup', handleMouseUp, false);
+       </script>
+
+       <script>
+              var basisuModule = null;
+              console.log("Loading the native module...");
+              createBasisuGdxModule().then(loadedModule => {
+                  basisuModule = loadedModule;
+                  console.log("The native module is loaded!");
+              });
        </script>
 </html>

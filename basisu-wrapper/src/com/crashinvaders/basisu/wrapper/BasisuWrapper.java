@@ -37,9 +37,6 @@ public class BasisuWrapper {
     #include "basisu_wrapper.h"
     #include "basisu_native_utils.h"
 
-
-
-
     #define LOG_TAG "BasisuWrapper.java"
     #define BASE_PACKAGE com/crashinvaders/basisu/wrapper
 
@@ -91,5 +88,4 @@ public class BasisuWrapper {
         env->SetByteArrayRegion(byteArray, (jsize)0, (jsize)rgba.size(), (jbyte*)rgba.data());
         return byteArray;
     */
-
 }

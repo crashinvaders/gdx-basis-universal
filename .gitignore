@@ -8,6 +8,7 @@ robovm-build
 .DS-Store
 
 /basisu-wrapper/libs
+!/basisu-wrapper/libs/web/BasisuGdxGwtNatives.gwt.xml
 /basisu-wrapper/obj
 /basisu-wrapper/test-output
 /basisu-wrapper/jni/*.*
