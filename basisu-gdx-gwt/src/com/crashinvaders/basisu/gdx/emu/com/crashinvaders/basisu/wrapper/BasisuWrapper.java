@@ -1,24 +1,24 @@
 package com.crashinvaders.basisu.wrapper;
 
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.typedarrays.shared.Uint8Array;
+
 public class BasisuWrapper {
 
-    public static boolean validateHeader(byte[] data) {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
+    public static native boolean validateHeader(byte[] data)/*-{
+        var typedArray = new Uint8Array(data);
+        return $wnd.basisuModule.validateHeader(typedArray);
+    }-*/;
 
-//        return validateHeaderNative(data, data.length);
-    }
+    public static native boolean validateChecksum(byte[] data, boolean fullValidation)/*-{
+        var typedArray = new Uint8Array(data);
+        return $wnd.basisuModule.validateChecksum(typedArray, fullValidation);
+    }-*/;
 
-    public static boolean validateChecksum(byte[] data, boolean fullValidation) {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-
-//        return validateChecksumNative(data, data.length, fullValidation);
-    }
-
-    public static int getTotalMipMapLevels(byte[] data) {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-
-//        return getTotalMipMapLevelsNative(data, data.length);
-    }
+    public static native int getTotalMipMapLevels(byte[] data)/*-{
+        var typedArray = new Uint8Array(data);
+        return $wnd.basisuModule.getTotalMipMapLevels(typedArray);
+    }-*/;
 
     public static BasisuFileInfo getFileInfo(byte[] data) {
         throw new UnsupportedOperationException("Not yet implemented for GWT");
@@ -29,17 +29,27 @@ public class BasisuWrapper {
     }
 
     public static BasisuImageInfo getImageInfo(byte[] data, int imageIndex) {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-
-//        BasisuImageInfo imageInfo = new BasisuImageInfo();
-//        getImageInfoNative(data, data.length, imageIndex, imageInfo.addr);
-//        return imageInfo;
+        JavaScriptObject imageInfoJs = getImageInfoNative(data, imageIndex);
+        return new BasisuImageInfo(imageInfoJs);
     }
+
+    static native JavaScriptObject getImageInfoNative(byte[] data, int imageIndex)/*-{
+        var typedArray = new Uint8Array(data);
+        return $wnd.basisuModule.getImageInfo(typedArray, imageIndex);
+    }-*/;
 
     public static byte[] transcode(byte[] data, int imageIndex, int levelIndex, BasisuTranscoderTextureFormat textureFormat) {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-
-//        int format = textureFormat.getId();
-//        return transcodeNative(data, data.length, imageIndex, levelIndex, format);
+        Uint8Array typedArray = transcodeNative(data, imageIndex, levelIndex, textureFormat);
+        byte[] bytes = new byte[typedArray.length()];
+        for (int i = 0; i < bytes.length; i++) {
+            bytes[i] = (byte) typedArray.get(i);
+        }
+        return bytes;
     }
+
+    static native Uint8Array transcodeNative(byte[] data, int imageIndex, int levelIndex, BasisuTranscoderTextureFormat textureFormat)/*-{
+        var typedArray = new Uint8Array(data);
+        var format = textureFormat.@com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat::getId()();
+        return $wnd.basisuModule.transcode(typedArray, imageIndex, levelIndex, format);
+    }-*/;
 }

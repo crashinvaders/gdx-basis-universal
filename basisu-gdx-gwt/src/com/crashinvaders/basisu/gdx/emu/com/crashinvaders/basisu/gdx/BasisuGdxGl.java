@@ -38,20 +38,19 @@ public class BasisuGdxGl {
             return resultValues;
 		}-*/;
 
+    /**
+     * This is a simplified version of JS typed array preparation of GwtGL20#glTexImage2D().
+     * It was tested for the GDX Basis Universal code and may not work for any other use cases.
+     */
     public static void glCompressedTexImage2D(int target, int level, int internalformat,
                                               int width, int height, int border,
                                               int imageSize, Buffer pixels) {
 
         HasArrayBufferView arrayHolder = (HasArrayBufferView)pixels;
         ArrayBufferView webGLArray = arrayHolder.getTypedArray();
-        ArrayBufferView buffer;
-        if (pixels instanceof FloatBuffer) {
-            buffer = webGLArray;
-        } else {
-            int remainingBytes = pixels.remaining() * 4;
-            int byteOffset = webGLArray.byteOffset() + pixels.position() * 4;
-            buffer = Uint8ArrayNative.create(webGLArray.buffer(), byteOffset, remainingBytes);
-        }
+        int remainingBytes = pixels.remaining();
+        ArrayBufferView buffer = Uint8ArrayNative.create(webGLArray.buffer(), 0, remainingBytes);
+
         glCompressedTexImage2DNative(getGlContext(), target, level, internalformat, width, height, border, imageSize, buffer);
     }
 

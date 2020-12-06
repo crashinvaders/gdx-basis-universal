@@ -117,6 +117,7 @@ public class BasisuTextureData implements TextureData {
         ByteBuffer buffer = BufferUtils.newByteBuffer(transcodedData.length);
         buffer.put(transcodedData);
         ((Buffer)buffer).position(0);
+        ((Buffer)buffer).limit(buffer.capacity());
         this.transcodedData = buffer;
 
         isPrepared = true;
@@ -134,7 +135,6 @@ public class BasisuTextureData implements TextureData {
                     transcodedData.capacity(), transcodedData);
         } else {
             int textureType = BasisuGdxUtils.toUncompressedGlTextureType(transcodeFormat);
-
             Gdx.gl.glTexImage2D(target, 0, glInternalFormatCode,
                     width, height, 0,
                     glInternalFormatCode, textureType, transcodedData);

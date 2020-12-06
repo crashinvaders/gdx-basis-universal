@@ -145,72 +145,103 @@ namespace basisuWrapper {
 using namespace emscripten;
 
 // From https://github.com/emscripten-core/emscripten/issues/5519#issuecomment-624775352
-template <typename T>
-std::vector<T> vecFromTypedArray(const val &jsValue) {
+std::vector<uint8_t> vecFromTypedArray(const val &jsValue) {
     const unsigned length = jsValue["length"].as<unsigned>();
-    std::vector<T> vec(length);
+    std::vector<uint8_t> vec(length);
     val memoryView{typed_memory_view(length, vec.data())};
     memoryView.call<void>("set", jsValue);
     return vec;
 }
 
-bool validateHeader_wrap(std::vector<uint8_t> &data) {
+val vecToTypedArray(std::vector<uint8_t> vec) {
+    val jsValue = val::global("Uint8Array").new_(vec.size());
+    val memoryView{typed_memory_view(vec.size(), vec.data())};
+    jsValue.call<void>("set", memoryView);
+    return jsValue;
+}
+
+int main(int, char**) {
+    basisuUtils::logInfo(LOG_TAG, "LibGDX Basis Universal native library is ready.");
+    return 0;
+}
+
+//FIXME Array double copying (Java->JS->C++) is really ugly. Find a way to pass data arrays more easily. Look into GWT types that LibGDX uses.
+bool validateHeader_wrap(const val &jsData) {
+    std::vector<uint8_t> data = vecFromTypedArray(jsData);
     return basisuWrapper::validateHeader(data.data(), data.size());
 }
 
-bool validateChecksum_wrap(std::vector<uint8_t> &data, bool fullValidation) {
+bool validateChecksum_wrap(const val &jsData, bool fullValidation) {
+    std::vector<uint8_t> data = vecFromTypedArray(jsData);
     return basisuWrapper::validateChecksum(data.data(), data.size(), fullValidation);
 }
 
-int getTotalMipMapLevels_wrap(std::vector<uint8_t> &data) {
+int getTotalMipMapLevels_wrap(const val &jsData) {
+    std::vector<uint8_t> data = vecFromTypedArray(jsData);
     return basisuWrapper::getTotalMipMapLevels(data.data(), data.size());
 }
 
 // uintptr_t
-void getFileInfo_wrap(int fileInfoAddr, std::vector<uint8_t> &data) {
+void getFileInfo_wrap(int fileInfoAddr, const val &jsData) {
+    std::vector<uint8_t> data = vecFromTypedArray(jsData);
     basist::basisu_file_info* fileInfo = (basist::basisu_file_info*)fileInfoAddr;
     if (basisuWrapper::getFileInfo(*fileInfo, data.data(), data.size())) {
-            basisuUtils::throwException(nullptr, "Failed to obtain file info.");
-            return;
-    }
-}
-
-// uintptr_t
-void getImageInfo_wrap(int imageInfoAddr, std::vector<uint8_t> &data, uint32_t imageIndex) {
-    basist::basisu_image_info* imageInfo = (basist::basisu_image_info*)imageInfoAddr;
-    if (basisuWrapper::getImageInfo(*imageInfo, data.data(), data.size(), imageIndex)) {
-        basisuUtils::throwException(nullptr, "Failed to obtain image info.");
+        basisuUtils::throwException(nullptr, "Failed to obtain file info.");
         return;
     }
 }
 
-std::vector<uint8_t> transcode_wrap(std::vector<uint8_t> &data, uint32_t imageIndex, uint32_t levelIndex, uint32_t textureFormatId) {
+//// uintptr_t
+//void getImageInfo_wrap(int imageInfoAddr, const val &jsData, uint32_t imageIndex) {
+//    std::vector<uint8_t> data = vecFromTypedArray(jsData);
+//    basist::basisu_image_info* imageInfo = (basist::basisu_image_info*)imageInfoAddr;
+//    if (basisuWrapper::getImageInfo(*imageInfo, data.data(), data.size(), imageIndex)) {
+//        basisuUtils::throwException(nullptr, "Failed to obtain image info.");
+//        return;
+//    }
+//}
+
+// uintptr_t
+basist::basisu_image_info getImageInfo_wrap(const val &jsData, uint32_t imageIndex) {
+    std::vector<uint8_t> data = vecFromTypedArray(jsData);
+    basist::basisu_image_info imageInfo;
+    if (basisuWrapper::getImageInfo(imageInfo, data.data(), data.size(), imageIndex)) {
+        basisuUtils::throwException(nullptr, "Failed to obtain image info.");
+    }
+    return imageInfo;
+}
+
+val transcode_wrap(const val &jsData, uint32_t imageIndex, uint32_t levelIndex, uint32_t textureFormatId) {
+    std::vector<uint8_t> data = vecFromTypedArray(jsData);
     std::vector<uint8_t> rgba;
     basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
 
     if (!basisuWrapper::transcode(rgba, data.data(), data.size(), imageIndex, levelIndex, format)) {
         basisuUtils::logError(LOG_TAG, "Error during image transcoding!");
         basisuUtils::throwException(nullptr, "Error during image transcoding!");
-        return rgba;
     }
 
-    return rgba;
-}
-
-int main(int, char**) {
-    basisuUtils::logInfo(LOG_TAG, "LibGDX Basis Universal native library is loaded.");
-    return 0;
-}
-
-//FIXME This is really ugly. Find a way to pass data arrays more easily. Look into GWT types that LibGDX uses.
-bool validateHeader_wrap_wrap(const val &jsData) {
-    std::vector<uint8_t> data = vecFromTypedArray<uint8_t>(jsData);
-    return validateHeader_wrap(data);
+    return vecToTypedArray(rgba);
 }
 
 EMSCRIPTEN_BINDINGS(my_module) {
 
-	register_vector<uint8_t>("Uint8Vector");
+//	register_vector<uint8_t>("Uint8Vector");
+
+    value_object<basist::basisu_image_info>("ImageInfo")
+        .field("imageIndex", &basist::basisu_image_info::m_image_index)             // uint32_t
+        .field("totalLevels", &basist::basisu_image_info::m_total_levels)           // uint32_t
+        .field("origWidth", &basist::basisu_image_info::m_orig_width)               // uint32_t
+        .field("origHeight", &basist::basisu_image_info::m_orig_height)             // uint32_t
+        .field("width", &basist::basisu_image_info::m_width)                        // uint32_t
+        .field("height", &basist::basisu_image_info::m_height)                      // uint32_t
+        .field("numBlocksX", &basist::basisu_image_info::m_num_blocks_x)            // uint32_t
+        .field("numBlocksY", &basist::basisu_image_info::m_num_blocks_y)            // uint32_t
+        .field("totalBlocks", &basist::basisu_image_info::m_total_blocks)           // uint32_t
+        .field("firstSliceIndex", &basist::basisu_image_info::m_first_slice_index)  // uint32_t
+        .field("alphaFlag", &basist::basisu_image_info::m_alpha_flag)               // bool
+        .field("iframeFlag", &basist::basisu_image_info::m_iframe_flag)             // bool
+        ;
 
     function("validateHeader", &validateHeader_wrap);
     function("validateChecksum", &validateChecksum_wrap);
@@ -218,8 +249,6 @@ EMSCRIPTEN_BINDINGS(my_module) {
     function("getFileInfo", &getFileInfo_wrap);
     function("getImageInfo", &getImageInfo_wrap);
     function("transcode", &transcode_wrap);
-
-    function("validateHeaderWrapWrap", &validateHeader_wrap_wrap);
 }
 
 #endif // __EMSCRIPTEN__

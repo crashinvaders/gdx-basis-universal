@@ -1,64 +1,76 @@
 package com.crashinvaders.basisu.wrapper;
 
+import com.google.gwt.core.client.JavaScriptObject;
+
 public class BasisuImageInfo {
 
-    public int getImageIndex() {
-        // getWrapped(addr)->m_image_index;
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
+    final JavaScriptObject imageInfoJs;
+
+    public BasisuImageInfo() {
+        throw new UnsupportedOperationException("GWT doesn't support this constructor.");
     }
 
-    public int getTotalLevels() {
-        // getWrapped(addr)->m_total_levels;
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
+    public BasisuImageInfo(JavaScriptObject imageInfoJs) {
+        this.imageInfoJs = imageInfoJs;
     }
 
-    public int getOrigWidth() {
-        // getWrapped(addr)->m_orig_width;
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-    }
+    public native int getImageIndex() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuImageInfo::imageInfoJs;
+        return data.imageIndex;
+    }-*/;
 
-    public int getOrigHeight() {
-        // getWrapped(addr)->m_orig_height;
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-    }
+    public native int getTotalLevels() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuImageInfo::imageInfoJs;
+        return data.totalLevels;
+    }-*/;
 
-    public int getWidth() {
-        // getWrapped(addr)->m_width;
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-    }
+    public native int getOrigWidth() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuImageInfo::imageInfoJs;
+        return data.origWidth;
+    }-*/;
 
-    public int getHeight() {
-        // getWrapped(addr)->m_height;
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-    }
+    public native int getOrigHeight() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuImageInfo::imageInfoJs;
+        return data.origHeight;
+    }-*/;
 
-    public int getNumBlocksX() {
-        // getWrapped(addr)->m_num_blocks_x;
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-    }
+    public native int getWidth() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuImageInfo::imageInfoJs;
+        return data.width;
+    }-*/;
 
-    public int getNumBlocksY() {
-        // getWrapped(addr)->m_num_blocks_y;
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-    }
+    public native int getHeight() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuImageInfo::imageInfoJs;
+        return data.height;
+    }-*/;
 
-    public int getTotalBlocks() {
-        // getWrapped(addr)->m_total_blocks;
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-    }
+    public native int getNumBlocksX() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuImageInfo::imageInfoJs;
+        return data.numBlocksX;
+    }-*/;
 
-    public int getFirstSliceIndex() {
-        // getWrapped(addr)->m_first_slice_index;
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-    }
+    public native int getNumBlocksY() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuImageInfo::imageInfoJs;
+        return data.numBlocksY;
+    }-*/;
 
-    public boolean hasAlphaFlag() {
-        // getWrapped(addr)->m_alpha_flag;
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-    }
+    public native int getTotalBlocks() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuImageInfo::imageInfoJs;
+        return data.totalBlocks;
+    }-*/;
 
-    public boolean hasIframeFlag() {
-        // getWrapped(addr)->m_iframe_flag;
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-    }
+    public native int getFirstSliceIndex() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuImageInfo::imageInfoJs;
+        return data.firstSliceIndex;
+    }-*/;
+
+    public native boolean hasAlphaFlag() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuImageInfo::imageInfoJs;
+        return data.alphaFlag;
+    }-*/;
+
+    public native boolean hasIframeFlag() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuImageInfo::imageInfoJs;
+        return data.iframeFlag;
+    }-*/;
 }

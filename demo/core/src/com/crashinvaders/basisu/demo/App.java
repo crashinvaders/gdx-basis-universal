@@ -12,9 +12,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.crashinvaders.basisu.gdx.BasisuGdxGl;
-import com.crashinvaders.basisu.gdx.BasisuTextureData;
+import com.crashinvaders.basisu.gdx.*;
+import com.crashinvaders.basisu.wrapper.BasisuFileInfo;
+import com.crashinvaders.basisu.wrapper.BasisuImageInfo;
 import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
+import com.crashinvaders.basisu.wrapper.BasisuWrapper;
+
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
 
 public class App implements ApplicationListener {
 
@@ -39,9 +44,42 @@ public class App implements ApplicationListener {
         batch = new SpriteBatch();
         stage = new Stage(viewport, batch);
 
-        int[] supportedTextureFormats = BasisuGdxGl.getSupportedTextureFormats();
-        for (int i = 0; i < supportedTextureFormats.length; i++) {
-            Gdx.app.log("App", "Supported texture format: " + supportedTextureFormats[i]);
+        {
+            StringBuilder sb = new StringBuilder("Supported texture formats: [");
+            int[] supportedTextureFormats = BasisuGdxGl.getSupportedTextureFormats();
+            for (int i = 0; i < supportedTextureFormats.length; i++) {
+                sb.append(Integer.toHexString(supportedTextureFormats[i]));
+                if (i < supportedTextureFormats.length-1) {
+                    sb.append(", ");
+                }
+            }sb.append("]");
+            Gdx.app.log("App", sb.toString());
+        }
+
+        {
+            BasisuNativeLibLoader.loadIfNeeded();
+            byte[] basisuData = Gdx.files.internal("kodim3.basis").readBytes();
+            boolean valid = BasisuWrapper.validateHeader(basisuData);
+            Gdx.app.log("App", "Data is " + (valid ? "valid" : "invalid"));
+
+            byte[] rgba = BasisuWrapper.transcode(basisuData, 0, 0, BasisuTranscoderTextureFormat.RGBA32);
+            Gdx.app.log("App", "Transcoded size: " + rgba.length);
+            Gdx.app.log("App", "Transcoded checksum: " + modRtuCrc(rgba));
+
+            BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisuData, 0);
+//            Gdx.app.log("App", "Image size: " + imageInfo.getWidth() + "x" + imageInfo.getHeight());
+            Gdx.app.log("App", "getImageIndex() " + imageInfo.getImageIndex());
+            Gdx.app.log("App", "getTotalLevels() " + imageInfo.getTotalLevels());
+            Gdx.app.log("App", "getOrigWidth() " + imageInfo.getOrigWidth());
+            Gdx.app.log("App", "getOrigHeight() " + imageInfo.getOrigHeight());
+            Gdx.app.log("App", "getWidth() " + imageInfo.getWidth());
+            Gdx.app.log("App", "getHeight() " + imageInfo.getHeight());
+            Gdx.app.log("App", "getNumBlocksX() " + imageInfo.getNumBlocksX());
+            Gdx.app.log("App", "getNumBlocksY() " + imageInfo.getNumBlocksY());
+            Gdx.app.log("App", "getTotalBlocks() " + imageInfo.getTotalBlocks());
+            Gdx.app.log("App", "getFirstSliceIndex() " + imageInfo.getFirstSliceIndex());
+            Gdx.app.log("App", "hasAlphaFlag() " + imageInfo.hasAlphaFlag());
+            Gdx.app.log("App", "hasIframeFlag() " + imageInfo.hasIframeFlag());
         }
 
         BasisuTextureData basisuData0 = new BasisuTextureData(Gdx.files.internal("kodim3.basis"));
@@ -98,5 +136,26 @@ public class App implements ApplicationListener {
 
         stage.act();
         stage.draw();
+    }
+
+    // Compute the MODBUS RTU CRC
+    // https://stackoverflow.com/a/38901367/3802890
+    private static int modRtuCrc(byte[] buf) {
+        int crc = 0xFFFF;
+        int len = buf.length;
+
+        for (int pos = 0; pos < len; pos++) {
+            crc ^= (int) buf[pos] & 0xFF;   // XOR byte into least sig. byte of crc
+
+            for (int i = 8; i != 0; i--) {    // Loop over each bit
+                if ((crc & 0x0001) != 0) {      // If the LSB is set
+                    crc >>= 1;                    // Shift right and XOR 0xA001
+                    crc ^= 0xA001;
+                } else                            // Else LSB is not set
+                    crc >>= 1;                    // Just shift right
+            }
+        }
+        // Note, this number has low and high bytes swapped, so use it accordingly (or swap bytes)
+        return crc;
     }
 }
