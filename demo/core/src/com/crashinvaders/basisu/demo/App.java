@@ -54,7 +54,7 @@ public class App implements ApplicationListener {
 //        basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.BC7_RGBA);
         texture0 = new Texture(basisuData0);
 
-        BasisuTextureData basisuData1 = new BasisuTextureData(Gdx.files.internal("cosmocat_promo.basis"));
+        BasisuTextureData basisuData1 = new BasisuTextureData(Gdx.files.internal("level_temple0.basis"));
         basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.RGBA32);
         texture1 = new Texture(basisuData1);
 
@@ -65,18 +65,17 @@ public class App implements ApplicationListener {
             rootTable.center();
 
             Image image0 = new Image(new TextureRegionDrawable(texture0), Scaling.fit);
-            rootTable.add(image0).growX();
+            image0.setScaling(Scaling.fit);
+            rootTable.add(image0).grow();
             Image image1 = new Image(new TextureRegionDrawable(texture1), Scaling.fit);
             Container containerImage1 = new Container<>(image1);
             containerImage1.setTransform(true);
-            containerImage1.addAction(Actions.delay(0.25f, Actions.sequence(
-                    Actions.run(() -> containerImage1.setOrigin(Align.center)),
-                    Actions.forever(Actions.sequence(
+            containerImage1.addAction(Actions.delay(0.25f, Actions.forever(Actions.sequence(
+                            Actions.run(() -> containerImage1.setOrigin(Align.center)),
                             Actions.rotateBy(360f, 1f, Interpolation.pow3),
                             Actions.delay(2f)
-            )
             ))));
-            rootTable.add(containerImage1).growX();
+            rootTable.add(containerImage1).grow();
 
             stage.addActor(rootTable);
         }
