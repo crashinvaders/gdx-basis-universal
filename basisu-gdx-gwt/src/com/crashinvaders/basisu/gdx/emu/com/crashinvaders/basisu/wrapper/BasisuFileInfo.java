@@ -1,96 +1,135 @@
 package com.crashinvaders.basisu.wrapper;
 
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.typedarrays.shared.Uint8Array;
+
+import static com.crashinvaders.basisu.wrapper.UniqueIdUtils.findOrThrow;
+
 public class BasisuFileInfo {
 
-    public BasisuTextureType getTextureType() {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-        // (int)getWrapped(addr)->m_tex_type;
+    final JavaScriptObject fileInfoJs;
+
+    BasisuFileInfo() {
+        throw new UnsupportedOperationException("GWT doesn't support this constructor.");
     }
+
+    BasisuFileInfo(JavaScriptObject fileInfoJs) {
+        this.fileInfoJs = fileInfoJs;
+    }
+
+    public BasisuTextureType getTextureType() {
+        int textureTypeId = getTextureTypeNative();
+        return findOrThrow(BasisuTextureType.values(), textureTypeId);
+    }
+    native int getTextureTypeNative() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
+        return data.getTexType();
+    }-*/;
 
     public BasisuTextureFormat getTextureFormat() {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-        // (int)getWrapped(addr)->m_tex_format;
+        int textureFormatId = getTextureFormatNative();
+        return findOrThrow(BasisuTextureFormat.values(), textureFormatId);
     }
-
-    public int getVersion() {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-        // getWrapped(addr)->m_version;
-    }
-
-    public int getTotalHeaderSize() {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-        // getWrapped(addr)->m_total_header_size;
-    }
-
-    public int getTotalSelectors() {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-        // getWrapped(addr)->m_total_selectors;
-    }
-
-    public int getSelectorCodebookSize() {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-        // getWrapped(addr)->m_selector_codebook_size;
-    }
-
-    public int getTotalEndpoints() {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-        // getWrapped(addr)->m_total_endpoints;
-    }
-
-    public int getEndpointCodebookSize() {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-        // getWrapped(addr)->m_endpoint_codebook_size;
-    }
-
-    public int getTablesSize() {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-        // getWrapped(addr)->m_tables_size;
-    }
-
-    public int getSlicesSize() {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-        // getWrapped(addr)->m_slices_size;
-    }
-
-    public int getUsPerFrame() {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-        // getWrapped(addr)->m_us_per_frame;
-    }
-
-    /** Total number of images. */
-    public int getTotalImages() {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-        // getWrapped(addr)->m_total_images;
-    }
+    native int getTextureFormatNative() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
+        return data.getTexFormat();
+    }-*/;
 
     /** The number of mipmap levels for each image. */
     public int[] getImageMipmapLevels() {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-        // std::vector<uint32_t> imageLevels = getWrapped(addr)->m_image_mipmap_levels;
+        Uint8Array typedArray = getImageMipmapLevelsNative();
+        int[] result = new int[typedArray.length()];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = typedArray.get(i);
+        }
+        return result;
     }
+    native Uint8Array getImageMipmapLevelsNative() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
+        return data.getImageMipmapLevels();
+//        var vec = data.imageMipmapLevels; // BasisuModule.Uint32Vector
+//        var arr = new Uint8Array(vec.size());
+//        for (var i = 0; i < arr.length; i++) {
+//            arr[i] = vec.get(i);
+//        }
+//        $wnd.mipmapsArr = arr;
+//        $wnd.mipmapsVec = vec;
+//        return arr;
+    }-*/;
 
-    public int getUserdata0() {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-        // getWrapped(addr)->m_userdata0;
-    }
+    public native int getVersion() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
+        return data.version;
+    }-*/;
 
-    public int getUserdata1() {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-        // getWrapped(addr)->m_userdata1;
-    }
+    public native int getTotalHeaderSize() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
+        return data.totalHeaderSize;
+    }-*/;
 
-    public boolean isFlippedY() {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-        // getWrapped(addr)->m_y_flipped;
-    }
+    public native int getTotalSelectors() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
+        return data.totalSelectors;
+    }-*/;
 
-    public boolean isEtc1s() {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-        // getWrapped(addr)->m_etc1s;
-    }
+    public native int getSelectorCodebookSize() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
+        return data.selectorCodebookSize;
+    }-*/;
 
-    public boolean hasAlphaSlices() {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-        // getWrapped(addr)->m_has_alpha_slices;
-    }
+    public native int getTotalEndpoints() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
+        return data.totalEndpoints;
+    }-*/;
+
+    public native int getEndpointCodebookSize() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
+        return data.endpointCodebookSize;
+    }-*/;
+
+    public native int getTablesSize() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
+        return data.tablesSize;
+    }-*/;
+
+    public native int getSlicesSize() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
+        return data.slicesSize;
+    }-*/;
+
+    public native int getUsPerFrame() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
+        return data.usPerFrame;
+    }-*/;
+
+    /** Total number of images. */
+    public native int getTotalImages() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
+        return data.totalImages;
+    }-*/;
+
+    public native int getUserdata0() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
+        return data.userdata0;
+    }-*/;
+
+    public native int getUserdata1() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
+        return data.userdata1;
+    }-*/;
+
+    public native boolean isFlippedY() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
+        return data.yFlipped;
+    }-*/;
+
+    public native boolean isEtc1s() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
+        return data.etc1s;
+    }-*/;
+
+    public native boolean hasAlphaSlices() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
+        return data.hasAlphaSlices;
+    }-*/;
 }

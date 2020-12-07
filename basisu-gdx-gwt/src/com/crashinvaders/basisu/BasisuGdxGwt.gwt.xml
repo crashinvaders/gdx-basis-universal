@@ -4,6 +4,10 @@
 	<inherits name='com.crashinvaders.basisu.BasisuGdx'/>
 	<inherits name='BasisuGdxGwtNatives'/>
 
-	<source path="gdx/gwt"/>
-	<super-source path="gdx/emu" />
+	<source path="gdx/gwt" />
+
+	<super-source path="gdx/emu">
+		<include name="**/*"/>
+		<exclude name="package-info.java"/>
+	</super-source>
 </module>

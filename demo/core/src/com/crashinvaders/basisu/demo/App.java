@@ -6,10 +6,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.crashinvaders.basisu.gdx.*;
@@ -17,9 +21,6 @@ import com.crashinvaders.basisu.wrapper.BasisuFileInfo;
 import com.crashinvaders.basisu.wrapper.BasisuImageInfo;
 import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
 import com.crashinvaders.basisu.wrapper.BasisuWrapper;
-
-import java.util.zip.CRC32;
-import java.util.zip.Checksum;
 
 public class App implements ApplicationListener {
 
@@ -44,43 +45,7 @@ public class App implements ApplicationListener {
         batch = new SpriteBatch();
         stage = new Stage(viewport, batch);
 
-        {
-            StringBuilder sb = new StringBuilder("Supported texture formats: [");
-            int[] supportedTextureFormats = BasisuGdxGl.getSupportedTextureFormats();
-            for (int i = 0; i < supportedTextureFormats.length; i++) {
-                sb.append(Integer.toHexString(supportedTextureFormats[i]));
-                if (i < supportedTextureFormats.length-1) {
-                    sb.append(", ");
-                }
-            }sb.append("]");
-            Gdx.app.log("App", sb.toString());
-        }
-
-        {
-            BasisuNativeLibLoader.loadIfNeeded();
-            byte[] basisuData = Gdx.files.internal("kodim3.basis").readBytes();
-            boolean valid = BasisuWrapper.validateHeader(basisuData);
-            Gdx.app.log("App", "Data is " + (valid ? "valid" : "invalid"));
-
-            byte[] rgba = BasisuWrapper.transcode(basisuData, 0, 0, BasisuTranscoderTextureFormat.RGBA32);
-            Gdx.app.log("App", "Transcoded size: " + rgba.length);
-            Gdx.app.log("App", "Transcoded checksum: " + modRtuCrc(rgba));
-
-            BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisuData, 0);
-//            Gdx.app.log("App", "Image size: " + imageInfo.getWidth() + "x" + imageInfo.getHeight());
-            Gdx.app.log("App", "getImageIndex() " + imageInfo.getImageIndex());
-            Gdx.app.log("App", "getTotalLevels() " + imageInfo.getTotalLevels());
-            Gdx.app.log("App", "getOrigWidth() " + imageInfo.getOrigWidth());
-            Gdx.app.log("App", "getOrigHeight() " + imageInfo.getOrigHeight());
-            Gdx.app.log("App", "getWidth() " + imageInfo.getWidth());
-            Gdx.app.log("App", "getHeight() " + imageInfo.getHeight());
-            Gdx.app.log("App", "getNumBlocksX() " + imageInfo.getNumBlocksX());
-            Gdx.app.log("App", "getNumBlocksY() " + imageInfo.getNumBlocksY());
-            Gdx.app.log("App", "getTotalBlocks() " + imageInfo.getTotalBlocks());
-            Gdx.app.log("App", "getFirstSliceIndex() " + imageInfo.getFirstSliceIndex());
-            Gdx.app.log("App", "hasAlphaFlag() " + imageInfo.hasAlphaFlag());
-            Gdx.app.log("App", "hasIframeFlag() " + imageInfo.hasIframeFlag());
-        }
+        testBasisuClasses();
 
         BasisuTextureData basisuData0 = new BasisuTextureData(Gdx.files.internal("kodim3.basis"));
 //        basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.RGBA32);
@@ -99,8 +64,19 @@ public class App implements ApplicationListener {
             rootTable.setFillParent(true);
             rootTable.center();
 
-            rootTable.add(new Image(new TextureRegionDrawable(texture0), Scaling.fit)).growX();
-            rootTable.add(new Image(new TextureRegionDrawable(texture1), Scaling.fit)).growX();
+            Image image0 = new Image(new TextureRegionDrawable(texture0), Scaling.fit);
+            rootTable.add(image0).growX();
+            Image image1 = new Image(new TextureRegionDrawable(texture1), Scaling.fit);
+            Container containerImage1 = new Container<>(image1);
+            containerImage1.setTransform(true);
+            containerImage1.addAction(Actions.delay(0.25f, Actions.sequence(
+                    Actions.run(() -> containerImage1.setOrigin(Align.center)),
+                    Actions.forever(Actions.sequence(
+                            Actions.rotateBy(360f, 1f, Interpolation.pow3),
+                            Actions.delay(2f)
+            )
+            ))));
+            rootTable.add(containerImage1).growX();
 
             stage.addActor(rootTable);
         }
@@ -136,6 +112,67 @@ public class App implements ApplicationListener {
 
         stage.act();
         stage.draw();
+    }
+
+    private static void testBasisuClasses() {
+        {
+            StringBuilder sb = new StringBuilder("Supported texture formats: [");
+            int[] supportedTextureFormats = BasisuGdxGl.getSupportedTextureFormats();
+            for (int i = 0; i < supportedTextureFormats.length; i++) {
+                sb.append(Integer.toHexString(supportedTextureFormats[i]));
+                if (i < supportedTextureFormats.length-1) {
+                    sb.append(", ");
+                }
+            }sb.append("]");
+            Gdx.app.log("App", sb.toString());
+        }
+
+        {
+            BasisuNativeLibLoader.loadIfNeeded();
+            byte[] basisuData = Gdx.files.internal("kodim3.basis").readBytes();
+            boolean valid = BasisuWrapper.validateHeader(basisuData);
+            Gdx.app.log("App", "Data is " + (valid ? "valid" : "invalid"));
+
+            byte[] rgba = BasisuWrapper.transcode(basisuData, 0, 0, BasisuTranscoderTextureFormat.RGBA32);
+            Gdx.app.log("App", "Transcoded size: " + rgba.length);
+            Gdx.app.log("App", "Transcoded checksum: " + modRtuCrc(rgba));
+
+            BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisuData, 0);
+            Gdx.app.log("App", "===== IMAGE INFO =====");
+            Gdx.app.log("App", "getImageIndex() " + imageInfo.getImageIndex());
+            Gdx.app.log("App", "getTotalLevels() " + imageInfo.getTotalLevels());
+            Gdx.app.log("App", "getOrigWidth() " + imageInfo.getOrigWidth());
+            Gdx.app.log("App", "getOrigHeight() " + imageInfo.getOrigHeight());
+            Gdx.app.log("App", "getWidth() " + imageInfo.getWidth());
+            Gdx.app.log("App", "getHeight() " + imageInfo.getHeight());
+            Gdx.app.log("App", "getNumBlocksX() " + imageInfo.getNumBlocksX());
+            Gdx.app.log("App", "getNumBlocksY() " + imageInfo.getNumBlocksY());
+            Gdx.app.log("App", "getTotalBlocks() " + imageInfo.getTotalBlocks());
+            Gdx.app.log("App", "getFirstSliceIndex() " + imageInfo.getFirstSliceIndex());
+            Gdx.app.log("App", "hasAlphaFlag() " + imageInfo.hasAlphaFlag());
+            Gdx.app.log("App", "hasIframeFlag() " + imageInfo.hasIframeFlag());
+
+            BasisuFileInfo fileInfo = BasisuWrapper.getFileInfo(basisuData);
+            Gdx.app.log("App", "===== FILE INFO =====");
+            Gdx.app.log("App", "getVersion() " + fileInfo.getVersion());
+            Gdx.app.log("App", "getTotalHeaderSize() " + fileInfo.getTotalHeaderSize());
+            Gdx.app.log("App", "getTotalSelectors() " + fileInfo.getTotalSelectors());
+            Gdx.app.log("App", "getSelectorCodebookSize() " + fileInfo.getSelectorCodebookSize());
+            Gdx.app.log("App", "getTotalEndpoints() " + fileInfo.getTotalEndpoints());
+            Gdx.app.log("App", "getEndpointCodebookSize() " + fileInfo.getEndpointCodebookSize());
+            Gdx.app.log("App", "getTablesSize() " + fileInfo.getTablesSize());
+            Gdx.app.log("App", "getSlicesSize() " + fileInfo.getSlicesSize());
+            Gdx.app.log("App", "getUsPerFrame() " + fileInfo.getUsPerFrame());
+            Gdx.app.log("App", "getTotalImages() " + fileInfo.getTotalImages());
+            Gdx.app.log("App", "getUserdata0() " + fileInfo.getUserdata0());
+            Gdx.app.log("App", "getUserdata1() " + fileInfo.getUserdata1());
+            Gdx.app.log("App", "isFlippedY() " + fileInfo.isFlippedY());
+            Gdx.app.log("App", "isEtc1s() " + fileInfo.isEtc1s());
+            Gdx.app.log("App", "hasAlphaSlices() " + fileInfo.hasAlphaSlices());
+            Gdx.app.log("App", "getImageMipmapLevels().length " + fileInfo.getImageMipmapLevels().length);
+            Gdx.app.log("App", "getTextureType() " + fileInfo.getTextureType());
+            Gdx.app.log("App", "getTextureFormat() " + fileInfo.getTextureFormat());
+        }
     }
 
     // Compute the MODBUS RTU CRC

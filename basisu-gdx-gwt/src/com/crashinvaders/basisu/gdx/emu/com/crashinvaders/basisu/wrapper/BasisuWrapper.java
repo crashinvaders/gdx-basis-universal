@@ -21,18 +21,18 @@ public class BasisuWrapper {
     }-*/;
 
     public static BasisuFileInfo getFileInfo(byte[] data) {
-        throw new UnsupportedOperationException("Not yet implemented for GWT");
-
-//        BasisuFileInfo fileInfo = new BasisuFileInfo();
-//        getFileInfoNative(data, data.length, fileInfo.addr);
-//        return fileInfo;
+        JavaScriptObject fileInfoJs = getFileInfoNative(data);
+        return new BasisuFileInfo(fileInfoJs);
     }
+    static native JavaScriptObject getFileInfoNative(byte[] data)/*-{
+        var typedArray = new Uint8Array(data);
+        return $wnd.basisuModule.getFileInfo(typedArray);
+    }-*/;
 
     public static BasisuImageInfo getImageInfo(byte[] data, int imageIndex) {
         JavaScriptObject imageInfoJs = getImageInfoNative(data, imageIndex);
         return new BasisuImageInfo(imageInfoJs);
     }
-
     static native JavaScriptObject getImageInfoNative(byte[] data, int imageIndex)/*-{
         var typedArray = new Uint8Array(data);
         return $wnd.basisuModule.getImageInfo(typedArray, imageIndex);
@@ -46,7 +46,6 @@ public class BasisuWrapper {
         }
         return bytes;
     }
-
     static native Uint8Array transcodeNative(byte[] data, int imageIndex, int levelIndex, BasisuTranscoderTextureFormat textureFormat)/*-{
         var typedArray = new Uint8Array(data);
         var format = textureFormat.@com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat::getId()();

@@ -23,9 +23,7 @@ public class BasisuData {
             throw new BasisuGdxException("Cannot validate header of the basis universal data.");
         }
 
-        //FIXME Replace this the commented code once BasisuFileInfo is fully natively mapped.
-//        this.fileInfo = BasisuWrapper.getFileInfo(encodedData);
-        this.fileInfo = new BasisuFileInfoExtension();
+        this.fileInfo = BasisuWrapper.getFileInfo(encodedData);
     }
 
     public byte[] getEncodedData() {
@@ -42,16 +40,5 @@ public class BasisuData {
 
     public byte[] transcode(int imageIndex, int mipmapLevel, BasisuTranscoderTextureFormat textureFormat) {
         return BasisuWrapper.transcode(encodedData, imageIndex, mipmapLevel, textureFormat);
-    }
-
-    private static class BasisuFileInfoExtension extends BasisuFileInfo {
-        @Override
-        public int getTotalImages() {
-            return 1;
-        }
-        @Override
-        public int[] getImageMipmapLevels() {
-            return new int[]{1};
-        }
     }
 }

@@ -27,7 +27,7 @@ public class BasisuFileInfo {
 
     final long addr;
 
-    public BasisuFileInfo() {
+    BasisuFileInfo() {
         this.addr = jniCreate();
     }
 

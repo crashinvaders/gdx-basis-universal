@@ -144,6 +144,8 @@ namespace basisuWrapper {
 
 using namespace emscripten;
 
+//FIXME Array double copying (Java->JS->C++) is really ugly. Find a way to pass data arrays more easily. Look into GWT types that LibGDX uses.
+
 // From https://github.com/emscripten-core/emscripten/issues/5519#issuecomment-624775352
 std::vector<uint8_t> vecFromTypedArray(const val &jsValue) {
     const unsigned length = jsValue["length"].as<unsigned>();
@@ -153,7 +155,7 @@ std::vector<uint8_t> vecFromTypedArray(const val &jsValue) {
     return vec;
 }
 
-val vecToTypedArray(std::vector<uint8_t> vec) {
+val vecToTypedArray(std::vector<uint8_t> &vec) {
     val jsValue = val::global("Uint8Array").new_(vec.size());
     val memoryView{typed_memory_view(vec.size(), vec.data())};
     jsValue.call<void>("set", memoryView);
@@ -165,7 +167,6 @@ int main(int, char**) {
     return 0;
 }
 
-//FIXME Array double copying (Java->JS->C++) is really ugly. Find a way to pass data arrays more easily. Look into GWT types that LibGDX uses.
 bool validateHeader_wrap(const val &jsData) {
     std::vector<uint8_t> data = vecFromTypedArray(jsData);
     return basisuWrapper::validateHeader(data.data(), data.size());
@@ -182,24 +183,14 @@ int getTotalMipMapLevels_wrap(const val &jsData) {
 }
 
 // uintptr_t
-void getFileInfo_wrap(int fileInfoAddr, const val &jsData) {
+basist::basisu_file_info getFileInfo_wrap(const val &jsData) {
     std::vector<uint8_t> data = vecFromTypedArray(jsData);
-    basist::basisu_file_info* fileInfo = (basist::basisu_file_info*)fileInfoAddr;
-    if (basisuWrapper::getFileInfo(*fileInfo, data.data(), data.size())) {
+    basist::basisu_file_info fileInfo;
+    if (basisuWrapper::getFileInfo(fileInfo, data.data(), data.size())) {
         basisuUtils::throwException(nullptr, "Failed to obtain file info.");
-        return;
     }
+    return fileInfo;
 }
-
-//// uintptr_t
-//void getImageInfo_wrap(int imageInfoAddr, const val &jsData, uint32_t imageIndex) {
-//    std::vector<uint8_t> data = vecFromTypedArray(jsData);
-//    basist::basisu_image_info* imageInfo = (basist::basisu_image_info*)imageInfoAddr;
-//    if (basisuWrapper::getImageInfo(*imageInfo, data.data(), data.size(), imageIndex)) {
-//        basisuUtils::throwException(nullptr, "Failed to obtain image info.");
-//        return;
-//    }
-//}
 
 // uintptr_t
 basist::basisu_image_info getImageInfo_wrap(const val &jsData, uint32_t imageIndex) {
@@ -224,9 +215,35 @@ val transcode_wrap(const val &jsData, uint32_t imageIndex, uint32_t levelIndex, 
     return vecToTypedArray(rgba);
 }
 
+uint8_t fileInfo_texType(basist::basisu_file_info &fileInfo) {
+    return (uint8_t)fileInfo.m_tex_type;
+}
+
+uint8_t fileInfo_texFormat(basist::basisu_file_info &fileInfo) {
+    return (uint8_t)fileInfo.m_tex_format;
+}
+
+val fileInfo_imageMipmapLevels(basist::basisu_file_info &fileInfo) {
+    std::vector<uint32_t> vec32 = fileInfo.m_image_mipmap_levels;
+    std::vector<uint8_t> vec8(vec32.size());
+    for (int i = 0; i < vec32.size(); i++) {
+        vec8[i] = (uint8_t)vec32[i];
+    }
+    return vecToTypedArray(vec8);
+}
+
 EMSCRIPTEN_BINDINGS(my_module) {
 
 //	register_vector<uint8_t>("Uint8Vector");
+	register_vector<uint32_t>("Uint32Vector");
+
+	enum_<basist::basis_texture_type>("TextureType")
+	    .value("TexType2D", basist::basis_texture_type::cBASISTexType2D)
+	    .value("TexType2DArray", basist::basis_texture_type::cBASISTexType2DArray)
+	    .value("TexTypeCubemapArray", basist::basis_texture_type::cBASISTexTypeCubemapArray)
+	    .value("TexTypeVideoFrames", basist::basis_texture_type::cBASISTexTypeVideoFrames)
+	    .value("TexTypeVolume", basist::basis_texture_type::cBASISTexTypeVolume)
+	    ;
 
     value_object<basist::basisu_image_info>("ImageInfo")
         .field("imageIndex", &basist::basisu_image_info::m_image_index)             // uint32_t
@@ -242,6 +259,31 @@ EMSCRIPTEN_BINDINGS(my_module) {
         .field("alphaFlag", &basist::basisu_image_info::m_alpha_flag)               // bool
         .field("iframeFlag", &basist::basisu_image_info::m_iframe_flag)             // bool
         ;
+
+    // Use "class_" mapping instead of "value_object" to define custom enum getter functions.
+    class_<basist::basisu_file_info>("FileInfo")
+		.property("version", &basist::basisu_file_info::m_version)                              // uint32_t
+		.property("totalHeaderSize", &basist::basisu_file_info::m_total_header_size)            // uint32_t
+		.property("totalSelectors", &basist::basisu_file_info::m_total_selectors)               // uint32_t
+		.property("selectorCodebookSize", &basist::basisu_file_info::m_selector_codebook_size)  // uint32_t
+		.property("totalEndpoints", &basist::basisu_file_info::m_total_endpoints)               // uint32_t
+		.property("endpointCodebookSize", &basist::basisu_file_info::m_endpoint_codebook_size)  // uint32_t
+		.property("tablesSize", &basist::basisu_file_info::m_tables_size)                       // uint32_t
+		.property("slicesSize", &basist::basisu_file_info::m_slices_size)                       // uint32_t
+		.property("usPerFrame", &basist::basisu_file_info::m_us_per_frame)                      // uint32_t
+		.property("totalImages", &basist::basisu_file_info::m_total_images)                     // uint32_t
+		.property("userdata0", &basist::basisu_file_info::m_userdata0)                          // uint32_t
+		.property("userdata1", &basist::basisu_file_info::m_userdata1)                          // uint32_t
+		.property("yFlipped", &basist::basisu_file_info::m_y_flipped)                           // bool
+		.property("etc1s", &basist::basisu_file_info::m_etc1s)                                  // bool
+		.property("hasAlphaSlices", &basist::basisu_file_info::m_has_alpha_slices)              // bool
+//		.property("imageMipmapLevels", &basist::basisu_file_info::m_image_mipmap_levels)        // std::vector<uint32_t>
+		.function("getImageMipmapLevels", &fileInfo_imageMipmapLevels)                          // val (Uint8Array)
+//		.property("texFormat", &basist::basisu_file_info::m_tex_format)                         // basis_tex_format
+		.function("getTexFormat", &fileInfo_texFormat)                                          // uint8_t
+//		.property("texType", &basist::basisu_file_info::m_tex_type)                             // basis_texture_type
+		.function("getTexType", &fileInfo_texType)                                              // uint8_t
+		;
 
     function("validateHeader", &validateHeader_wrap);
     function("validateChecksum", &validateChecksum_wrap);

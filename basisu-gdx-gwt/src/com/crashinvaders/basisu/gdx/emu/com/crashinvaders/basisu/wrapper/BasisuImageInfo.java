@@ -6,11 +6,11 @@ public class BasisuImageInfo {
 
     final JavaScriptObject imageInfoJs;
 
-    public BasisuImageInfo() {
+    BasisuImageInfo() {
         throw new UnsupportedOperationException("GWT doesn't support this constructor.");
     }
 
-    public BasisuImageInfo(JavaScriptObject imageInfoJs) {
+    BasisuImageInfo(JavaScriptObject imageInfoJs) {
         this.imageInfoJs = imageInfoJs;
     }
 

@@ -14,7 +14,7 @@ public class BasisuImageInfo {
 
     final long addr;
 
-    public BasisuImageInfo() {
+    BasisuImageInfo() {
         this.addr = jniCreate();
     }
 
