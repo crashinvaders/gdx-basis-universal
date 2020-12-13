@@ -18,6 +18,10 @@ public class BasisuImageInfo {
         this.addr = jniCreate();
     }
 
+    BasisuImageInfo(Object ignored) {
+        throw new UnsupportedOperationException("This constructor exists solely for GWT compilation compatibility.");
+    }
+
     //TODO Finalizers are deprecated since Java 9. Figure how to handle native resource release properly.
     @Override
     protected void finalize() throws Throwable {

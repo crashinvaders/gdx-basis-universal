@@ -1,6 +1,9 @@
 package com.crashinvaders.basisu.wrapper;
 
+import java.nio.Buffer;
+
 public class BasisuWrapper {
+
 
     public static boolean validateHeader(byte[] data) {
         return validateHeaderNative(data, data.length);
@@ -88,4 +91,30 @@ public class BasisuWrapper {
         env->SetByteArrayRegion(byteArray, (jsize)0, (jsize)rgba.size(), (jbyte*)rgba.data());
         return byteArray;
     */
+
+    public static native boolean validateHeaderBuf(Buffer data, int dataSize); /*
+        return basisuWrapper::validateHeader((uint8_t*)data, dataSize);
+    */
+
+//    public static byte[] transcodeBuf(Buffer data, int imageIndex, int levelIndex, BasisuTranscoderTextureFormat textureFormat) {
+//        int format = textureFormat.getId();
+//        return transcodeNativeBuf(data, data.capacity(), imageIndex, levelIndex, format);
+//    }
+//
+//    private static native Buffer transcodeBufNative(Buffer dataRaw, int dataSize, int imageIndex, int levelIndex, int textureFormatId); /*MANUAL
+//        std::vector<uint8_t> rgba;
+//        basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
+//
+//        uint8_t* data = (uint8_t*)env->GetDirectBufferAddress(dataRaw);
+//
+//        if (!basisuWrapper::transcode(rgba, data, dataSize, imageIndex, levelIndex, format)) {
+//            basisuUtils::logError(LOG_TAG, "Error during image transcoding!");
+//            basisuUtils::throwException(env, "Error during image transcoding!");
+//            return 0;
+//        }
+//
+//        jbyteArray byteArray = env->NewByteArray(rgba.size());
+//        env->SetByteArrayRegion(byteArray, (jsize)0, (jsize)rgba.size(), (jbyte*)rgba.data());
+//        return byteArray;
+//    */
 }

@@ -182,7 +182,6 @@ int getTotalMipMapLevels_wrap(const val &jsData) {
     return basisuWrapper::getTotalMipMapLevels(data.data(), data.size());
 }
 
-// uintptr_t
 basist::basisu_file_info getFileInfo_wrap(const val &jsData) {
     std::vector<uint8_t> data = vecFromTypedArray(jsData);
     basist::basisu_file_info fileInfo;
@@ -192,7 +191,6 @@ basist::basisu_file_info getFileInfo_wrap(const val &jsData) {
     return fileInfo;
 }
 
-// uintptr_t
 basist::basisu_image_info getImageInfo_wrap(const val &jsData, uint32_t imageIndex) {
     std::vector<uint8_t> data = vecFromTypedArray(jsData);
     basist::basisu_image_info imageInfo;

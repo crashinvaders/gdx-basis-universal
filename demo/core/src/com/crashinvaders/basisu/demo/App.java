@@ -3,24 +3,23 @@ package com.crashinvaders.basisu.demo;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.ui.Container;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Scaling;
+import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.crashinvaders.basisu.gdx.*;
 import com.crashinvaders.basisu.wrapper.BasisuFileInfo;
 import com.crashinvaders.basisu.wrapper.BasisuImageInfo;
 import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
 import com.crashinvaders.basisu.wrapper.BasisuWrapper;
+
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.lang.StringBuilder;
+import java.nio.ByteBuffer;
 
 public class App implements ApplicationListener {
 
@@ -46,45 +45,48 @@ public class App implements ApplicationListener {
         stage = new Stage(viewport, batch);
 
         testBasisuClasses();
+        testBasisuBuffers();
+        Gdx.app.exit();
+        return;
 
-        BasisuTextureData basisuData0 = new BasisuTextureData(Gdx.files.internal("kodim3.basis"));
+//        BasisuTextureData basisuData0 = new BasisuTextureData(Gdx.files.internal("kodim3.basis"));
+////        basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.RGBA32);
+////        basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.ETC1_RGB);
+////        basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.BC3_RGBA);
+////        basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.BC7_RGBA);
+//        texture0 = new Texture(basisuData0);
+//
+//        BasisuTextureData basisuData1 = new BasisuTextureData(Gdx.files.internal("level_temple0.basis"));
 //        basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.RGBA32);
-//        basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.ETC1_RGB);
-//        basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.BC3_RGBA);
-//        basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.BC7_RGBA);
-        texture0 = new Texture(basisuData0);
-
-        BasisuTextureData basisuData1 = new BasisuTextureData(Gdx.files.internal("level_temple0.basis"));
-        basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.RGBA32);
-        texture1 = new Texture(basisuData1);
-
-        // UI actors.
-        {
-            Table rootTable = new Table();
-            rootTable.setFillParent(true);
-            rootTable.center();
-
-            Image image0 = new Image(new TextureRegionDrawable(texture0), Scaling.fit);
-            image0.setScaling(Scaling.fit);
-            rootTable.add(image0).grow();
-            Image image1 = new Image(new TextureRegionDrawable(texture1), Scaling.fit);
-            Container containerImage1 = new Container<>(image1);
-            containerImage1.setTransform(true);
-            containerImage1.addAction(Actions.delay(0.25f, Actions.forever(Actions.sequence(
-                            Actions.run(() -> containerImage1.setOrigin(Align.center)),
-                            Actions.rotateBy(360f, 1f, Interpolation.pow3),
-                            Actions.delay(2f)
-            ))));
-            rootTable.add(containerImage1).grow();
-
-            stage.addActor(rootTable);
-        }
+//        texture1 = new Texture(basisuData1);
+//
+//        // UI actors.
+//        {
+//            Table rootTable = new Table();
+//            rootTable.setFillParent(true);
+//            rootTable.center();
+//
+//            Image image0 = new Image(new TextureRegionDrawable(texture0), Scaling.fit);
+//            image0.setScaling(Scaling.fit);
+//            rootTable.add(image0).grow();
+//            Image image1 = new Image(new TextureRegionDrawable(texture1), Scaling.fit);
+//            Container containerImage1 = new Container<>(image1);
+//            containerImage1.setTransform(true);
+//            containerImage1.addAction(Actions.delay(0.25f, Actions.forever(Actions.sequence(
+//                            Actions.run(() -> containerImage1.setOrigin(Align.center)),
+//                            Actions.rotateBy(360f, 1f, Interpolation.pow3),
+//                            Actions.delay(2f)
+//            ))));
+//            rootTable.add(containerImage1).grow();
+//
+//            stage.addActor(rootTable);
+//        }
     }
 
     @Override
     public void dispose() {
-        texture0.dispose();
-        texture1.dispose();
+//        texture0.dispose();
+//        texture1.dispose();
         batch.dispose();
         stage.dispose();
     }
@@ -174,6 +176,35 @@ public class App implements ApplicationListener {
         }
     }
 
+    private static void testBasisuBuffers() {
+        BasisuNativeLibLoader.loadIfNeeded();
+
+        byte[] basisuData = Gdx.files.internal("kodim3.basis").readBytes();
+
+        ByteBuffer byteBuffer = readFileIntoBuffer(Gdx.files.internal("kodim3.basis"));
+//        ByteBuffer byteBuffer = BufferUtils.newByteBuffer(basisuData.length);
+//        byteBuffer.put(basisuData);
+//        byteBuffer.position(0);
+
+        final int iterations = 100;
+
+        long arrStart = TimeUtils.nanoTime();
+        for (int i = 0; i < iterations; i++) {
+            BasisuWrapper.validateHeader(basisuData);
+        }
+        long arrTime = TimeUtils.timeSinceNanos(arrStart);
+        Gdx.app.log("BUF", "ARRAY: " + (int)(arrTime/1000000f));
+
+        long bufStart = TimeUtils.nanoTime();
+        for (int i = 0; i < iterations; i++) {
+            BasisuWrapper.validateHeaderBuf(byteBuffer, byteBuffer.capacity());
+        }
+        long bufTime = TimeUtils.timeSinceNanos(bufStart);
+        Gdx.app.log("BUF", "BUFFER: " + (int)(bufTime/1000000f));
+
+//        BufferUtils.disposeUnsafeByteBuffer(byteBuffer);
+    }
+
     // Compute the MODBUS RTU CRC
     // https://stackoverflow.com/a/38901367/3802890
     private static int modRtuCrc(byte[] buf) {
@@ -193,5 +224,27 @@ public class App implements ApplicationListener {
         }
         // Note, this number has low and high bytes swapped, so use it accordingly (or swap bytes)
         return crc;
+    }
+
+    private static ByteBuffer readFileIntoBuffer(FileHandle file) {
+        byte[] buffer = new byte[1024 * 10];
+        DataInputStream in = null;
+        try {
+            in = new DataInputStream(new BufferedInputStream(file.read()));
+            int fileSize = (int)file.length();
+//            ByteBuffer byteBuffer = BufferUtils.newUnsafeByteBuffer(fileSize);
+            ByteBuffer byteBuffer = BufferUtils.newByteBuffer(fileSize);
+            int readBytes = 0;
+            while ((readBytes = in.read(buffer)) != -1) {
+                byteBuffer.put(buffer, 0, readBytes);
+            }
+            byteBuffer.position(0);
+            byteBuffer.limit(byteBuffer.capacity());
+            return byteBuffer;
+        } catch (Exception e) {
+            throw new GdxRuntimeException("Couldn't load file '" + file + "'", e);
+        } finally {
+            StreamUtils.closeQuietly(in);
+        }
     }
 }

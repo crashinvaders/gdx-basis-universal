@@ -1,5 +1,6 @@
-@REM A temporary script to assemble natives for web platforms (using Emscripten).
 @echo off
+@REM A temporary script to assemble natives for web platforms (using Emscripten).
+@REM Emscipten SDK bin should be on PATH.
 
 call emsdk_env.bat
 
@@ -7,14 +8,14 @@ set LIB_NAME=gdx-basis-universal
 @REM JS function to load the wasm wrapping module.
 set MODULE_CREAT_FUNCTIOn=gdx-basis-universal
 
-set SRC_DIR=jni\src
-set BUILD_DIR=jni\target\web
-set OUT_DIR=libs\web
+set SRC_DIR=basisu-wrapper\jni\src
+set BUILD_DIR=basisu-wrapper\jni\target\web
+set OUT_DIR=basisu-wrapper\libs\web
 
 call mkdir %BUILD_DIR%
 call mkdir %OUT_DIR%
 
-set INCLUDES_OPTIONS=-Ijni\include
+set INCLUDES_OPTIONS=-Ibasisu-wrapper\jni\include
 set COMMON_OPTIONS=-std=c++11 -Wall -flto -fno-exceptions -s MODULARIZE=1 -s EXPORT_NAME=createBasisuGdxModule -s ENVIRONMENT=web -s WASM=1 --bind -mnontrapping-fptoint
 set COMPILER_OPTIONS=-c
 set OUTPUT_SUFFIX=.js

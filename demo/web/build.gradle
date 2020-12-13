@@ -23,7 +23,7 @@ gwt {
     compiler.strict = true
     compiler.disableCastChecking = true
 
-    logLevel = 'DEBUG'
+//    logLevel = 'DEBUG'
 }
 
 dependencies {

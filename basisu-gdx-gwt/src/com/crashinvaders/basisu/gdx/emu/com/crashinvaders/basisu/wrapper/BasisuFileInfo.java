@@ -13,8 +13,8 @@ public class BasisuFileInfo {
         throw new UnsupportedOperationException("GWT doesn't support this constructor.");
     }
 
-    BasisuFileInfo(JavaScriptObject fileInfoJs) {
-        this.fileInfoJs = fileInfoJs;
+    BasisuFileInfo(Object fileInfoJs) {
+        this.fileInfoJs = (JavaScriptObject)fileInfoJs;
     }
 
     public BasisuTextureType getTextureType() {

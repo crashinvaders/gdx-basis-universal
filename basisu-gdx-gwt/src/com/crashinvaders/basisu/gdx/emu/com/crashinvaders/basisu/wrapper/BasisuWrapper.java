@@ -1,7 +1,11 @@
 package com.crashinvaders.basisu.wrapper;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.typedarrays.shared.ArrayBufferView;
 import com.google.gwt.typedarrays.shared.Uint8Array;
+
+import java.nio.Buffer;
+import java.nio.HasArrayBufferView;
 
 public class BasisuWrapper {
 
@@ -51,4 +55,15 @@ public class BasisuWrapper {
         var format = textureFormat.@com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat::getId()();
         return $wnd.basisuModule.transcode(typedArray, imageIndex, levelIndex, format);
     }-*/;
+
+    public static boolean validateHeaderBuf(Buffer data, int dataSize) {
+        return validateHeaderBufNative(toTypedArray(data));
+    }
+    private static native boolean validateHeaderBufNative(ArrayBufferView data)/*-{
+        return $wnd.basisuModule.validateHeader(data);
+    }-*/;
+
+    private static ArrayBufferView toTypedArray(Buffer data) {
+        return ((HasArrayBufferView)data).getTypedArray();
+    }
 }

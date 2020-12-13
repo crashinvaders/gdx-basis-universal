@@ -10,8 +10,8 @@ public class BasisuImageInfo {
         throw new UnsupportedOperationException("GWT doesn't support this constructor.");
     }
 
-    BasisuImageInfo(JavaScriptObject imageInfoJs) {
-        this.imageInfoJs = imageInfoJs;
+    BasisuImageInfo(Object imageInfoJs) {
+        this.imageInfoJs = (JavaScriptObject)imageInfoJs;
     }
 
     public native int getImageIndex() /*-{
