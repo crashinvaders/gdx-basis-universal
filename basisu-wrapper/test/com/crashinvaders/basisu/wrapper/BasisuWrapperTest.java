@@ -1,13 +1,14 @@
 package com.crashinvaders.basisu.wrapper;
 
 import com.badlogic.gdx.utils.SharedLibraryLoader;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
 
 import static org.junit.Assert.*;
 
@@ -15,7 +16,7 @@ public class BasisuWrapperTest {
 
     private static final String IMAGE_FILE = "kodim3.basis";
 
-    private static byte[] basisBytes;
+    private static ByteBuffer basisBuffer;
 
     @BeforeClass
     public static void init() throws IOException {
@@ -23,18 +24,19 @@ public class BasisuWrapperTest {
 
         System.out.println("Loading " + IMAGE_FILE);
         try (InputStream is = BasisuWrapperTest.class.getClassLoader().getResourceAsStream(IMAGE_FILE)) {
-            basisBytes = TestUtils.readToByteArray(is);
+            byte[] bytes = TestUtils.readToByteArray(is);
+            basisBuffer = TestUtils.asByteBuffer(bytes);
         }
     }
 
     @Test
     public void testValidateHeader() {
-        assertTrue(BasisuWrapper.validateHeader(basisBytes));
+        assertTrue(BasisuWrapper.validateHeader(basisBuffer));
     }
 
     @Test
     public void testGetFileInfo() {
-        BasisuFileInfo fileInfo = BasisuWrapper.getFileInfo(basisBytes);
+        BasisuFileInfo fileInfo = BasisuWrapper.getFileInfo(basisBuffer);
 
         assertEquals(fileInfo.getTextureType(), BasisuTextureType.REGULAR_2D);
         assertEquals(fileInfo.getTextureFormat(), BasisuTextureFormat.ETC1S);
@@ -59,7 +61,7 @@ public class BasisuWrapperTest {
 
     @Test
     public void testGetImageInfo() {
-        BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisBytes, 0);
+        BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisBuffer, 0);
 
         assertEquals(imageInfo.getImageIndex(), 0);
         assertEquals(imageInfo.getTotalLevels(), 1);
@@ -77,12 +79,12 @@ public class BasisuWrapperTest {
 
     @Test
     public void testTranscodeRgba32() {
-        BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisBytes, 0);
+        BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisBuffer, 0);
 
-        byte[] rgba8888 = BasisuWrapper.transcode(basisBytes, 0, 0, BasisuTranscoderTextureFormat.RGBA32);
+        ByteBuffer rgba8888 = BasisuWrapper.transcode(basisBuffer, 0, 0, BasisuTranscoderTextureFormat.RGBA32);
 
         // Check if encoding is correct.
-        assertEquals(rgba8888.length, imageInfo.getWidth() * imageInfo.getHeight() * 4);
+        assertEquals(rgba8888.capacity(), imageInfo.getWidth() * imageInfo.getHeight() * 4);
 
         BufferedImage bufferedImage = TestUtils.fromRgba8888(rgba8888, imageInfo.getWidth(), imageInfo.getHeight());
         TestUtils.saveImagePng(bufferedImage, IMAGE_FILE + ".rgba32");
@@ -90,12 +92,12 @@ public class BasisuWrapperTest {
 
     @Test
     public void testTranscodeEtc2Rgba() {
-        BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisBytes, 0);
+        BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisBuffer, 0);
 
-        byte[] etc2Rgba = BasisuWrapper.transcode(basisBytes, 0, 0, BasisuTranscoderTextureFormat.ETC2_RGBA);
+        ByteBuffer etc2Rgba = BasisuWrapper.transcode(basisBuffer, 0, 0, BasisuTranscoderTextureFormat.ETC2_RGBA);
 
         // Check if encoding is correct.
-        assertEquals(etc2Rgba.length, imageInfo.getTotalBlocks() * 16);
+        assertEquals(etc2Rgba.capacity(), imageInfo.getTotalBlocks() * 16);
 
         TestUtils.saveFile(etc2Rgba, IMAGE_FILE + ".etc2rgba");
     }
@@ -107,7 +109,7 @@ public class BasisuWrapperTest {
      */
     @Test
     public void testTranscodeAll() {
-        BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisBytes, 0);
+        BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisBuffer, 0);
 
         for (BasisuTranscoderTextureFormat format : BasisuTranscoderTextureFormat.values()) {
             if ((format == BasisuTranscoderTextureFormat.PVRTC1_4_RGB || format == BasisuTranscoderTextureFormat.PVRTC1_4_RGBA)
@@ -116,7 +118,7 @@ public class BasisuWrapperTest {
                 continue;
             }
             System.out.println("Transcoding to " + format);
-            BasisuWrapper.transcode(basisBytes, 0, 0, format);
+            BasisuWrapper.transcode(basisBuffer, 0, 0, format);
         }
     }
 }

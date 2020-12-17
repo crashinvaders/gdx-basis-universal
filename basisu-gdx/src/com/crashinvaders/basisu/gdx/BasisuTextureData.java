@@ -4,17 +4,21 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.TextureData;
-import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.crashinvaders.basisu.wrapper.BasisuImageInfo;
 import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
 
 import java.nio.Buffer;
-import java.nio.ByteBuffer;
 
 public class BasisuTextureData implements TextureData {
     private static final String TAG = BasisuTextureData.class.getSimpleName();
 
+    /**
+     * Default texture format selector to be used by all the BasisuTextureData instances
+     * if another is not specified explicitly.
+     * @see #setTextureFormatSelector(BasisuTextureFormatSelector)
+     * @see #setTextureFormatSelector(BasisuTranscoderTextureFormat)
+     */
     public static BasisuTextureFormatSelector defaultFormatSelector = new BasisuTextureFormatSelector.Default();
 
     private BasisuTextureFormatSelector formatSelector = BasisuTextureData.defaultFormatSelector;
@@ -25,7 +29,7 @@ public class BasisuTextureData implements TextureData {
 
     private BasisuData basisuData;
 
-    private ByteBuffer transcodedData = null;
+    private Buffer transcodedData = null;
     private BasisuTranscoderTextureFormat transcodeFormat = null;
 
     private int width = 0;
@@ -64,15 +68,15 @@ public class BasisuTextureData implements TextureData {
         this.basisuData = basisuData;
     }
 
-    public BasisuTextureFormatSelector getFormatSelector() {
+    public BasisuTextureFormatSelector getTextureFormatSelector() {
         return formatSelector;
     }
 
-    public void setFormatSelector(BasisuTextureFormatSelector formatSelector) {
+    public void setTextureFormatSelector(BasisuTextureFormatSelector formatSelector) {
         this.formatSelector = formatSelector;
     }
 
-    public void setFormatSelector(BasisuTranscoderTextureFormat format) {
+    public void setTextureFormatSelector(BasisuTranscoderTextureFormat format) {
         this.formatSelector = (data, imageInfo) -> format;
     }
 
@@ -113,12 +117,7 @@ public class BasisuTextureData implements TextureData {
         transcodeFormat = formatSelector.resolveTextureFormat(basisuData, imageInfo);
         Gdx.app.debug(TAG, "Transcoding " + (file != null ? file.path() : "a texture") + " to the " + transcodeFormat + " format.");
 
-        byte[] transcodedData = basisuData.transcode(imageIndex, mipmapLevel, transcodeFormat);
-        ByteBuffer buffer = BufferUtils.newByteBuffer(transcodedData.length);
-        buffer.put(transcodedData);
-        ((Buffer)buffer).position(0);
-        ((Buffer)buffer).limit(buffer.capacity());
-        this.transcodedData = buffer;
+        this.transcodedData = basisuData.transcode(imageIndex, mipmapLevel, transcodeFormat);
 
         isPrepared = true;
     }

@@ -3,6 +3,8 @@ package com.crashinvaders.basisu.wrapper;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 public class TestUtils {
     private static final String OUTPUT_ROOT = "test-output/";
@@ -19,17 +21,22 @@ public class TestUtils {
         }
     }
 
-    public static void saveFile(byte[] data, String fileName) {
+    public static void saveFile(ByteBuffer data, String fileName) {
         File outFile = new File(OUTPUT_ROOT + fileName);
         outFile.getParentFile().mkdirs();
 
+        data.position(0);
+        data.limit(data.capacity());
         try (FileOutputStream os = new FileOutputStream(outFile)) {
-            os.write(data);
+            while (data.hasRemaining()) {
+                os.write(data.get());
+            }
             System.out.println("File has been saved to " + outFile.getAbsolutePath());
         } catch (IOException e) {
             System.err.println("Failed to save image " + outFile.getAbsolutePath());
             e.printStackTrace();
         }
+        data.position(0);
     }
 
     // RGBA layout. 2 bytes per component.
@@ -55,8 +62,8 @@ public class TestUtils {
     }
 
     // RGBA layout. 4 bytes per component.
-    public static BufferedImage fromRgba8888(byte[] rgba, int width, int height) {
-        if (rgba.length != width * height * 4) {
+    public static BufferedImage fromRgba8888(ByteBuffer rgba, int width, int height) {
+        if (rgba.capacity() != width * height * 4) {
             throw new IllegalArgumentException("RGBA image data doesn't match the required size for the specified width & height.");
         }
 
@@ -65,10 +72,10 @@ public class TestUtils {
             final int rowStartIdx = y * bufferedImage.getWidth() * 4;
             for (int x = 0; x < bufferedImage.getWidth(); x++) {
                 int pixelIdx = rowStartIdx + x * 4;
-                int r = rgba[pixelIdx + 0] & 0xff;
-                int g = rgba[pixelIdx + 1] & 0xff;
-                int b = rgba[pixelIdx + 2] & 0xff;
-                int a = rgba[pixelIdx + 3] & 0xff;
+                int r = rgba.get(pixelIdx + 0) & 0xff;
+                int g = rgba.get(pixelIdx + 1) & 0xff;
+                int b = rgba.get(pixelIdx + 2) & 0xff;
+                int a = rgba.get(pixelIdx + 3) & 0xff;
                 int argb = a << 24 | r << 16 | g << 8 | b;
                 bufferedImage.setRGB(x, y, argb);
             }
@@ -87,6 +94,15 @@ public class TestUtils {
         }
 
         return buffer.toByteArray();
+    }
+
+    public static ByteBuffer asByteBuffer(byte[] data) {
+        ByteBuffer buffer = ByteBuffer.allocateDirect(data.length);
+        buffer.order(ByteOrder.nativeOrder());
+        buffer.put(buffer);
+        buffer.limit(buffer.capacity());
+        buffer.position(0);
+        return buffer;
     }
 
     /** Checks if the dimensions are equal and are power of two. */

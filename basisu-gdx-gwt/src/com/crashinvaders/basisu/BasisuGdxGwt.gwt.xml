@@ -3,6 +3,7 @@
 <module>
 	<inherits name='com.crashinvaders.basisu.BasisuGdx'/>
 	<inherits name='BasisuGdxGwtNatives'/>
+	<inherits name='BasisuGdxGwtExt'/>
 
 	<source path="gdx/gwt" />
 

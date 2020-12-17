@@ -232,9 +232,6 @@ val fileInfo_imageMipmapLevels(basist::basisu_file_info &fileInfo) {
 
 EMSCRIPTEN_BINDINGS(my_module) {
 
-//	register_vector<uint8_t>("Uint8Vector");
-	register_vector<uint32_t>("Uint32Vector");
-
 	enum_<basist::basis_texture_type>("TextureType")
 	    .value("TexType2D", basist::basis_texture_type::cBASISTexType2D)
 	    .value("TexType2DArray", basist::basis_texture_type::cBASISTexType2DArray)
@@ -275,11 +272,9 @@ EMSCRIPTEN_BINDINGS(my_module) {
 		.property("yFlipped", &basist::basisu_file_info::m_y_flipped)                           // bool
 		.property("etc1s", &basist::basisu_file_info::m_etc1s)                                  // bool
 		.property("hasAlphaSlices", &basist::basisu_file_info::m_has_alpha_slices)              // bool
-//		.property("imageMipmapLevels", &basist::basisu_file_info::m_image_mipmap_levels)        // std::vector<uint32_t>
+		// Properties simulated through functions (to return more JS friendly type).
 		.function("getImageMipmapLevels", &fileInfo_imageMipmapLevels)                          // val (Uint8Array)
-//		.property("texFormat", &basist::basisu_file_info::m_tex_format)                         // basis_tex_format
 		.function("getTexFormat", &fileInfo_texFormat)                                          // uint8_t
-//		.property("texType", &basist::basisu_file_info::m_tex_type)                             // basis_texture_type
 		.function("getTexType", &fileInfo_texType)                                              // uint8_t
 		;
 
