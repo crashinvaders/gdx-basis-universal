@@ -2,6 +2,7 @@ package com.crashinvaders.basisu.gdx;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.BufferUtils;
+import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.StreamUtils;
 import com.crashinvaders.basisu.wrapper.BasisuFileInfo;
@@ -11,9 +12,10 @@ import com.crashinvaders.basisu.wrapper.BasisuWrapper;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public class BasisuData {
+public class BasisuData implements Disposable {
     private final ByteBuffer encodedData;
     private final BasisuFileInfo fileInfo;
 
@@ -31,6 +33,11 @@ public class BasisuData {
         }
 
         this.fileInfo = BasisuWrapper.getFileInfo(encodedData);
+    }
+
+    @Override
+    public void dispose() {
+        fileInfo.close();
     }
 
     public ByteBuffer getEncodedData() {
@@ -55,7 +62,6 @@ public class BasisuData {
         try {
             in = new DataInputStream(new BufferedInputStream(file.read()));
             int fileSize = (int)file.length();
-//            ByteBuffer byteBuffer = BufferUtils.newUnsafeByteBuffer(fileSize);
             ByteBuffer byteBuffer = BufferUtils.newByteBuffer(fileSize);
             int readBytes = 0;
             while ((readBytes = in.read(buffer)) != -1) {

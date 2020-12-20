@@ -1,12 +1,16 @@
 package com.crashinvaders.basisu.wrapper;
 
+import java.io.Closeable;
+
 import static com.crashinvaders.basisu.wrapper.UniqueIdUtils.findOrThrow;
 
 /**
  * Direct mapping of <code>basist::transcoder_texture_format</code> struct.
+ *
  * <p/>
  * High-level composite texture formats supported by the transcoder.
  * Each of these texture formats directly correspond to OpenGL/D3D/Vulkan etc. texture formats.
+ *
  * <p/>
  * Notes:
  * <ul>
@@ -15,8 +19,12 @@ import static com.crashinvaders.basisu.wrapper.UniqueIdUtils.findOrThrow;
  *  <li>The PVRTC1 transcoders are real-time encoders, so don't expect the highest quality. We may add a slower encoder with improved quality.</li>
  *  <li>These enums must be kept in sync with Javascript code that calls the transcoder.</li>
  * </ul>
+ *
+ * <p/>
+ * CLOSEABLE: Instances of this class internally manage native resources
+ * and need to be closed using {@link #close()} when no longer needed.
  */
-public class BasisuFileInfo {
+public class BasisuFileInfo implements Closeable {
 	/*JNI
         #include "basisu_transcoder.h"
 
@@ -25,7 +33,7 @@ public class BasisuFileInfo {
         }
 	 */
 
-    final long addr;
+    long addr = 0;
 
     BasisuFileInfo() {
         this.addr = jniCreate();
@@ -35,11 +43,22 @@ public class BasisuFileInfo {
         throw new UnsupportedOperationException("This constructor exists solely for GWT compilation compatibility.");
     }
 
-    //TODO Finalizers are deprecated since Java 9. Figure how to handle native resource release properly.
+    @Override
+    public void close() {
+        if (addr == 0) {
+            throw new IllegalStateException("Object was already closed!");
+        }
+        jniDispose(addr);
+        addr = 0;
+    }
+
     @Override
     protected void finalize() throws Throwable {
+        if (addr != 0) {
+            System.err.println(this + " object was GC'ed but never closed!");
+            close();
+        }
         super.finalize();
-        jniDispose(addr);
     }
 
     public BasisuTextureType getTextureType() {
@@ -152,7 +171,7 @@ public class BasisuFileInfo {
        return reinterpret_cast<intptr_t>(fileInfo);
     */
 
-    private static native void jniDispose (long addr); /*
+    private static native void jniDispose(long addr); /*
 		basist::basisu_file_info* fileInfo = (basist::basisu_file_info*)addr;
 		delete fileInfo;
 	*/

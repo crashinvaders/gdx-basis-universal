@@ -1,9 +1,14 @@
 package com.crashinvaders.basisu.wrapper;
 
+import java.io.Closeable;
+
 /**
  * Direct mapping of <code>basist::basisu_image_info</code> struct.
+ * <p/>
+ * CLOSEABLE: Instances of this class internally manage native resources
+ * and need to be closed using {@link #close()} when no longer needed.
  */
-public class BasisuImageInfo {
+public class BasisuImageInfo implements Closeable {
 	/*JNI
         #include "basisu_transcoder.h"
 
@@ -12,7 +17,7 @@ public class BasisuImageInfo {
         }
 	 */
 
-    final long addr;
+    long addr;
 
     BasisuImageInfo() {
         this.addr = jniCreate();
@@ -22,11 +27,22 @@ public class BasisuImageInfo {
         throw new UnsupportedOperationException("This constructor exists solely for GWT compilation compatibility.");
     }
 
-    //TODO Finalizers are deprecated since Java 9. Figure how to handle native resource release properly.
+    @Override
+    public void close() {
+        if (addr == 0) {
+            throw new IllegalStateException("Object was already closed!");
+        }
+        jniDispose(addr);
+        addr = 0;
+    }
+
     @Override
     protected void finalize() throws Throwable {
+        if (addr != 0) {
+            System.err.println(this + " object was GC'ed but never closed!");
+            close();
+        }
         super.finalize();
-        jniDispose(addr);
     }
 
 
@@ -97,7 +113,7 @@ public class BasisuImageInfo {
        return reinterpret_cast<intptr_t>(imageInfo);
     */
 
-    private static native void jniDispose (long addr); /*
+    private static native void jniDispose(long addr); /*
 		basist::basisu_image_info* imageInfo = (basist::basisu_image_info*)addr;
 		delete imageInfo;
 	*/

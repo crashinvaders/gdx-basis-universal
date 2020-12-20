@@ -3,9 +3,11 @@ package com.crashinvaders.basisu.wrapper;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.typedarrays.shared.Uint8Array;
 
+import java.io.Closeable;
+
 import static com.crashinvaders.basisu.wrapper.UniqueIdUtils.findOrThrow;
 
-public class BasisuFileInfo {
+public class BasisuFileInfo implements Closeable {
 
     final JavaScriptObject fileInfoJs;
 
@@ -16,6 +18,13 @@ public class BasisuFileInfo {
     BasisuFileInfo(Object fileInfoJs) {
         this.fileInfoJs = (JavaScriptObject)fileInfoJs;
     }
+
+    @Override
+    public native void close() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
+        data["delete"]();
+        this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs = null;
+    }-*/;
 
     public BasisuTextureType getTextureType() {
         int textureTypeId = getTextureTypeNative();

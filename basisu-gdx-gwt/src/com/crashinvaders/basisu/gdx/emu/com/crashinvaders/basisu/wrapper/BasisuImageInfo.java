@@ -2,7 +2,9 @@ package com.crashinvaders.basisu.wrapper;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
-public class BasisuImageInfo {
+import java.io.Closeable;
+
+public class BasisuImageInfo implements Closeable {
 
     final JavaScriptObject imageInfoJs;
 
@@ -13,6 +15,13 @@ public class BasisuImageInfo {
     BasisuImageInfo(Object imageInfoJs) {
         this.imageInfoJs = (JavaScriptObject)imageInfoJs;
     }
+
+    @Override
+    public native void close() /*-{
+        var data = this.@com.crashinvaders.basisu.wrapper.BasisuImageInfo::imageInfoJs;
+        data["delete"]();
+        this.@com.crashinvaders.basisu.wrapper.BasisuImageInfo::imageInfoJs = null;
+    }-*/;
 
     public native int getImageIndex() /*-{
         var data = this.@com.crashinvaders.basisu.wrapper.BasisuImageInfo::imageInfoJs;
