@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1.0)
-project(jnigen-test VERSION 0.1.0)
+project(basisu-wrapper-test VERSION 0.1.0)
 
 set (CMAKE_CXX_STANDARD 11)
 
@@ -15,4 +15,4 @@ file(GLOB SOURCES
     "../jni/src/basisu_wrapper.cpp"
 )
 
-add_executable(jnigen-test ${SOURCES})
+add_executable(basisu-wrapper-test ${SOURCES})

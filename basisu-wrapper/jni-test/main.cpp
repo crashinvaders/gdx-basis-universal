@@ -11,12 +11,11 @@
 int main(int, char**) {
     std::vector<uint8_t> basisData = fileUtils::readFile("../test-resources/kodim3.basis");
     if (basisData.size() == 0) {
-        basisuUtils::logError(LOG_TAG, "An error occured during reading the file.");
+        basisuUtils::logError(LOG_TAG, "An error occurred during reading the file.");
         return 1;
     }
 
     basisuUtils::logInfo(LOG_TAG, (std::string("File was successfully read. Size: ") += basisData.size()).c_str());
-
     
     if (!basisuWrapper::validateHeader(basisData.data(), basisData.size())) {
         basisuUtils::logError(LOG_TAG, "File is not a valid basis universal image!");

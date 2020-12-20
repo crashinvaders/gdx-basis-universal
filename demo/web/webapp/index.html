@@ -44,13 +44,4 @@
               document.getElementById('embed-html').addEventListener('mousedown', handleMouseDown, false);
               document.getElementById('embed-html').addEventListener('mouseup', handleMouseUp, false);
        </script>
-
-       <script>
-              var basisuModule = null;
-              console.log("Loading the native module...");
-              createBasisuGdxModule().then(loadedModule => {
-                  basisuModule = loadedModule;
-                  console.log("The native module is loaded!");
-              });
-       </script>
 </html>

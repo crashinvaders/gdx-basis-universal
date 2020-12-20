@@ -15,7 +15,7 @@ mkdir -p $BUILD_DIR
 mkdir -p $OUT_DIR
 
 INCLUDES_OPTIONS='-Ibasisu-wrapper/jni/include'
-COMMON_OPTIONS='-std=c++11 -Wall -flto -fno-exceptions -s MODULARIZE=1 -s EXPORT_NAME=createBasisuGdxModule -s ENVIRONMENT=web -s WASM=1 --bind -mnontrapping-fptoint'
+COMMON_OPTIONS='-std=c++11 -Wall -O2 -g0 -flto -fno-exceptions -s MODULARIZE=1 -s EXPORT_NAME=createBasisuGdxModule -s ENVIRONMENT=web -s WASM=1 --closure 1 --bind -mnontrapping-fptoint'
 COMPILER_OPTIONS='-c'
 OUTPUT_SUFFIX='.js'
 
