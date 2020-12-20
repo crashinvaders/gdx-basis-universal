@@ -92,7 +92,12 @@
 		<condition property="has-em-env-script">
 			<equals arg1="${em-env-script-found}" arg2="true"/>
 		</condition>
-		<exec executable="${emEnvScript}" failonerror="true"/>
+		<!-- on Unix systems, emsdk_env.sh is very sensitive to the working dir, so we have to find and set it explicitly -->
+		<exec executable="which" outputproperty="emEnvScriptPath">
+			<arg value="${emEnvScript}"/>
+		</exec>
+		<property name="emEnvScriptDir" location="${emEnvScriptPath}/.."/>
+		<exec executable="${emEnvScript}" dir="${emEnvScriptDir}" failonerror="true"/>
 	</target>
 
 	<target name="create-build-dir" depends="precompile" if="has-compiler">
