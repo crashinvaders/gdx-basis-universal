@@ -54,6 +54,22 @@ public class BasisuWrapper {
     }-*/;
 
 
+    //region Emscripten exception handler.
+    static {
+        setupNativeExceptionHandler();
+    }
+    private static native void setupNativeExceptionHandler()/*-{
+        $wnd.basisuThrowException = function(message) {
+            @com.crashinvaders.basisu.wrapper.BasisuWrapper::throwBasisuException(Ljava/lang/String;)(message);
+        }
+        console.log("BasisuWrapper: Native code exception handler has been set.");
+    }-*/;
+    private static void throwBasisuException(String message) {
+        throw new BasisuWrapperException("Native code exception: " + message);
+    }
+    //endregion
+
+
     //region JSNI utils.
     private static ArrayBufferView toTypedArray(Buffer data) {
         return ((HasArrayBufferView)data).getTypedArray();

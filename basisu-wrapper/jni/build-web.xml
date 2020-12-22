@@ -10,7 +10,7 @@
 <!-- EXAMPLES:  Windows:  "C:\emsdk\upstream\emscripten" -->
 <!--			Linux:  "home/username/emsdk/upstream/emscripten" -->
 
-<project name="gdx-basis-universal-Windows-64" basedir="." default="postcompile">
+<project name="gdx-basis-universal-web" basedir="." default="postcompile">
 	<!-- include the environment -->
 	<property environment="env"/>
 

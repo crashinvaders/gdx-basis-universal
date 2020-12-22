@@ -51,7 +51,7 @@ namespace basisuWrapper {
         basisu_transcoder transcoder(&codebook);
         bool successful = transcoder.get_file_info(data, dataSize, fileInfo);
         if (!successful) {
-            basisuUtils::logInfo(LOG_TAG, "Failed to obtain file info.");
+            basisuUtils::logError(LOG_TAG, "Failed to obtain file info.");
         }
         return successful;
     }
@@ -185,7 +185,7 @@ int getTotalMipMapLevels_wrap(const val &jsData) {
 basist::basisu_file_info getFileInfo_wrap(const val &jsData) {
     std::vector<uint8_t> data = vecFromTypedArray(jsData);
     basist::basisu_file_info fileInfo;
-    if (basisuWrapper::getFileInfo(fileInfo, data.data(), data.size())) {
+    if (!basisuWrapper::getFileInfo(fileInfo, data.data(), data.size())) {
         basisuUtils::throwException(nullptr, "Failed to obtain file info.");
     }
     return fileInfo;
@@ -194,7 +194,7 @@ basist::basisu_file_info getFileInfo_wrap(const val &jsData) {
 basist::basisu_image_info getImageInfo_wrap(const val &jsData, uint32_t imageIndex) {
     std::vector<uint8_t> data = vecFromTypedArray(jsData);
     basist::basisu_image_info imageInfo;
-    if (basisuWrapper::getImageInfo(imageInfo, data.data(), data.size(), imageIndex)) {
+    if (!basisuWrapper::getImageInfo(imageInfo, data.data(), data.size(), imageIndex)) {
         basisuUtils::throwException(nullptr, "Failed to obtain image info.");
     }
     return imageInfo;

@@ -27,7 +27,7 @@ test {
 }
 
 //region jnigen configuration
-apply plugin: "com.badlogicgames.gdx.gdx-jnigen"
+apply plugin: 'com.badlogicgames.gdx.gdx-jnigen'
 
 def nativeSrcFiles = [
         'com_crashinvaders_basisu_wrapper_BasisuWrapper.cpp',
@@ -51,28 +51,30 @@ jnigen {
 
         cppIncludes = nativeSrcFiles
 
-        cFlags += ' -fvisibility=hidden '
-        cppFlags += ' -std=c++11 -fvisibility=hidden '
-        linkerFlags += ' -fvisibility=hidden '
+        cFlags +=      ' -std=c11   -fvisibility=hidden -Wall -O2 -g0 -flto -fno-exceptions '
+        cppFlags +=    ' -std=c++11 -fvisibility=hidden -Wall -O2 -g0 -flto -fno-exceptions '
+        linkerFlags += '            -fvisibility=hidden -Wall -O2 -g0 -flto -fno-exceptions '
 
         // Enable for Basis Universal debug messages.
         //  cppFlags += ' -DBASISU_FORCE_DEVEL_MESSAGES=1 '
     }
     add(Windows, x32) {
-        compilerPrefix = "mingw32-"
-        compilerSuffix = ".exe"
+        compilerPrefix = 'mingw32-'
+        compilerSuffix = '.exe'
     }
     add(Windows, x64) {
-        compilerSuffix = ".exe"
+        compilerSuffix = '.exe'
     }
     add(Linux, x32)
     add(Linux, x64)
     add(Linux, x32, ARM)
     add(Linux, x64, ARM)
     add(MacOsX, x64)
-    add(Android)
+    add(Android) {
+        linkerFlags += '-llog'
+    }
     add(IOS) {
-        cppFlags += " -stdlib=libc++ "
+        cppFlags += ' -stdlib=libc++ '
     }
 }
 
