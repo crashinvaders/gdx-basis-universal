@@ -5,7 +5,7 @@ build
 out
 /local.properties
 robovm-build
-.DS-Store
+.DS_Store
 
 /basisu-wrapper/libs
 !/basisu-wrapper/libs/web/BasisuGdxGwtNatives.gwt.xml

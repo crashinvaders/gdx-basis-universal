@@ -46,7 +46,7 @@ public class BasisuWrapper {
 
         // Seems like allocating and filling a DirectByteBuffer
         // is faster on Java side rather than on the native one
-        // (Even with receiving extra Java primitive array from native code).
+        // (Even with receiving extra Java primitive array from the native code).
         ByteBuffer buffer = ByteBuffer.allocateDirect(transcodedData.length);
         buffer.order(ByteOrder.nativeOrder());
         buffer.put(transcodedData);

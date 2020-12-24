@@ -1,5 +1,7 @@
 package com.crashinvaders.basisu.gdx;
 
+import com.badlogic.gdx.Application;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.Disposable;
@@ -12,7 +14,7 @@ import com.crashinvaders.basisu.wrapper.BasisuWrapper;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
-import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 public class BasisuData implements Disposable {
@@ -38,6 +40,9 @@ public class BasisuData implements Disposable {
     @Override
     public void dispose() {
         fileInfo.close();
+        if (BufferUtils.isUnsafeByteBuffer(encodedData)) {
+            BufferUtils.disposeUnsafeByteBuffer(encodedData);
+        }
     }
 
     public ByteBuffer getEncodedData() {
@@ -56,19 +61,32 @@ public class BasisuData implements Disposable {
         return BasisuWrapper.transcode(encodedData, imageIndex, mipmapLevel, textureFormat);
     }
 
+    /**
+     * Reads the file content into the {@link ByteBuffer}.
+     * It uses unsafe (direct) byte buffer for all the platforms except for GWT,
+     * so don't forget to free it using {@link BufferUtils#disposeUnsafeByteBuffer(ByteBuffer)}.
+     */
     public static ByteBuffer readFileIntoBuffer(FileHandle file) {
         byte[] buffer = new byte[1024 * 10];
         DataInputStream in = null;
         try {
             in = new DataInputStream(new BufferedInputStream(file.read()));
             int fileSize = (int)file.length();
-            ByteBuffer byteBuffer = BufferUtils.newByteBuffer(fileSize);
+
+            // We use unsafe (direct) byte buffer everywhere but not on GWT as it doesn't support it.
+            final ByteBuffer byteBuffer;
+            if (Gdx.app.getType() == Application.ApplicationType.WebGL) {
+                byteBuffer = BufferUtils.newByteBuffer(fileSize);
+            } else {
+                byteBuffer = BufferUtils.newUnsafeByteBuffer(fileSize);
+            }
+
             int readBytes = 0;
             while ((readBytes = in.read(buffer)) != -1) {
                 byteBuffer.put(buffer, 0, readBytes);
             }
-            byteBuffer.position(0);
-            byteBuffer.limit(byteBuffer.capacity());
+            ((Buffer)byteBuffer).position(0);
+            ((Buffer)byteBuffer).limit(byteBuffer.capacity());
             return byteBuffer;
         } catch (Exception e) {
             throw new GdxRuntimeException("Couldn't load file '" + file + "'", e);
