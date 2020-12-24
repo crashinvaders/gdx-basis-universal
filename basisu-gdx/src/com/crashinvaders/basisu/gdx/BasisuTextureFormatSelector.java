@@ -84,7 +84,6 @@ public interface BasisuTextureFormatSelector {
                 if (isBasisuFormatSupported(PVRTC2_4_RGB)) {
                     return PVRTC2_4_RGB;
                 }
-                //TODO Restore once it works in native transcoder.
 //                // Fast and almost as high quality as BC1.
 //                if (isBasisuFormatSupported(FXT1_RGB)) {
 //                    return FXT1_RGB;

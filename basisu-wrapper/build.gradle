@@ -30,14 +30,16 @@ test {
 apply plugin: 'com.badlogicgames.gdx.gdx-jnigen'
 
 def nativeSrcFiles = [
+        'basisu_wrapper.cpp',
+        'basisu_native_utils.cpp',
+        'basis-universal/transcoder/basisu_transcoder.cpp',
         'com_crashinvaders_basisu_wrapper_BasisuWrapper.cpp',
         'com_crashinvaders_basisu_wrapper_BasisuFileInfo.cpp',
         'com_crashinvaders_basisu_wrapper_BasisuImageInfo.cpp',
-//        'src/basisu_transcoder.cpp',
-        'src/basisu_wrapper.cpp',
-        'src/basisu_native_utils.cpp',
-        'contrib/basis_universal/transcoder/basisu_transcoder.cpp',
 ]
+
+// NOTE: All the disabled texture formats should be in sync with this file BasisuPlatform.java
+def desktopUnsupportedFormats = ' -DBASISD_SUPPORT_PVRTC1=0 '
 
 jnigen {
     sharedLibName = 'gdx-basis-universal'
@@ -47,35 +49,66 @@ jnigen {
     }
 
     all {
-        headerDirs = ['include', 'contrib/basis_universal/transcoder']
+        headerDirs = ['include', 'basis-universal/transcoder']
         cExcludes = cppExcludes = ['build/**',]
 
         cppIncludes = nativeSrcFiles
 
-        cFlags +=      ' -std=c11   -fvisibility=hidden -Wall -O2 -g0 -flto -fno-exceptions '
-        cppFlags +=    ' -std=c++11 -fvisibility=hidden -Wall -O2 -g0 -flto -fno-exceptions '
-        linkerFlags += '            -fvisibility=hidden -Wall -O2 -g0 -flto -fno-exceptions '
+        cFlags +=      ' -std=c11   -fvisibility=hidden -Wall -O2 -g0 -fno-exceptions '
+        cppFlags +=    ' -std=c++11 -fvisibility=hidden -Wall -O2 -g0 -fno-exceptions '
+        linkerFlags += '            -fvisibility=hidden -Wall -O2 -g0 -fno-exceptions '
+
+        // Disable texture formats we don't support at all.
+        // Macros reference - https://github.com/BinomialLLC/basis_universal/wiki/Transcoder-details-and-shrinking-the-compiled-size-of-the-transcoder#shrinking-the-transcoders-compiled-size
+        cppFlags += ' -DBASISD_SUPPORT_FXT1=0 '
 
         // Enable for Basis Universal debug messages.
-        //  cppFlags += ' -DBASISU_FORCE_DEVEL_MESSAGES=1 '
+        // cppFlags += ' -DBASISU_FORCE_DEVEL_MESSAGES=1 '
     }
     add(Windows, x32) {
         compilerPrefix = 'mingw32-'
         compilerSuffix = '.exe'
+
+        linkerFlags += ' -s '   // Strip debug symbols.
+        cppFlags += desktopUnsupportedFormats
+
     }
     add(Windows, x64) {
         compilerSuffix = '.exe'
+
+        linkerFlags += ' -s '   // Strip debug symbols.
+        cppFlags += desktopUnsupportedFormats
     }
-    add(Linux, x32)
-    add(Linux, x64)
-    add(Linux, x32, ARM)
-    add(Linux, x64, ARM)
-    add(MacOsX, x64)
+    add(Linux, x32) {
+        cppFlags += desktopUnsupportedFormats
+    }
+    add(Linux, x64) {
+        cppFlags += desktopUnsupportedFormats
+    }
+    add(Linux, x32, ARM) {
+        cppFlags += desktopUnsupportedFormats
+    }
+    add(Linux, x64, ARM) {
+        cppFlags += desktopUnsupportedFormats
+    }
+    add(MacOsX, x64) {
+        cppFlags += desktopUnsupportedFormats
+    }
     add(Android) {
-        linkerFlags += '-llog'
+        linkerFlags += ' -llog '  // We use "log.h" lib and should explicitly declare it.
+
+        cppFlags += ' -DBASISD_SUPPORT_BC7=0 '
+        cppFlags += ' -DBASISD_SUPPORT_BC7_MODE5=0 '
     }
     add(IOS) {
-        cppFlags += ' -stdlib=libc++ '
+        cppFlags += ' -stdlib=libc++ '  // iOS compiler toolchain is pretty whiny about this...
+
+        cppFlags += ' -DBASISD_SUPPORT_DXT1=0 '
+        cppFlags += ' -DBASISD_SUPPORT_DXT5A=0 '
+        cppFlags += ' -DBASISD_SUPPORT_BC7=0 '
+        cppFlags += ' -DBASISD_SUPPORT_BC7_MODE5=0 '
+        cppFlags += ' -DBASISD_SUPPORT_ATC=0 '
+        cppFlags += ' -DBASISD_SUPPORT_PVRTC2=0 '
     }
 }
 

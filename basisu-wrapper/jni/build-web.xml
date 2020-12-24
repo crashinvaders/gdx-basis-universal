@@ -41,11 +41,11 @@
 	<property name="webLibSetupFile" value="web-lib-setup.js"/>
 
 	<!-- common options used for the both C & C++ compilers and the linker -->
-	<property name="build-opt-common" value="-Wall -O2 -g0 -flto -fno-exceptions -s MODULARIZE=1 -s EXPORT_NAME=createBasisuGdxModule -s ENVIRONMENT=web -s WASM=1 -s FILESYSTEM=0 --closure 1 --bind -mnontrapping-fptoint " />
+	<property name="common-opts" value="-Wall -O2 -g0 -flto -fno-exceptions -s MODULARIZE=1 -s EXPORT_NAME=createBasisuGdxModule -s ENVIRONMENT=web -s WASM=1 -s FILESYSTEM=0 --closure 1 --bind -mnontrapping-fptoint -DBASISD_SUPPORT_PVRTC2=0 -DBASISD_SUPPORT_ATC=0 -DBASISD_SUPPORT_BC7=0 -DBASISD_SUPPORT_BC7_MODE5=0 -DBASISD_SUPPORT_ASTC_HIGHER_OPAQUE_QUALITY=0 " />
 
 	<!-- define gcc compiler, options and files to compile -->
 	<property name="gcc" value="${compilerPrefix}${cCompiler}${compilerSuffix}"/>
-	<property name="gcc-opts" value="-c -std=c11 ${build-opt-common}"/>
+	<property name="gcc-opts" value="-c -std=c11 ${common-opts}"/>
 	<fileset id="gcc-files" dir="./">
 		<!-- we don't have any C code for web target as of now -->
 		<exclude name="**/*"/>
@@ -53,16 +53,18 @@
 
 	<!-- define g++ compiler, options and files to compile -->
 	<property name="g++" value="${compilerPrefix}${cppCompiler}${compilerSuffix}"/>
-	<property name="g++-opts" value="-c -std=c++11 ${build-opt-common}"/>
+	<property name="g++-opts" value="-c -std=c++11 ${common-opts}"/>
 	<fileset id="g++-files" dir="./">
 		<exclude name="target/"/>
 		<exclude name="build/**"/>
-		<include name="src/*.cpp"/>
+		<include name="basisu_native_utils.cpp"/>
+		<include name="basisu_wrapper.cpp"/>
+		<include name="basis-universal/transcoder/basisu_transcoder.cpp"/>
 	</fileset>
 
 	<!-- define linker and options -->
 	<property name="linker" value="${compilerPrefix}${cppCompiler}${compilerSuffix}"/>
-	<property name="linker-opts" value="--extern-post-js ${webLibSetupFile} ${build-opt-common}"/>
+	<property name="linker-opts" value="--extern-post-js ${webLibSetupFile} ${common-opts}"/>
 	<property name="libraries" value=""/>
 
 	<!-- cleans the build directory, removes all object files and shared libs -->
@@ -110,7 +112,8 @@
 		<mkdir dir="${buildDir}"/>
 		<apply failonerror="true" executable="${g++}" dest="${buildDir}" verbose="true">
 			<arg line="${g++-opts}"/>
-			<arg value="-Iinclude"/>
+			<arg value="-I."/>
+			<arg value="-Ibasis-universal/transcoder"/>
 			<srcfile/>
 			<arg value="-o"/>
 			<targetfile/>
@@ -122,7 +125,8 @@
 		</apply>
 		<apply failonerror="true" executable="${gcc}" dest="${buildDir}" verbose="true">
 			<arg line="${gcc-opts}"/>
-			<arg value="-Iinclude"/>
+			<arg value="-I."/>
+			<arg value="-Ibasis-universal/transcoder"/>
 			<srcfile/>
 			<arg value="-o"/>
 			<targetfile/>

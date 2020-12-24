@@ -45,7 +45,6 @@ public enum BasisuTranscoderTextureFormat implements UniqueIdUtils.UniqueIdValue
     /** Opaque+alpha, alpha channel will be opaque for opaque .basis files. ATI ATC (GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD). */
     ATC_RGBA(12),
 
-    //TODO Restore once it works in native transcoder.
 //// FXT1 (desktop, Intel devices, this is a super obscure format)
 //    /**
 //     * Opaque only, uses exclusively CC_MIXED blocks. Notable for having a 8x4 block size. GL_3DFX_texture_compression_FXT1 is supported on Intel integrated GPU's (such as HD 630).
