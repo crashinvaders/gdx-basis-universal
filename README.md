@@ -2,18 +2,25 @@
 
 Some things besides JDK and Gradle to build the project. 
 
-### Windows
-> All further steps consider you have [Chocolatey](https://chocolatey.org/) installed on the system.
-
-- Install ant
-    1. `choco install ant`
-    2. Add ant's bin dir to the PATH (chocolatey creates an `ant.exe` shortcut file, but jnigen expects `ant.bat` to be on the PATH).
-- Install MinGW-w64
-    1. `choco install msys64`
-
 ### Linux
 - To build for Linux ARM32 target, `g++-arm-linux-gnueabihf` [package](https://packages.debian.org/stretch/g++-arm-linux-gnueabihf) (or similar) should be installed. 
 - To build for Linux ARM64 target, `g++-aarch64-linux-gnu` [package](https://packages.debian.org/stretch/g++-aarch64-linux-gnu) (or similar) should be installed. 
+
+### Windows
+> All further steps consider you have [Chocolatey](https://chocolatey.org/) installed on the system.
+- Install __Ant__
+    1. `choco install ant`
+    2. Add ant's bin dir to the `PATH` (chocolatey creates an `ant.exe` shortcut file, but jnigen expects `ant.bat` to be on the PATH).
+- To build for Win64 target
+    1. `choco install msys2`
+- To build for Win32 target
+    1. Go to [MinGW32](https://sourceforge.net/projects/mingw/files/Installer/) distribution page and get the installer from there.
+    2. Make sure that `g++.exe`, `gcc.exe`, `strip.exe` and `ar.exe` are discoverable from the `PATH`.
+
+### Android
+> The build was only tested with NDK 21.3.6528147 and may not work with any other version. It's recommended you install and use the same one.
+- Install the NDK (using IntelliJ Idea/Android Studio's Android SDK manager or from [the official web page](https://developer.android.com/ndk/downloads)).
+- Create an environment variable `NDK_HOME` pointing to the installed NDK location.
 
 ## Notes
 
@@ -21,7 +28,7 @@ Some things besides JDK and Gradle to build the project.
 - WebAssembly support is enabled by default as of Firefox 52, Chrome 57 and Opera 44. On Edge 15 you can enable it via “Experimental JavaScript Features” flag.
 
 
-## Recommendations
+## Recomendations
 
 - PVRTC1 requires square textures with power of two sides.
 - PVRTC1 transparency is very poor and only suitable for pre-multiplied alpha (check that).
