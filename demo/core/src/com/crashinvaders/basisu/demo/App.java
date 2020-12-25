@@ -155,6 +155,7 @@ public class App implements ApplicationListener {
             Gdx.app.log("App", "getFirstSliceIndex() " + imageInfo.getFirstSliceIndex());
             Gdx.app.log("App", "hasAlphaFlag() " + imageInfo.hasAlphaFlag());
             Gdx.app.log("App", "hasIframeFlag() " + imageInfo.hasIframeFlag());
+            imageInfo.close();
 
             BasisuFileInfo fileInfo = BasisuWrapper.getFileInfo(basisuData);
             Gdx.app.log("App", "===== FILE INFO =====");
@@ -176,6 +177,7 @@ public class App implements ApplicationListener {
             Gdx.app.log("App", "getImageMipmapLevels().length " + fileInfo.getImageMipmapLevels().length);
             Gdx.app.log("App", "getTextureType() " + fileInfo.getTextureType());
             Gdx.app.log("App", "getTextureFormat() " + fileInfo.getTextureFormat());
+            fileInfo.close();
         }
     }
 
