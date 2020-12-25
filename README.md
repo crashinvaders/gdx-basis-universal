@@ -2,7 +2,12 @@
 
 Some things besides JDK and Gradle to build the project. 
 
+### Linux
+- To build for Linux ARM32 target, `g++-arm-linux-gnueabihf` [package](https://packages.debian.org/stretch/g++-arm-linux-gnueabihf) (or similar) should be installed. 
+- To build for Linux ARM64 target, `g++-aarch64-linux-gnu` [package](https://packages.debian.org/stretch/g++-aarch64-linux-gnu) (or similar) should be installed. 
+
 ### Windows
+> All further steps consider you have [Chocolatey](https://chocolatey.org/) installed on the system.
 - Install __Ant__
     1. `choco install ant`
     2. Add ant's bin dir to the `PATH` (chocolatey creates an `ant.exe` shortcut file, but jnigen expects `ant.bat` to be on the PATH).
@@ -11,7 +16,6 @@ Some things besides JDK and Gradle to build the project.
 - To build for Win32 target
     1. Go to [MinGW32](https://sourceforge.net/projects/mingw/files/Installer/) distribution page and get the installer from there.
     2. Make sure that `g++.exe`, `gcc.exe`, `strip.exe` and `ar.exe` are discoverable from the `PATH`.
-
 
 ## Notes
 
