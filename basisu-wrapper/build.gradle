@@ -1,7 +1,6 @@
 apply plugin: 'java-library'
 
 group 'com.crashinvaders.gdx-basis-universal'
-version '0.1.0-SNAPSHOT'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -99,6 +98,10 @@ jnigen {
 
         cppFlags += ' -DBASISD_SUPPORT_BC7=0 '
         cppFlags += ' -DBASISD_SUPPORT_BC7_MODE5=0 '
+
+        // Should be in sync with the official supported ABI list.
+        // https://developer.android.com/ndk/guides/abis#sa
+        androidABIs = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
     }
     add(IOS) {
         cppFlags += ' -stdlib=libc++ '  // iOS compiler toolchain is pretty whiny about this...

@@ -17,8 +17,7 @@ dependencies {
     implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
     implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
 
-//    runtimeOnly files("$rootDir/basisu-wrapper/libs/gdx-basis-universal-natives.jar")
-    runtimeOnly files("../../basisu-wrapper/libs/gdx-basis-universal-natives.jar")
+    runtimeOnly files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${project.appVersion}-natives-desktop.jar")
 }
 
 task run(dependsOn: classes, type: JavaExec) {

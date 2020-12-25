@@ -26,6 +26,7 @@ Some things besides JDK and Gradle to build the project.
 
 - `basis_transcoder.h` requires `#include <stddef.h>` on Win32 for some reason.
 - WebAssembly support is enabled by default as of Firefox 52, Chrome 57 and Opera 44. On Edge 15 you can enable it via “Experimental JavaScript Features” flag.
+- Due to NDK limitations, __the minimum supported Android SDK version code is 16__.
 
 
 ## Recomendations

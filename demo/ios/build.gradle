@@ -12,13 +12,15 @@ sourceSets.main.resources.srcDirs = [ '../assets' ]
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 dependencies {
-    // Natives jar should be available after :jnigen && :jnigenBuildIOS && :jnigenJarNativesIOS
-    implementation files("../../basisu-wrapper/build/libs/basisu-wrapper-$project.appVersion-natives-ios.jar")
     implementation project(":demo:core")
     implementation "com.mobidevelop.robovm:robovm-rt:$roboVmVersion"
     implementation "com.mobidevelop.robovm:robovm-cocoatouch:$roboVmVersion"
     implementation "com.badlogicgames.gdx:gdx-backend-robovm:$gdxVersion"
     implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-ios"
+
+    // Natives jar should be available after :jnigen && :jnigenBuildIOS && :jnigenJarNativesIOS
+//    implementation files("../../basisu-wrapper/build/libs/basisu-wrapper-$project.appVersion-natives-ios.jar")
+    runtimeOnly files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${project.appVersion}-natives-ios.jar")
 }
 
 launchIPhoneSimulator.dependsOn build

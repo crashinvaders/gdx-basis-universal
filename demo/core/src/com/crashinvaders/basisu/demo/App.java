@@ -3,6 +3,7 @@ package com.crashinvaders.basisu.demo;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -28,6 +29,7 @@ import com.crashinvaders.basisu.wrapper.BasisuWrapper;
 import java.nio.ByteBuffer;
 
 public class App implements ApplicationListener {
+    private static final String TAG = App.class.getSimpleName();
 
     private final PlatformLauncher launcher;
 
@@ -128,55 +130,57 @@ public class App implements ApplicationListener {
                     sb.append(", ");
                 }
             }sb.append("]");
-            Gdx.app.log("App", sb.toString());
+            Gdx.app.log(TAG, sb.toString());
         }
 
         {
             BasisuNativeLibLoader.loadIfNeeded();
-            ByteBuffer basisuData = BasisuData.readFileIntoBuffer(Gdx.files.internal("kodim3.basis"));
+            FileHandle file = Gdx.files.internal("kodim3.basis");
+            Gdx.app.log(TAG, "Reading Basis file: " + file.name());
+            ByteBuffer basisuData = BasisuData.readFileIntoBuffer(file);
             boolean valid = BasisuWrapper.validateHeader(basisuData);
-            Gdx.app.log("App", "Data is " + (valid ? "valid" : "invalid"));
+            Gdx.app.log(TAG, "Data is " + (valid ? "valid" : "invalid"));
 
             ByteBuffer rgba = BasisuWrapper.transcode(basisuData, 0, 0, BasisuTranscoderTextureFormat.RGBA32);
-            Gdx.app.log("App", "Transcoded size: " + rgba.capacity());
-            Gdx.app.log("App", "Transcoded checksum: " + modRtuCrc(rgba));
+            Gdx.app.log(TAG, "Transcoded size: " + rgba.capacity());
+            Gdx.app.log(TAG, "Transcoded checksum: " + modRtuCrc(rgba));
 
             BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisuData, 0);
-            Gdx.app.log("App", "===== IMAGE INFO =====");
-            Gdx.app.log("App", "getImageIndex() " + imageInfo.getImageIndex());
-            Gdx.app.log("App", "getTotalLevels() " + imageInfo.getTotalLevels());
-            Gdx.app.log("App", "getOrigWidth() " + imageInfo.getOrigWidth());
-            Gdx.app.log("App", "getOrigHeight() " + imageInfo.getOrigHeight());
-            Gdx.app.log("App", "getWidth() " + imageInfo.getWidth());
-            Gdx.app.log("App", "getHeight() " + imageInfo.getHeight());
-            Gdx.app.log("App", "getNumBlocksX() " + imageInfo.getNumBlocksX());
-            Gdx.app.log("App", "getNumBlocksY() " + imageInfo.getNumBlocksY());
-            Gdx.app.log("App", "getTotalBlocks() " + imageInfo.getTotalBlocks());
-            Gdx.app.log("App", "getFirstSliceIndex() " + imageInfo.getFirstSliceIndex());
-            Gdx.app.log("App", "hasAlphaFlag() " + imageInfo.hasAlphaFlag());
-            Gdx.app.log("App", "hasIframeFlag() " + imageInfo.hasIframeFlag());
+            Gdx.app.log(TAG, "===== IMAGE INFO =====");
+            Gdx.app.log(TAG, "getImageIndex() " + imageInfo.getImageIndex());
+            Gdx.app.log(TAG, "getTotalLevels() " + imageInfo.getTotalLevels());
+            Gdx.app.log(TAG, "getOrigWidth() " + imageInfo.getOrigWidth());
+            Gdx.app.log(TAG, "getOrigHeight() " + imageInfo.getOrigHeight());
+            Gdx.app.log(TAG, "getWidth() " + imageInfo.getWidth());
+            Gdx.app.log(TAG, "getHeight() " + imageInfo.getHeight());
+            Gdx.app.log(TAG, "getNumBlocksX() " + imageInfo.getNumBlocksX());
+            Gdx.app.log(TAG, "getNumBlocksY() " + imageInfo.getNumBlocksY());
+            Gdx.app.log(TAG, "getTotalBlocks() " + imageInfo.getTotalBlocks());
+            Gdx.app.log(TAG, "getFirstSliceIndex() " + imageInfo.getFirstSliceIndex());
+            Gdx.app.log(TAG, "hasAlphaFlag() " + imageInfo.hasAlphaFlag());
+            Gdx.app.log(TAG, "hasIframeFlag() " + imageInfo.hasIframeFlag());
             imageInfo.close();
 
             BasisuFileInfo fileInfo = BasisuWrapper.getFileInfo(basisuData);
-            Gdx.app.log("App", "===== FILE INFO =====");
-            Gdx.app.log("App", "getVersion() " + fileInfo.getVersion());
-            Gdx.app.log("App", "getTotalHeaderSize() " + fileInfo.getTotalHeaderSize());
-            Gdx.app.log("App", "getTotalSelectors() " + fileInfo.getTotalSelectors());
-            Gdx.app.log("App", "getSelectorCodebookSize() " + fileInfo.getSelectorCodebookSize());
-            Gdx.app.log("App", "getTotalEndpoints() " + fileInfo.getTotalEndpoints());
-            Gdx.app.log("App", "getEndpointCodebookSize() " + fileInfo.getEndpointCodebookSize());
-            Gdx.app.log("App", "getTablesSize() " + fileInfo.getTablesSize());
-            Gdx.app.log("App", "getSlicesSize() " + fileInfo.getSlicesSize());
-            Gdx.app.log("App", "getUsPerFrame() " + fileInfo.getUsPerFrame());
-            Gdx.app.log("App", "getTotalImages() " + fileInfo.getTotalImages());
-            Gdx.app.log("App", "getUserdata0() " + fileInfo.getUserdata0());
-            Gdx.app.log("App", "getUserdata1() " + fileInfo.getUserdata1());
-            Gdx.app.log("App", "isFlippedY() " + fileInfo.isFlippedY());
-            Gdx.app.log("App", "isEtc1s() " + fileInfo.isEtc1s());
-            Gdx.app.log("App", "hasAlphaSlices() " + fileInfo.hasAlphaSlices());
-            Gdx.app.log("App", "getImageMipmapLevels().length " + fileInfo.getImageMipmapLevels().length);
-            Gdx.app.log("App", "getTextureType() " + fileInfo.getTextureType());
-            Gdx.app.log("App", "getTextureFormat() " + fileInfo.getTextureFormat());
+            Gdx.app.log(TAG, "===== FILE INFO =====");
+            Gdx.app.log(TAG, "getVersion() " + fileInfo.getVersion());
+            Gdx.app.log(TAG, "getTotalHeaderSize() " + fileInfo.getTotalHeaderSize());
+            Gdx.app.log(TAG, "getTotalSelectors() " + fileInfo.getTotalSelectors());
+            Gdx.app.log(TAG, "getSelectorCodebookSize() " + fileInfo.getSelectorCodebookSize());
+            Gdx.app.log(TAG, "getTotalEndpoints() " + fileInfo.getTotalEndpoints());
+            Gdx.app.log(TAG, "getEndpointCodebookSize() " + fileInfo.getEndpointCodebookSize());
+            Gdx.app.log(TAG, "getTablesSize() " + fileInfo.getTablesSize());
+            Gdx.app.log(TAG, "getSlicesSize() " + fileInfo.getSlicesSize());
+            Gdx.app.log(TAG, "getUsPerFrame() " + fileInfo.getUsPerFrame());
+            Gdx.app.log(TAG, "getTotalImages() " + fileInfo.getTotalImages());
+            Gdx.app.log(TAG, "getUserdata0() " + fileInfo.getUserdata0());
+            Gdx.app.log(TAG, "getUserdata1() " + fileInfo.getUserdata1());
+            Gdx.app.log(TAG, "isFlippedY() " + fileInfo.isFlippedY());
+            Gdx.app.log(TAG, "isEtc1s() " + fileInfo.isEtc1s());
+            Gdx.app.log(TAG, "hasAlphaSlices() " + fileInfo.hasAlphaSlices());
+            Gdx.app.log(TAG, "getImageMipmapLevels().length " + fileInfo.getImageMipmapLevels().length);
+            Gdx.app.log(TAG, "getTextureType() " + fileInfo.getTextureType());
+            Gdx.app.log(TAG, "getTextureFormat() " + fileInfo.getTextureFormat());
             fileInfo.close();
         }
     }

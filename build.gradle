@@ -24,4 +24,6 @@ allprojects {
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         maven { url "https://oss.sonatype.org/content/repositories/releases/" }
     }
+
+    version '0.1.0-SNAPSHOT'
 }
