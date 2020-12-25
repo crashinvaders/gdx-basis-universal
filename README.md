@@ -17,6 +17,11 @@ Some things besides JDK and Gradle to build the project.
     1. Go to [MinGW32](https://sourceforge.net/projects/mingw/files/Installer/) distribution page and get the installer from there.
     2. Make sure that `g++.exe`, `gcc.exe`, `strip.exe` and `ar.exe` are discoverable from the `PATH`.
 
+### Android
+> The build was only tested with NDK 21.3.6528147 and may not work with any other version. It's recommended you install and use the same one.
+- Install the NDK (using IntelliJ Idea/Android Studio's Android SDK manager or from [the official web page](https://developer.android.com/ndk/downloads)).
+- Create an environment variable `NDK_HOME` pointing to the installed NDK location.
+
 ## Notes
 
 - `basis_transcoder.h` requires `#include <stddef.h>` on Win32 for some reason.
