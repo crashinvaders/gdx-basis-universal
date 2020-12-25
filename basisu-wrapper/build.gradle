@@ -141,10 +141,35 @@ getTasksByName('jnigen', false).first().doLast {
     }
 }
 
+task jnigenBuildWeb() {
+    group 'jnigen'
+    description 'Executes jnigen build script for build target web (JS + WASM).'
+
+    // This is pretty much the direct copy of JnigenBuildTargetTask#run() code.
+    doFirst {
+        if (!com.badlogic.gdx.jnigen.BuildExecutor.executeAnt(
+                "${projectDir}/jni/build-web.xml",
+                "-Drelease=" + jnigen.release, "clean", "postcompile", "-v")) {
+            throw new RuntimeException("Ant execution for web failed.");
+        }
+    }
+}
+
+task jnigenJarNativesWeb(type: Jar) {
+    group 'jnigen'
+    description 'Assembles a jar archive containing the web native libraries.'
+
+    archiveBaseName = project.name
+    archiveVersion = project.version
+    archiveClassifier = 'natives-web'
+
+    from "${projectDir}/${jnigen.libsDir}/web"
+}
+
 //if (file('jni/build.xml').exists()) {
 //    println 'Importing ANT tasks from \"jni/build.xml\"'
 //    ant.importBuild('jni/build.xml') { antTargetName ->
-//        def taskName = 'jnigen-build-' + antTargetName
+//        def taskName = 'jnigenAntBuild-' + antTargetName
 //        println "\"$taskName\" ANT task has been imported."
 //        taskName
 //    }
