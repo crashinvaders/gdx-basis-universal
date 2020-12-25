@@ -4,12 +4,9 @@ import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.IntSet;
 import com.crashinvaders.basisu.wrapper.BasisuPlatform;
 import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
-
-import java.nio.IntBuffer;
 
 /**
  * Various utility methods required for Basis Universal LibGDX port.
@@ -35,7 +32,7 @@ import java.nio.IntBuffer;
  *     <a href="https://www.khronos.org/registry/OpenGL/extensions/KHR/KHR_texture_compression_astc_hdr.txt">ASTC</a>
  * </li>
  * <li>
- *     <a href="https://www.khronos.org/registry/OpenGL/extensions/AMD/AMD_compressed_ATC_texture.txt">ARC</a>
+ *     <a href="https://www.khronos.org/registry/OpenGL/extensions/AMD/AMD_compressed_ATC_texture.txt">ATC</a>
  * </li>
  * <li>
  *     <a href="https://www.khronos.org/registry/OpenGL/extensions/3DFX/3DFX_texture_compression_FXT1.txt">FXT1</a>
@@ -61,8 +58,8 @@ public class BasisuGdxUtils {
     public static final int GL_TEX_BC5_RGTC2_RG = 0x8dbd;
     public static final int GL_TEX_BC7_BPTC_RGBA = 0x8e8c;
     public static final int GL_TEX_ASTC_4X4_RGBA = 0x93b0;
-    public static final int GL_TEX_ARC_RGB = 0x8c92;
-    public static final int GL_TEX_ARC_RGBA_INTERPOLATED = 0x87ee;
+    public static final int GL_TEX_ATC_RGB = 0x8c92;
+    public static final int GL_TEX_ATC_RGBA_INTERPOLATED = 0x87ee;
     public static final int GL_TEX_FXT1_RGB = 0x86b0;
     public static final int GL_TEX_PVRTC1_4BPP_RGB = 0x8c00;
     public static final int GL_TEX_PVRTC1_4BPP_RGBA = 0x8c02;
@@ -137,9 +134,9 @@ public class BasisuGdxUtils {
             case ASTC_4x4_RGBA:
                 return GL_TEX_ASTC_4X4_RGBA;
             case ATC_RGB:
-                return GL_TEX_ARC_RGB;
+                return GL_TEX_ATC_RGB;
             case ATC_RGBA:
-                return GL_TEX_ARC_RGBA_INTERPOLATED;
+                return GL_TEX_ATC_RGBA_INTERPOLATED;
 //            case FXT1_RGB:
 //                return GL_TEX_FXT1_RGB;
             case PVRTC1_4_RGB:
