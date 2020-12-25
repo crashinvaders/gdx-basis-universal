@@ -40,8 +40,9 @@ public class BasisuData implements Disposable {
     @Override
     public void dispose() {
         fileInfo.close();
-        if (BufferUtils.isUnsafeByteBuffer(encodedData)) {
-            BufferUtils.disposeUnsafeByteBuffer(encodedData);
+        //TODO Replace with BufferUtils.newUnsafeByteBuffer(fileSize) once it's compatible with GWT compiler.
+        if (BasisuBufferUtils.isUnsafeByteBuffer(encodedData)) {
+            BasisuBufferUtils.disposeUnsafeByteBuffer(encodedData);
         }
     }
 
@@ -78,7 +79,8 @@ public class BasisuData implements Disposable {
             if (Gdx.app.getType() == Application.ApplicationType.WebGL) {
                 byteBuffer = BufferUtils.newByteBuffer(fileSize);
             } else {
-                byteBuffer = BufferUtils.newUnsafeByteBuffer(fileSize);
+                //TODO Replace with BufferUtils.newUnsafeByteBuffer(fileSize) once it's compatible with GWT compiler.
+                byteBuffer = BasisuBufferUtils.newUnsafeByteBuffer(fileSize);
             }
 
             int readBytes = 0;

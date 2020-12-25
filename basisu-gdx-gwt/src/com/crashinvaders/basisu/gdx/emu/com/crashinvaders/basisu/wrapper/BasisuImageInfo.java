@@ -18,8 +18,12 @@ public class BasisuImageInfo implements Closeable {
 
     @Override
     public native void close() /*-{
+        // Depends on if the JS object was mapped using "emscripten::class_" or "emscripten::value_object"
+        // it might have or haven't the "delete" method.
         var data = this.@com.crashinvaders.basisu.wrapper.BasisuImageInfo::imageInfoJs;
-        data["delete"]();
+        if (data["delete"]) {
+            data["delete"]();
+        }
         this.@com.crashinvaders.basisu.wrapper.BasisuImageInfo::imageInfoJs = null;
     }-*/;
 

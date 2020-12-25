@@ -21,8 +21,12 @@ public class BasisuFileInfo implements Closeable {
 
     @Override
     public native void close() /*-{
+        // Depends on if the JS object was mapped using "emscripten::class_" or "emscripten::value_object"
+        // it might have or haven't the "delete" method.
         var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
-        data["delete"]();
+        if (data["delete"]) {
+            data["delete"]();
+        }
         this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs = null;
     }-*/;
 
@@ -56,14 +60,6 @@ public class BasisuFileInfo implements Closeable {
     native Uint8Array getImageMipmapLevelsNative() /*-{
         var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
         return data.getImageMipmapLevels();
-//        var vec = data.imageMipmapLevels; // BasisuModule.Uint32Vector
-//        var arr = new Uint8Array(vec.size());
-//        for (var i = 0; i < arr.length; i++) {
-//            arr[i] = vec.get(i);
-//        }
-//        $wnd.mipmapsArr = arr;
-//        $wnd.mipmapsVec = vec;
-//        return arr;
     }-*/;
 
     public native int getVersion() /*-{
