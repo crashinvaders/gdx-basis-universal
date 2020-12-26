@@ -1,5 +1,7 @@
 apply plugin: 'java-library'
 
+description 'LibGDX library to support Basis Universal super-compressed textures. GWT backend specific code.'
+
 sourceSets.main.java.srcDirs = [ 'src' ]
 
 dependencies {

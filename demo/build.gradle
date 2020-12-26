@@ -14,5 +14,7 @@ buildscript {
 
 subprojects {
     ext.appName = 'gdx-basis-universal-demo'
-    ext.appVersion = '0.1.0-SNAPSHOT'
+
+    version = ext.version
+    group 'com.crashinvaders.gdx-basis-universal.demo'
 }

@@ -1,6 +1,6 @@
 apply plugin: 'java-library'
 
-group 'com.crashinvaders.gdx-basis-universal'
+description 'Java wrapper for Basis Universal texture transcoder native native code.'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -169,6 +169,15 @@ task jnigenJarNativesWeb(type: Jar) {
     from "${projectDir}/${jnigen.libsDir}/web"
 }
 
+//// Android native jar tasks are all have pretty misleading classifier of "natives-$ABI".
+//// Lets patch it up to make the naming a bit more canonical (e.g. "natives-android-$ABI").
+//jnigenJarNativesAndroid.dependsOn.forEach { task ->
+//    String origClassifier = task.archiveClassifier.get()
+//    String patchedClassifier = origClassifier.replace('natives-', 'natives-android-')
+//    task.archiveClassifier = patchedClassifier
+//}
+
+//// Import native build Ant tasks.
 //if (file('jni/build.xml').exists()) {
 //    println 'Importing ANT tasks from \"jni/build.xml\"'
 //    ant.importBuild('jni/build.xml') { antTargetName ->
@@ -177,4 +186,16 @@ task jnigenJarNativesWeb(type: Jar) {
 //        taskName
 //    }
 //}
+
 //endregion
+
+// Define all the natives jars so Maven can pickup those and publish.
+artifacts {
+    archives jnigenJarNativesDesktop
+    archives jnigenJarNativesIOS
+    archives jnigenJarNativesWeb
+    // Include all the Android ABI jars.
+    jnigenJarNativesAndroid.dependsOn.forEach { androidAbiJarNativesTask ->
+        archives androidAbiJarNativesTask
+    }
+}

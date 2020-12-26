@@ -33,7 +33,7 @@ dependencies {
     implementation "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion"
     implementation "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion:sources"
 
-    implementation files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${project.appVersion}-natives-web.jar")
+    implementation files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${version}-natives-web.jar")
 }
 
 def HttpFileServer server = null

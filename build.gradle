@@ -25,5 +25,149 @@ allprojects {
         maven { url "https://oss.sonatype.org/content/repositories/releases/" }
     }
 
-    version '0.1.0-SNAPSHOT'
+    ext {
+        versionName = '0.1.0'
+        snapshotVersion = true
+        version = "$versionName${snapshotVersion ? '-SNAPSHOT' : ''}"
+    }
+}
+
+/** Checks if the property exists and if not tries to resolve it from the environment variable. */
+void resolveProperty(String propertyName, String envVariableName) {
+    if (!project.hasProperty(propertyName)) {
+        project.ext.propertyName = System.getenv(envVariableName)
+        if (!project.ext.propertyName) {
+            println "$propertyName is not defined"
+        } else {
+            println "$propertyName has been set from an environment variable."
+        }
+    }
+}
+// Setup Nexus repo and GitHub package repo credentials.
+// They usually defined in user global gradle.properties file
+// or as environment variables (Travis-CI).
+resolveProperty('ossrhUsername', 'OSSRH_USERNAME')
+resolveProperty('ossrhPassword', 'OSSRH_PASSWORD')
+resolveProperty('githubUsername', 'GITHUB_USERNAME')
+resolveProperty('githubAccessToken', 'GITHUB_ACCESS_TOKEN')
+
+def basisuLibProjects = subprojects.findAll { subproject -> subproject.name.startsWith('basisu-') }
+
+configure(basisuLibProjects) {
+    apply plugin: 'java-library'
+    apply plugin: 'maven'
+    apply plugin: 'signing'
+
+    version = ext.version
+    group 'com.crashinvaders.gdx-basis-universal'
+
+    task sourcesJar(type: Jar) {
+        archiveClassifier.set('sources')
+        from sourceSets.main.allSource
+    }
+
+    task javadocJar(type: Jar) {
+        archiveClassifier.set('javadoc')
+        from javadoc.destinationDir
+    }
+
+    artifacts {
+        archives sourcesJar
+        archives javadocJar
+    }
+
+    signing {
+        required { !snapshotVersion && gradle.taskGraph.hasTask("uploadArchives") }
+        sign configurations.archives
+    }
+
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+//                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+//                    authentication(userName: ossrhUsername, password: ossrhPassword)
+//                }
+
+//                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+//                    authentication(userName: ossrhUsername, password: ossrhPassword)
+//                }
+
+                // Read about setting up a personal GitHub access token if you don't have one.
+                // https://docs.github.com/en/free-pro-team@latest/packages/learn-github-packages/about-github-packages#authenticating-to-github-packages
+                repository(url: "https://maven.pkg.github.com/metaphore/jnigen-test") {
+                    authentication(userName: project.githubUsername, password: project.githubAccessToken)
+                }
+
+                pom.project {
+                    name = project.name
+                    artifactId = project.name
+                    description = project.description
+                    packaging = 'jar'
+                    url = 'http://github.com/crashinvaders/gdx-basis-universal'
+
+                    licenses {
+                        license {
+                            name 'The Apache License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+
+                    scm {
+                        connection 'scm:git:git@github.com:crashinvaders/gdx-basis-universal.git'
+                        developerConnection 'scm:git:git@github.com:crashinvaders/gdx-basis-universal.git'
+                        url 'http://github.com/crashinvaders/gdx-basis-universal'
+                    }
+
+                    developers {
+                        developer {
+                            id 'metaphore'
+                            name 'Anton Chekulaev'
+                            email 'metaphore@crashinvaders.com'
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Invokes uploadArchives task if the version is a snapshot.
+    task uploadSnapshotArchives() {
+        if (!snapshotVersion) {
+            println 'Not a snapshot version.'
+            return;
+        }
+        dependsOn 'build'
+        dependsOn 'uploadArchives'
+    }
+}
+
+task publishAll {
+    group 'GDX Basis Universal'
+    description 'Publish all the Maven artifacts to the public repos.'
+
+    basisuLibProjects.forEach {project ->
+        dependsOn project.uploadArchives
+    }
+
+}
+
+task publishSnapshotAll {
+    group 'GDX Basis Universal'
+    description 'Publish all the Maven artifacts to the public repos.' +
+            'This task will only be execute if the current version is a snapshot.'
+
+    basisuLibProjects.forEach {project ->
+        dependsOn project.uploadSnapshotArchives
+    }
+}
+
+task installAll {
+    group 'GDX Basis Universal'
+    description 'Installes all the Maven artifacts to the local Maven repo.'
+
+    basisuLibProjects.forEach {project ->
+        dependsOn project.install
+    }
 }

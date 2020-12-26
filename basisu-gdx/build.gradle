@@ -1,5 +1,7 @@
 apply plugin: 'java-library'
 
+description 'LibGDX library to support Basis Universal super-compressed textures.'
+
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8

@@ -9,7 +9,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 30
         versionCode 1
-        versionName project.appVersion
+        versionName version
 
 //        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -60,11 +60,10 @@ dependencies {
     natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86_64"
 
     // Basis Universal native libs.
-    natives files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${project.appVersion}-natives-armeabi.jar")
-    natives files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${project.appVersion}-natives-armeabi-v7a.jar")
-    natives files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${project.appVersion}-natives-arm64-v8a.jar")
-    natives files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${project.appVersion}-natives-x86.jar")
-    natives files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${project.appVersion}-natives-x86_64.jar")
+    natives files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${version}-natives-armeabi-v7a.jar")
+    natives files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${version}-natives-arm64-v8a.jar")
+    natives files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${version}-natives-x86.jar")
+    natives files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${version}-natives-x86_64.jar")
 
 //    testImplementation 'junit:junit:4.12'
 //    androidTestImplementation 'com.android.support.test:runner:1.0.2'

@@ -20,7 +20,7 @@ dependencies {
 
     // Natives jar should be available after :jnigen && :jnigenBuildIOS && :jnigenJarNativesIOS
 //    implementation files("../../basisu-wrapper/build/libs/basisu-wrapper-$project.appVersion-natives-ios.jar")
-    runtimeOnly files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${project.appVersion}-natives-ios.jar")
+    runtimeOnly files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${version}-natives-ios.jar")
 }
 
 launchIPhoneSimulator.dependsOn build
