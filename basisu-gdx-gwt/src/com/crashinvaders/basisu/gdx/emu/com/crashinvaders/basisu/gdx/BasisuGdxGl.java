@@ -7,7 +7,6 @@ import com.google.gwt.typedarrays.shared.ArrayBufferView;
 import com.google.gwt.webgl.client.WebGLRenderingContext;
 
 import java.nio.Buffer;
-import java.nio.FloatBuffer;
 import java.nio.HasArrayBufferView;
 
 /**
