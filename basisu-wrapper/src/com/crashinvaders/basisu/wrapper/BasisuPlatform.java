@@ -9,6 +9,7 @@ import static com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat.*;
  * <p/>
  * Unity docs have a nice reference page - https://docs.unity3d.com/Manual/class-TextureImporterOverride.html
  */
+//TODO Use basist::basis_is_format_supported() native function to make a list of supported transcoder formats.
 public enum BasisuPlatform {
     MAC_OS,
     WINDOWS,

@@ -12,6 +12,17 @@ import com.badlogic.gdx.graphics.Texture.TextureWrap;
 import com.badlogic.gdx.utils.Array;
 import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
 
+/**
+ * {@link AssetManager} compliant loader for Basis Universal textures.
+ * <p/>
+ * Here's an example of how to setup the loader, so the {@link AssetManager} can support loading of ".basis" texture files: *
+ * <br/>
+ * <code>
+ *     assetManager.setLoader(Texture.class, ".basis", new BasisuTextureLoader(assetManager.getFileHandleResolver()));
+ * </code>
+ * <br/>
+ * And after that call to <code>assetManager.load("MyImage.basis", Texture.class);</code> will post the texture for loading.
+ */
 public class BasisuTextureLoader extends AsynchronousAssetLoader<Texture, BasisuTextureLoader.BasisuTextureParameter> {
 
     BasisuTextureData textureData;
