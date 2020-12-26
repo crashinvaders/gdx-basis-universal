@@ -1,4 +1,24 @@
-## Build requirements
+# GDX Basis Universal
+
+The library provides support for [Basis Universal](https://github.com/BinomialLLC/basis_universal) portable super-compressed GPU textures.
+
+_Work in progress. The first beta release is on the way..._
+
+## Library limitations
+
+Here's a list of the limitations you should be aware of when using this library.
+
+- __[Android]__ Due to NDK specs, __the minimum supported Android SDK version code is 16__.
+- __[GWT]__ WebAssembly support is enabled by default as of __Firefox 52, Chrome 57__ and __Opera 44__. On Edge 15 you can enable it via “Experimental JavaScript Features” flag.
+
+
+## Texture format notes
+
+- PVRTC1 requires square textures with power of two sides.
+- PVRTC1 transparency is very poor and only suitable for pre-multiplied alpha (check that).
+- BC1_RGB & BC3_RGBA require textures with sides to be multiple of four (superseded by PVRTC1 requirements).
+
+## Native build requirements
 
 Some things besides JDK and Gradle to build the project. 
 
@@ -21,16 +41,3 @@ Some things besides JDK and Gradle to build the project.
 > The build was only tested with NDK 21.3.6528147 and may not work with any other version. It's recommended you install and use the same one.
 - Install the NDK (using IntelliJ Idea/Android Studio's Android SDK manager or from [the official web page](https://developer.android.com/ndk/downloads)).
 - Create an environment variable `NDK_HOME` pointing to the installed NDK location.
-
-## Notes
-
-- `basis_transcoder.h` requires `#include <stddef.h>` on Win32 for some reason.
-- WebAssembly support is enabled by default as of Firefox 52, Chrome 57 and Opera 44. On Edge 15 you can enable it via “Experimental JavaScript Features” flag.
-- Due to NDK limitations, __the minimum supported Android SDK version code is 16__.
-
-
-## Recomendations
-
-- PVRTC1 requires square textures with power of two sides.
-- PVRTC1 transparency is very poor and only suitable for pre-multiplied alpha (check that).
-- BC1_RGB & BC3_RGBA require textures with sides to be multiple of four (superseded by PVRTC1 requirements).
