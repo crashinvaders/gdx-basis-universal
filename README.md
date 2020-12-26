@@ -22,7 +22,13 @@ Here's a list of the limitations you should be aware of when using this library.
 
 ## Native build requirements
 
-Some things besides JDK and Gradle to build the project. 
+Some things besides JDK and Gradle to build the natives libs.
+
+First and foremost, make sure you have all the sub-repos cloned (including Basis Universal).
+From the project's root, use this command to recursively pull everything: 
+```
+git submodule update --init --recursive
+```
 
 ### Linux
 - To build for Linux ARM32 target, `g++-arm-linux-gnueabihf` [package](https://packages.debian.org/stretch/g++-arm-linux-gnueabihf) (or similar) should be installed. 
