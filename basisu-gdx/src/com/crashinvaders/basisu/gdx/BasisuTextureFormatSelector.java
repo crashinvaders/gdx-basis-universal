@@ -7,6 +7,13 @@ import static com.crashinvaders.basisu.gdx.BasisuGdxUtils.*;
 import static com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat.*;
 
 /**
+ * An abstract texture resolver that should decide which native
+ * GPU texture compression format transcode a Basis texture to.
+ * <br/>
+ * The selection criteria may be different (e.g. the platform's GPU supported formats, supported subset of Basis Univeral native library transcoders, etc).
+ * <br/>
+ * The default selector is implemented by {@link Default}, and you may provide your own implementations based off it.
+ * <p/>
  * <b>Useful Links</b>
  * <br/>
  * <a href="https://github.com/BinomialLLC/basis_universal#how-to-use-the-system">Comprehensive texture format comparison</a> from Unity documentation.
@@ -22,6 +29,9 @@ public interface BasisuTextureFormatSelector {
     BasisuTranscoderTextureFormat resolveTextureFormat(BasisuData data, BasisuImageInfo imageInfo);
 
     /**
+     * The default texture format selector.
+     * It's meant to be universal and to suit all the official LibGDX backends.
+     * <br/>
      * The priority and comments are based on the Basis Universal
      * <a href="https://github.com/BinomialLLC/basis_universal#how-to-use-the-system">official GitHub repo documentation</a>.
      */
