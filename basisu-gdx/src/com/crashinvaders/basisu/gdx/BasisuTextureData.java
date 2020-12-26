@@ -77,6 +77,11 @@ public class BasisuTextureData implements TextureData {
         this.formatSelector = formatSelector;
     }
 
+    /**
+     * Shortcut method to lock the transcoder to the specific texture format.
+     * Use it carefully as there's no single texture format to be supported by all the platforms
+     * (that's kinda the whole purpose of Basis Universal dynamic format selector...)
+     */
     public void setTextureFormatSelector(BasisuTranscoderTextureFormat format) {
         this.formatSelector = (data, imageInfo) -> format;
     }

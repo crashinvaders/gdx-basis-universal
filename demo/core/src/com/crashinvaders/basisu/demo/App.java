@@ -3,6 +3,8 @@ package com.crashinvaders.basisu.demo;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.assets.loaders.AssetLoader;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -17,10 +19,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.crashinvaders.basisu.gdx.BasisuData;
-import com.crashinvaders.basisu.gdx.BasisuGdxGl;
-import com.crashinvaders.basisu.gdx.BasisuNativeLibLoader;
-import com.crashinvaders.basisu.gdx.BasisuTextureData;
+import com.crashinvaders.basisu.gdx.*;
 import com.crashinvaders.basisu.wrapper.BasisuFileInfo;
 import com.crashinvaders.basisu.wrapper.BasisuImageInfo;
 import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
@@ -37,8 +36,9 @@ public class App implements ApplicationListener {
     private SpriteBatch batch;
 
     private Texture texture0;
-    private Texture texture1;
     private Stage stage;
+
+    private AssetManager assetManager;
 
     public App(PlatformLauncher launcher) {
         this.launcher = launcher;
@@ -54,16 +54,13 @@ public class App implements ApplicationListener {
 
         testBasisuClasses();
 
-        BasisuTextureData basisuData0 = new BasisuTextureData(Gdx.files.internal("kodim3.basis"));
-//        basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.RGBA32);
-//        basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.ETC1_RGB);
-//        basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.BC3_RGBA);
-//        basisuData0.setFormatSelector(BasisuTranscoderTextureFormat.BC7_RGBA);
-        texture0 = new Texture(basisuData0);
+        assetManager = new AssetManager();
+        assetManager.setLoader(Texture.class, ".basis", new BasisuTextureLoader(assetManager.getFileHandleResolver()));
+        assetManager.load("level_temple0.basis", Texture.class);
+        assetManager.finishLoading();
 
-        BasisuTextureData basisuData1 = new BasisuTextureData(Gdx.files.internal("level_temple0.basis"));
-        basisuData0.setTextureFormatSelector(BasisuTranscoderTextureFormat.RGBA32);
-        texture1 = new Texture(basisuData1);
+        BasisuTextureData basisuData0 = new BasisuTextureData(Gdx.files.internal("kodim3.basis"));
+        texture0 = new Texture(basisuData0);
 
         // UI actors.
         {
@@ -74,7 +71,7 @@ public class App implements ApplicationListener {
             Image image0 = new Image(new TextureRegionDrawable(texture0), Scaling.fit);
             image0.setScaling(Scaling.fit);
             rootTable.add(image0).grow();
-            Image image1 = new Image(new TextureRegionDrawable(texture1), Scaling.fit);
+            Image image1 = new Image(new TextureRegionDrawable(assetManager.get("level_temple0.basis", Texture.class)), Scaling.fit);
             Container containerImage1 = new Container<>(image1);
             containerImage1.setTransform(true);
             containerImage1.addAction(Actions.delay(0.25f, Actions.forever(Actions.sequence(
@@ -90,8 +87,8 @@ public class App implements ApplicationListener {
 
     @Override
     public void dispose() {
+        assetManager.dispose();
         texture0.dispose();
-        texture1.dispose();
         batch.dispose();
         stage.dispose();
     }

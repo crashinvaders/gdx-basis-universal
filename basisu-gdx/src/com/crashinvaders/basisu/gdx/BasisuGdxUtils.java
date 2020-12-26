@@ -190,7 +190,7 @@ public class BasisuGdxUtils {
         return supportedGlTextureFormats.contains(glTextureFormat);
     }
 
-    private static synchronized void initSupportedGlTextureFormats() {
+    public static synchronized void initSupportedGlTextureFormats() {
         if (supportedGlTextureFormatsInitialized) return;
         supportedGlTextureFormatsInitialized = true;
 
