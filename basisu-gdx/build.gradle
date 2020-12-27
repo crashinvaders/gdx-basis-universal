@@ -17,6 +17,10 @@ dependencies {
     implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
 
     testImplementation "junit:junit:$junitVersion"
+    testImplementation "com.badlogicgames.gdx:gdx-backend-headless:$gdxVersion"
+    testRuntimeOnly "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+    testRuntimeOnly files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${version}-natives-desktop.jar")
+
 }
 
 test {

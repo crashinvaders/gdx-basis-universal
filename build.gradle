@@ -86,13 +86,13 @@ configure(basisuLibProjects) {
             mavenDeployer {
                 beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-//                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-//                    authentication(userName: ossrhUsername, password: ossrhPassword)
-//                }
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                }
 
-//                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-//                    authentication(userName: ossrhUsername, password: ossrhPassword)
-//                }
+                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                }
 
                 // Read about setting up a personal GitHub access token if you don't have one.
                 // https://docs.github.com/en/free-pro-team@latest/packages/learn-github-packages/about-github-packages#authenticating-to-github-packages

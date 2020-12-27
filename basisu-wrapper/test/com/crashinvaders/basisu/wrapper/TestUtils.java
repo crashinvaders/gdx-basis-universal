@@ -99,7 +99,7 @@ public class TestUtils {
     public static ByteBuffer asByteBuffer(byte[] data) {
         ByteBuffer buffer = ByteBuffer.allocateDirect(data.length);
         buffer.order(ByteOrder.nativeOrder());
-        buffer.put(buffer);
+        buffer.put(data);
         buffer.limit(buffer.capacity());
         buffer.position(0);
         return buffer;

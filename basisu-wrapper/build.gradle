@@ -15,9 +15,9 @@ sourceSets.test.java.srcDirs += ['test']
 sourceSets.test.resources.srcDirs += ['test-resources']
 
 dependencies {
-    testRuntimeOnly files('libs/gdx-basis-universal-natives.jar')
     testImplementation "junit:junit:$junitVersion"
     testImplementation "com.badlogicgames.gdx:gdx-jnigen-loader:$jnigenVersion"
+    testRuntimeOnly files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${version}-natives-desktop.jar")
 }
 
 test {

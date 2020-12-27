@@ -13,7 +13,7 @@ sourceSets.main.resources.srcDirs += ['../assets']
 dependencies {
     implementation project(':demo:core')
     implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
-    implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+    runtimeOnly "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
 
     if (useGdxBasisuMavenArtifacts) {
         runtimeOnly "com.crashinvaders.basisu:basisu-wrapper:$gdxBasisuVersion:natives-desktop"
