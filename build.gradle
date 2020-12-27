@@ -153,7 +153,7 @@ task publishAll {
 
 }
 
-task publishSnapshotAll {
+task publishAllSnapshots {
     group 'GDX Basis Universal'
     description 'Publish all the Maven artifacts to the public repos.' +
             'This task will only be execute if the current version is a snapshot.'
