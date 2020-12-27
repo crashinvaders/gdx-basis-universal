@@ -10,6 +10,12 @@ compileJava.options.incremental = true
 sourceSets.main.java.srcDirs += ['src']
 
 dependencies {
-    api project(':basisu-gdx')
     api "com.badlogicgames.gdx:gdx:$gdxVersion"
+
+    if (useGdxBasisuMavenArtifacts) {
+        api "com.crashinvaders.basisu:basisu-wrapper:$gdxBasisuVersion"
+        api "com.crashinvaders.basisu:basisu-gdx:$gdxBasisuVersion"
+    } else {
+        api project(':basisu-gdx')
+    }
 }

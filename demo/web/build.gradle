@@ -28,12 +28,21 @@ gwt {
 
 dependencies {
     implementation project(':demo:core')
-    implementation project(':basisu-gdx-gwt')
     implementation "com.badlogicgames.gdx:gdx:$gdxVersion:sources"
     implementation "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion"
     implementation "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion:sources"
 
-    implementation files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${version}-natives-web.jar")
+
+    if (useGdxBasisuMavenArtifacts) {
+        implementation "com.crashinvaders.basisu:basisu-gdx-gwt"
+        implementation "com.crashinvaders.basisu:basisu-gdx-gwt:$gdxBasisuVersion:sources"
+        implementation "com.crashinvaders.basisu:basisu-gdx:$gdxBasisuVersion:sources"
+        implementation "com.crashinvaders.basisu:basisu-wrapper:$gdxBasisuVersion:sources"
+        implementation "com.crashinvaders.basisu:basisu-wrapper:$gdxBasisuVersion:natives-web"
+    } else {
+        implementation project(':basisu-gdx-gwt')
+        implementation files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${gdxBasisuVersion}-natives-web.jar")
+    }
 }
 
 def HttpFileServer server = null

@@ -12,11 +12,14 @@ sourceSets.main.resources.srcDirs += ['../assets']
 
 dependencies {
     implementation project(':demo:core')
-    implementation project(':basisu-gdx')
     implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
     implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
 
-    runtimeOnly files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${version}-natives-desktop.jar")
+    if (useGdxBasisuMavenArtifacts) {
+        runtimeOnly "com.crashinvaders.basisu:basisu-wrapper:$gdxBasisuVersion:natives-desktop"
+    } else {
+        runtimeOnly files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${gdxBasisuVersion}-natives-desktop.jar")
+    }
 }
 
 task run(dependsOn: classes, type: JavaExec) {

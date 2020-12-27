@@ -59,16 +59,28 @@ dependencies {
     natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
     natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86_64"
 
-    // Basis Universal native libs.
-    natives files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${version}-natives-armeabi-v7a.jar")
-    natives files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${version}-natives-arm64-v8a.jar")
-    natives files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${version}-natives-x86.jar")
-    natives files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${version}-natives-x86_64.jar")
+    if (useGdxBasisuMavenArtifacts) {
+        natives "com.crashinvaders.basisu:basisu-wrapper:$gdxBasisuVersion:natives-armeabi-v7a"
+        natives "com.crashinvaders.basisu:basisu-wrapper:$gdxBasisuVersion:natives-arm64-v8a"
+        natives "com.crashinvaders.basisu:basisu-wrapper:$gdxBasisuVersion:natives-x86"
+        natives "com.crashinvaders.basisu:basisu-wrapper:$gdxBasisuVersion:natives-x86_64"
+    } else {
+        // Android module dependency resolution is quite aggressive and will fail
+        // general Gradle project configuration validation if any of the dependencies are not found.
+        // But in order to provide these dependency JARs we need to build them first from another modules
+        // (basisu-wrapper:jnigen basisu-wrapper:jnigenBuildAndroid basisu-wrapper:jnigenJarNativesAndroid).
+        // So here's conditional dependency declaration...
+        files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${gdxBasisuVersion}-natives-armeabi-v7a.jar",
+              "${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${gdxBasisuVersion}-natives-arm64-v8a.jar",
+              "${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${gdxBasisuVersion}-natives-x86.jar",
+              "${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${gdxBasisuVersion}-natives-x86_64.jar")
+              .filter { file -> file.exists() }
+              .forEach { file -> natives files(file.getAbsolutePath()) }
+    }
 
 //    testImplementation 'junit:junit:4.12'
 //    androidTestImplementation 'com.android.support.test:runner:1.0.2'
 //    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-
 }
 
 // Called every time gradle gets executed, takes the native dependencies of

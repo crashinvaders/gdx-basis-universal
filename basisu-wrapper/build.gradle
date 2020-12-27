@@ -185,6 +185,19 @@ task jnigenJarNativesWeb(type: Jar) {
     from "${projectDir}/${jnigen.jniDir}/BasisuWrapperNatives.gwt.xml"
 }
 
+task jnigenJarNativesAll {
+    group 'jnigen'
+    description 'Assembles jar archives native libraries for all the supported platforms.'
+
+    dependsOn jnigenJarNativesDesktop
+    dependsOn jnigenJarNativesIOS
+    dependsOn jnigenJarNativesWeb
+    // Include all the Android ABI jars.
+    jnigenJarNativesAndroid.dependsOn.forEach { androidAbiJarNativesTask ->
+        dependsOn androidAbiJarNativesTask
+    }
+}
+
 //// Android native jar tasks are all have pretty misleading classifier of "natives-$ABI".
 //// Lets patch it up to make the naming a bit more canonical (e.g. "natives-android-$ABI").
 //jnigenJarNativesAndroid.dependsOn.forEach { task ->
@@ -207,11 +220,7 @@ task jnigenJarNativesWeb(type: Jar) {
 
 // Define all the natives jars so Maven can pickup those and publish.
 artifacts {
-    archives jnigenJarNativesDesktop
-    archives jnigenJarNativesIOS
-    archives jnigenJarNativesWeb
-    // Include all the Android ABI jars.
-    jnigenJarNativesAndroid.dependsOn.forEach { androidAbiJarNativesTask ->
-        archives androidAbiJarNativesTask
+    jnigenJarNativesAll.dependsOn.forEach { jarNativesTask ->
+        archives jarNativesTask
     }
 }

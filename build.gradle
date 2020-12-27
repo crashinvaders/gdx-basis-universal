@@ -59,7 +59,7 @@ configure(basisuLibProjects) {
     apply plugin: 'signing'
 
     version = ext.version
-    group 'com.crashinvaders.gdx-basis-universal'
+    group 'com.crashinvaders.basisu'
 
     task sourcesJar(type: Jar) {
         archiveClassifier.set('sources')
