@@ -1,2 +1,0 @@
-@echo off
-CALL gradlew jnigen jnigenBuildWin64 jnigenJarNativesDesktop
