@@ -37,8 +37,18 @@ def nativeSrcFiles = [
         'com_crashinvaders_basisu_wrapper_BasisuImageInfo.cpp',
 ]
 
-// NOTE: All the disabled texture formats should be in sync with this file BasisuPlatform.java
+// The set of supported native GPU texture formats varies based on the platform.
+// "-DBASISD_SUPPORT_*" flag params disable specific transcoder texture tables to save up space.
+// Unity docs have a nice reference page - https://docs.unity3d.com/Manual/class-TextureImporterOverride.html
+//
+// Desktop
+// Essentially supports everything (or it's more accurate to say ANYTHING), so we need them all.
+// Except for a few mobile-first GPU specific formats.
 def desktopUnsupportedFormats = ' -DBASISD_SUPPORT_PVRTC1=0 '
+
+// Web (WebGL) - all the disabled texture types hardcoded in the jni/build-web.xml Ant script file.
+// https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Compressed_texture_formats
+// SUPPORTED TEXTURES: [ASTC, ETC1, ETC2, PVRTC1, DXT]
 
 jnigen {
     sharedLibName = 'gdx-basis-universal'
@@ -96,6 +106,8 @@ jnigen {
     add(Android) {
         linkerFlags += ' -llog '  // We use "log.h" lib and should explicitly declare it.
 
+        // Android
+        // SUPPORTED TEXTURES: [ASTC, ETC1, ETC2, DXT, ATC, PVRTC1 and PVRTC2]
         cppFlags += ' -DBASISD_SUPPORT_BC7=0 '
         cppFlags += ' -DBASISD_SUPPORT_BC7_MODE5=0 '
 
@@ -106,6 +118,9 @@ jnigen {
     add(IOS) {
         cppFlags += ' -stdlib=libc++ '  // iOS compiler toolchain is pretty whiny about this...
 
+
+        // iOS
+        // SUPPORTED TEXTURES: [ASTC, ETC1, ETC2, PVRTC1]
         cppFlags += ' -DBASISD_SUPPORT_DXT1=0 '
         cppFlags += ' -DBASISD_SUPPORT_DXT5A=0 '
         cppFlags += ' -DBASISD_SUPPORT_BC7=0 '
@@ -167,6 +182,7 @@ task jnigenJarNativesWeb(type: Jar) {
     archiveClassifier = 'natives-web'
 
     from "${projectDir}/${jnigen.libsDir}/web"
+    from "${projectDir}/${jnigen.jniDir}/BasisuWrapperNatives.gwt.xml"
 }
 
 //// Android native jar tasks are all have pretty misleading classifier of "natives-$ABI".

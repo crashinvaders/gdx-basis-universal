@@ -3,10 +3,7 @@ package com.crashinvaders.basisu.gdx;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.utils.BufferUtils;
-import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.GdxRuntimeException;
-import com.badlogic.gdx.utils.StreamUtils;
+import com.badlogic.gdx.utils.*;
 import com.crashinvaders.basisu.wrapper.BasisuFileInfo;
 import com.crashinvaders.basisu.wrapper.BasisuImageInfo;
 import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
@@ -18,8 +15,15 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 public class BasisuData implements Disposable {
+
     private final ByteBuffer encodedData;
     private final BasisuFileInfo fileInfo;
+
+    /**
+     * Keeps track of all the image info instances created by this object
+     * and calls "#close()" for them when disposed itself.
+     */
+    private IntMap<BasisuImageInfo> imageInfoIndex = null;
 
     public BasisuData(FileHandle fileHandle) {
         this(readFileIntoBuffer(fileHandle));
@@ -40,6 +44,14 @@ public class BasisuData implements Disposable {
     @Override
     public void dispose() {
         fileInfo.close();
+
+        if (imageInfoIndex != null) {
+            for (BasisuImageInfo value : imageInfoIndex.values()) {
+                value.close();
+            }
+            imageInfoIndex.clear();
+        }
+
         //TODO Replace with BufferUtils.newUnsafeByteBuffer(fileSize) once it's compatible with GWT compiler.
         if (BasisuBufferUtils.isUnsafeByteBuffer(encodedData)) {
             BasisuBufferUtils.disposeUnsafeByteBuffer(encodedData);
@@ -54,8 +66,21 @@ public class BasisuData implements Disposable {
         return fileInfo;
     }
 
+    /**
+     * Retrieves the image info data for the specified image number.
+     * NOTE: You don't have to call {@link BasisuImageInfo#close()} as the returned instance is managed by the BasisuData.
+     */
     public BasisuImageInfo getImageInfo(int imageIndex) {
-        return BasisuWrapper.getImageInfo(encodedData, imageIndex);
+        // Lazy create index map.
+        if (imageInfoIndex == null) {
+            imageInfoIndex = new IntMap<>();
+        }
+        BasisuImageInfo imageInfo = imageInfoIndex.get(imageIndex);
+        if (imageInfo == null) {
+            imageInfo = BasisuWrapper.getImageInfo(encodedData, imageIndex);
+            imageInfoIndex.put(imageIndex, imageInfo);
+        }
+        return imageInfo;
     }
 
     public ByteBuffer transcode(int imageIndex, int mipmapLevel, BasisuTranscoderTextureFormat textureFormat) {

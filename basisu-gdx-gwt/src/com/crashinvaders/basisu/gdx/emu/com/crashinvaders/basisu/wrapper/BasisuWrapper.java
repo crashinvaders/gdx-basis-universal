@@ -53,6 +53,12 @@ public class BasisuWrapper {
         return $wnd.basisuModule.getImageInfo(data, imageIndex);
     }-*/;
 
+    public static native boolean isTranscoderTexFormatSupported(BasisuTranscoderTextureFormat transcoderTexFormat, BasisuTextureFormat basisTexFormat)/*-{
+        var transcoderTexFormatId = transcoderTexFormat.@com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat::getId()();
+        var basisTexFormatId = basisTexFormat.@com.crashinvaders.basisu.wrapper.BasisuTextureFormat::getId()();
+        return $wnd.basisuModule.isTranscoderTexFormatSupported(transcoderTexFormatId, basisTexFormatId);
+    }-*/;
+
 
     //region Emscripten exception handler.
     static {

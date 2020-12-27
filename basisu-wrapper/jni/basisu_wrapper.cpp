@@ -131,6 +131,10 @@ namespace basisuWrapper {
 
         return status;
     }
+
+    bool isTranscoderTexFormatSupported(transcoder_texture_format transcoderTexFormat, basis_tex_format basisTexFormat) {
+        return basis_is_format_supported(transcoderTexFormat, basisTexFormat);
+    }
 } // namespace basisuWrapper
 
 
@@ -213,6 +217,13 @@ val transcode_wrap(const val &jsData, uint32_t imageIndex, uint32_t levelIndex, 
     return vecToTypedArray(rgba);
 }
 
+bool isTranscoderTexFormatSupported_wrap(uint32_t transcoderTexFormatId, uint32_t basisTexFormatId) {
+    basist::transcoder_texture_format transcoderTexFormat = static_cast<basist::transcoder_texture_format>(transcoderTexFormatId);
+    basist::basis_tex_format basisTexFormat = static_cast<basist::basis_tex_format>(basisTexFormatId);
+
+    return basisuWrapper::isTranscoderTexFormatSupported(transcoderTexFormat, basisTexFormat);
+}
+
 uint8_t fileInfo_texType(basist::basisu_file_info &fileInfo) {
     return (uint8_t)fileInfo.m_tex_type;
 }
@@ -284,6 +295,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
     function("getFileInfo", &getFileInfo_wrap);
     function("getImageInfo", &getImageInfo_wrap);
     function("transcode", &transcode_wrap);
+    function("isTranscoderTexFormatSupported", &isTranscoderTexFormatSupported_wrap);
 }
 
 #endif // __EMSCRIPTEN__

@@ -83,7 +83,7 @@ public class BasisuTextureLoader extends AsynchronousAssetLoader<Texture, Basisu
          * (that's kinda the whole purpose of Basis Universal dynamic format selector...)
          */
         public void setTextureFormat(BasisuTranscoderTextureFormat format) {
-            this.formatSelector = (data, imageInfo) -> format;
+            this.formatSelector = (data, fileInfo, imageInfo) -> format;
         }
     }
 }

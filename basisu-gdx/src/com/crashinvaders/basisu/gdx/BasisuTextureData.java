@@ -4,8 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.TextureData;
-import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.crashinvaders.basisu.wrapper.BasisuFileInfo;
 import com.crashinvaders.basisu.wrapper.BasisuImageInfo;
 import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
 
@@ -83,7 +83,7 @@ public class BasisuTextureData implements TextureData {
      * (that's kinda the whole purpose of Basis Universal dynamic format selector...)
      */
     public void setTextureFormatSelector(BasisuTranscoderTextureFormat format) {
-        this.formatSelector = (data, imageInfo) -> format;
+        this.formatSelector = (data, fileInfo, imageInfo) -> format;
     }
 
     @Override
@@ -104,13 +104,15 @@ public class BasisuTextureData implements TextureData {
             basisuData = new BasisuData(file);
         }
 
-        int totalImages = basisuData.getFileInfo().getTotalImages();
+        BasisuFileInfo fileInfo = basisuData.getFileInfo();
+
+        int totalImages = fileInfo.getTotalImages();
         if (imageIndex < 0 || imageIndex >= totalImages) {
             throw new IllegalStateException("imageIndex " + imageIndex + " exceeds " +
                     "the total number of images (" + totalImages + ") in the basis file.");
         }
 
-        int mipmapLevels = basisuData.getFileInfo().getImageMipmapLevels()[imageIndex];
+        int mipmapLevels = fileInfo.getImageMipmapLevels()[imageIndex];
         if (mipmapLevel < 0 || mipmapLevel >= mipmapLevels) {
             throw new IllegalStateException("mipmapLevel " + mipmapLevel + " exceeds " +
                     "the total number of mipmap levels (" + mipmapLevels + ") in the basis file.");
@@ -120,7 +122,7 @@ public class BasisuTextureData implements TextureData {
         width = imageInfo.getWidth();
         height = imageInfo.getHeight();
 
-        transcodeFormat = formatSelector.resolveTextureFormat(basisuData, imageInfo);
+        transcodeFormat = formatSelector.resolveTextureFormat(basisuData, fileInfo, imageInfo);
         Gdx.app.debug(TAG, "Transcoding " + (file != null ? file.path() : "a texture") + " to the " + transcodeFormat + " format.");
 
         this.transcodedData = basisuData.transcode(imageIndex, mipmapLevel, transcodeFormat);

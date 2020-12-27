@@ -5,8 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.IntSet;
-import com.crashinvaders.basisu.wrapper.BasisuPlatform;
-import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
+import com.crashinvaders.basisu.wrapper.*;
 
 /**
  * Various utility methods required for Basis Universal LibGDX port.
@@ -68,37 +67,13 @@ public class BasisuGdxUtils {
     private static final IntSet supportedGlTextureFormats = new IntSet();
     private static boolean supportedGlTextureFormatsInitialized = false;
 
-    private static BasisuPlatform platform = null;
-
-    public static BasisuPlatform getPlatform() {
-        if (platform == null) {
-            switch (Gdx.app.getType()) {
-                case Android:
-                    platform = BasisuPlatform.ANDROID;
-                    break;
-                case iOS:
-                    platform = BasisuPlatform.IOS;
-                case WebGL:
-                    platform = BasisuPlatform.WEB;
-                    break;
-                case Desktop:
-                    //FIXME As all the desktop targets have the same texture compatibility we simply use any of those as fallback for now.
-                default:
-                    // Fallback to Windows as it has the most diverse texture format support.
-                    platform = BasisuPlatform.WINDOWS;
-            }
-        }
-        return platform;
-    }
-
     /**
      * Checks if the transcoder texture format is compatible with the current platform.
-     * This is a not native texture support check, but rather test if Basis Universal
+     * This is a not native GPU texture support check, but rather test if Basis Universal
      * is able to transcode to the requested format.
      */
-    public static boolean isPlatformCompatible(BasisuTranscoderTextureFormat basisuFormat) {
-        BasisuPlatform platform = getPlatform();
-        return platform.isCompatible(basisuFormat);
+    public static boolean isTranscoderTextureFormatSupported(BasisuTranscoderTextureFormat transcoderTexFormat, BasisuTextureFormat basisTexFormat) {
+        return BasisuTranscoderTextureFormatSupportIndex.isTextureFormatSupported(transcoderTexFormat, basisTexFormat);
     }
 
     /**
@@ -180,9 +155,9 @@ public class BasisuGdxUtils {
     /**
      * Checks if the texture format can be transcoded to and if there's a native graphics API support for it as well.
      */
-    public static boolean isBasisuFormatSupported(BasisuTranscoderTextureFormat textureFormat) {
+    public static boolean isBasisuFormatSupported(BasisuTranscoderTextureFormat textureFormat, BasisuTextureFormat basisTexFormat) {
         int glTextureFormat = toGlTextureFormat(textureFormat);
-        return isGlTextureFormatSupported(glTextureFormat) && isPlatformCompatible(textureFormat);
+        return isGlTextureFormatSupported(glTextureFormat) && isTranscoderTextureFormatSupported(textureFormat, basisTexFormat);
     }
 
     public static boolean isGlTextureFormatSupported(int glTextureFormat) {

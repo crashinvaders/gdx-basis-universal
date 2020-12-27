@@ -157,8 +157,8 @@
 	</target>
 
 	<target name="postcompile" depends="link" if="has-compiler">
-		<!-- generate minified gwt.xml file to include the native library files into the project distribution -->
-		<echo file="${libsDir}/BasisuGdxGwtNatives.gwt.xml"
-			  message="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;!DOCTYPE module PUBLIC &quot;-//Google Inc.//DTD Google Web Toolkit trunk//EN&quot; &quot;http://www.gwtproject.org/doctype/2.8.2/gwt-module.dtd&quot;&gt;&lt;module rename-to=&quot;com.crashinvaders.basisu.BasisuGdxGwtNatives&quot;&gt;&lt;public path=&quot;&quot;&gt;&lt;include name=&quot;${libName}.js&quot;/&gt;&lt;include name=&quot;${libName}.wasm&quot;/&gt;&lt;/public&gt;&lt;/module&gt;"/>
+<!--		&lt;!&ndash; generate minified gwt.xml file to include the native library files into the project distribution &ndash;&gt;-->
+<!--		<echo file="${libsDir}/BasisuGdxGwtNatives.gwt.xml"-->
+<!--			  message="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;!DOCTYPE module PUBLIC &quot;-//Google Inc.//DTD Google Web Toolkit trunk//EN&quot; &quot;http://www.gwtproject.org/doctype/2.8.2/gwt-module.dtd&quot;&gt;&lt;module rename-to=&quot;com.crashinvaders.basisu.BasisuGdxGwtNatives&quot;&gt;&lt;public path=&quot;&quot;&gt;&lt;include name=&quot;${libName}.js&quot;/&gt;&lt;include name=&quot;${libName}.wasm&quot;/&gt;&lt;/public&gt;&lt;/module&gt;"/>-->
 	</target>
 </project>

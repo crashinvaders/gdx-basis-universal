@@ -121,4 +121,14 @@ public class BasisuWrapperTest {
             BasisuWrapper.transcode(basisBuffer, 0, 0, format);
         }
     }
+
+    /**
+     * Test if transcoder texture format check method works for all the Java declared formats.
+     */
+    @Test
+    public void testSupportedTranscoderTextureFormats() {
+        for (BasisuTextureFormat basisTextureFormat : BasisuTextureFormat.values()) {
+            BasisuTranscoderTextureFormatSupportIndex.getSupportedTextureFormats(basisTextureFormat);
+        }
+    }
 }

@@ -20,12 +20,10 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.crashinvaders.basisu.gdx.*;
-import com.crashinvaders.basisu.wrapper.BasisuFileInfo;
-import com.crashinvaders.basisu.wrapper.BasisuImageInfo;
-import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
-import com.crashinvaders.basisu.wrapper.BasisuWrapper;
+import com.crashinvaders.basisu.wrapper.*;
 
 import java.nio.ByteBuffer;
+import java.util.Set;
 
 public class App implements ApplicationListener {
     private static final String TAG = App.class.getSimpleName();
@@ -53,6 +51,8 @@ public class App implements ApplicationListener {
         stage = new Stage(viewport, batch);
 
         testBasisuClasses();
+        printBasisSupportedTextureFormats(BasisuTextureFormat.ETC1S);
+        printBasisSupportedTextureFormats(BasisuTextureFormat.UASTC4x4);
 
         assetManager = new AssetManager();
         assetManager.setLoader(Texture.class, ".basis", new BasisuTextureLoader(assetManager.getFileHandleResolver()));
@@ -180,6 +180,16 @@ public class App implements ApplicationListener {
             Gdx.app.log(TAG, "getTextureFormat() " + fileInfo.getTextureFormat());
             fileInfo.close();
         }
+    }
+
+    private void printBasisSupportedTextureFormats(BasisuTextureFormat basisTexFormat) {
+        Gdx.app.log(TAG, "===== SUPPORTED TRANSCODER FORMATS | " + basisTexFormat.name() + " =====");
+        StringBuilder sb = new StringBuilder();
+        Set<BasisuTranscoderTextureFormat> formats = BasisuTranscoderTextureFormatSupportIndex.getSupportedTextureFormats(basisTexFormat);
+        for (BasisuTranscoderTextureFormat format : formats) {
+            sb.append(format).append(" ");
+        }
+        Gdx.app.log(TAG, sb.toString());
     }
 
     // Compute the MODBUS RTU CRC

@@ -3,6 +3,9 @@ package com.crashinvaders.basisu.wrapper;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 
 public class BasisuWrapper {
 
@@ -92,5 +95,25 @@ public class BasisuWrapper {
         if (!basisuWrapper::getImageInfo(*imageInfo, (uint8_t*)data, dataSize, imageIndex)) {
             basisuUtils::throwException(env, "Failed to obtain image info.");
         }
+    */
+
+    /**
+     * Checks weather the transcoder can transcode to the specified texture format.
+     * Some transcoding table are disabled per platform to save up space, so you always
+     * should check if the format is supported before transcoding to it.
+     * <p/>
+     * NOTE: Use {@link BasisuTranscoderTextureFormatSupportIndex#isTextureFormatSupported(BasisuTranscoderTextureFormat, BasisuTextureFormat)}
+     * instead for frequent checks as calls to this method are relatively slow.
+     * @param transcoderTexFormat the format to check support for
+     * @param basisTexFormat the intermediate Basis texture format you want to transcode from
+     * @return weather the transcoding is supported for the specified formats
+     */
+    public static boolean isTranscoderTexFormatSupported(BasisuTranscoderTextureFormat transcoderTexFormat, BasisuTextureFormat basisTexFormat) {
+        return isTranscoderTexFormatSupportedNative(transcoderTexFormat.getId(), basisTexFormat.getId());
+    }
+    private native static boolean isTranscoderTexFormatSupportedNative(int transcoderTexFormatId, int basisTexFormatId); /*
+        basist::transcoder_texture_format transcoderTexFormat = static_cast<basist::transcoder_texture_format>(transcoderTexFormatId);
+        basist::basis_tex_format basisTexFormat = static_cast<basist::basis_tex_format>(basisTexFormatId);
+        return basisuWrapper::isTranscoderTexFormatSupported(transcoderTexFormat, basisTexFormat);
     */
 }

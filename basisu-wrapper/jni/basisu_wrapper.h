@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "basisu_transcoder.h"
+#include "basisu_file_headers.h"
 
 #define LOG_INFO "[BASISU_WRAPPER] INFO: "
 #define LOG_ERROR "[BASISU_WRAPPER] ERROR: "
@@ -24,4 +25,6 @@ namespace basisuWrapper {
 
     bool transcode(std::vector<uint8_t> &out, uint8_t *data, uint32_t dataSize,
                    uint32_t imageIndex, uint32_t levelIndex, transcoder_texture_format format);
+
+    bool isTranscoderTexFormatSupported(transcoder_texture_format transcoderTexFormat, basis_tex_format basisTexFormat); 
 } // namespace basisuWrapper
