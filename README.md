@@ -11,7 +11,7 @@ _Work in progress. The first beta release is on the way..._
 Here's a list of the limitations you should be aware of when using this library (on top of regular LibGDX backend limitations).
 
 - __[Android]__ Due to NDK specs, __Android 4.1 (API 16) is the minimum supported version__.
-- __[GWT]__ [WebAssembly is available](https://caniuse.com/wasm) pretty much on every modern browser. But just for reference, the support is enabled by default as of __Firefox 52, Chrome 57, Opera 44__, and __On Edge 16__.
+- __[GWT]__ [WebAssembly is available](https://caniuse.com/wasm) pretty much on every modern browser. But just for reference, the support is enabled by default as of __Firefox 52__, __Chrome 57__, __Opera 44__, and __Edge 16__.
 
 ## Texture format notes
 
