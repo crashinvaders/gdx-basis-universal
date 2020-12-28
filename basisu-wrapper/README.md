@@ -50,7 +50,7 @@ Read [the official LibGDX wiki](https://github.com/libgdx/libgdx/wiki/jnigen#lin
 > To be added soon
 
 #### Android
-> The build was only tested with NDK 21.3.6528147 and may not work with any other version. It's recommended you install and use the same one.
+> The build was only tested with NDK 21.3.6528147 and may not work with any other version. It's recommended that you install and use the same NDK release.
 - Install the NDK (using IntelliJ Idea/Android Studio's Android SDK manager or from [the official web page](https://developer.android.com/ndk/downloads)).
 - Create an environment variable `NDK_HOME` pointing to the installed NDK location.
 
