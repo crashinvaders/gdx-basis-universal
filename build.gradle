@@ -94,11 +94,11 @@ configure(basisuLibProjects) {
                     authentication(userName: ossrhUsername, password: ossrhPassword)
                 }
 
-                // Read about setting up a personal GitHub access token if you don't have one.
-                // https://docs.github.com/en/free-pro-team@latest/packages/learn-github-packages/about-github-packages#authenticating-to-github-packages
-                repository(url: "https://maven.pkg.github.com/crashinvaders/gdx-basis-universal") {
-                    authentication(userName: project.githubUsername, password: project.githubAccessToken)
-                }
+//                // Read about setting up a personal GitHub access token if you don't have one.
+//                // https://docs.github.com/en/free-pro-team@latest/packages/learn-github-packages/about-github-packages#authenticating-to-github-packages
+//                repository(url: "https://maven.pkg.github.com/crashinvaders/gdx-basis-universal") {
+//                    authentication(userName: project.githubUsername, password: project.githubAccessToken)
+//                }
 
                 pom.project {
                     name = project.name

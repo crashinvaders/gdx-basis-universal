@@ -1,7 +1,5 @@
 apply plugin: 'java-library'
 
-description 'Java wrapper for Basis Universal texture transcoder native native code.'
-
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8

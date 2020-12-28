@@ -1,7 +1,5 @@
 apply plugin: 'java-library'
 
-description 'LibGDX library to support Basis Universal super-compressed textures.'
-
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
@@ -20,7 +18,6 @@ dependencies {
     testImplementation "com.badlogicgames.gdx:gdx-backend-headless:$gdxVersion"
     testRuntimeOnly "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
     testRuntimeOnly files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${version}-natives-desktop.jar")
-
 }
 
 test {
