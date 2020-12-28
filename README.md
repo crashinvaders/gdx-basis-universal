@@ -122,7 +122,7 @@ The library provides transparent support for `Basis` format textures using `Basi
 Texture myTexture = new Texture(new BasisuTextureData(Gdx.files.internal("MyTexture.basis")));
 ```
 
-From now on, it's safe to use the texture instance as usual and it's already should hold the data transcoded to the best suited native GPU compressed texture format for your platform.
+From now on, it's safe to use the texture instance as usual and it already should hold the data transcoded to the best suited native GPU compressed texture format for your platform.
 
 If you're using `AssetManager` to load game textures, you can easily integrate with it as well using `BasisuTextureLoader` class.
 
