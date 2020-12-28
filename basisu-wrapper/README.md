@@ -36,7 +36,7 @@ Read [official LibGDX wiki](https://github.com/libgdx/libgdx/wiki/jnigen#linux) 
 > All further steps consider you have [Chocolatey](https://chocolatey.org/) installed on the system.
 - Install __Ant__
     1. `choco install ant`
-    2. Add ant's bin dir to the `PATH` (chocolatey creates an `ant.exe` shortcut file, but jnigen expects `ant.bat` to be on the PATH).
+    2. Add ant's bin dir to the `PATH` (_Chocolatey__ creates an `ant.exe` shortcut file, but __jnigen__ expects `ant.bat` to be on the `PATH`).
 - To build for Win64 target
     1. `choco install msys2`
 - To build for Win32 target
