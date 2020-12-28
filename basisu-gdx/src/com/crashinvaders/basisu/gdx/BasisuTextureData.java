@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.TextureData;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.crashinvaders.basisu.wrapper.BasisuFileInfo;
 import com.crashinvaders.basisu.wrapper.BasisuImageInfo;
@@ -172,9 +173,11 @@ public class BasisuTextureData implements TextureData {
         height = imageInfo.getHeight();
 
         transcodeFormat = formatSelector.resolveTextureFormat(basisuData, fileInfo, imageInfo);
-        Gdx.app.debug(TAG, "Transcoding " + (file != null ? file.path() : "a texture") + " to the " + transcodeFormat + " format.");
+        Gdx.app.debug(TAG, (file != null ? "["+file.path()+"] " : "") + "Transcoding to the " + transcodeFormat + " format");
 
         this.transcodedData = basisuData.transcode(imageIndex, mipmapLevel, transcodeFormat);
+
+        Gdx.app.debug(TAG, (file != null ? "["+file.path()+"] " : "") + "Transcoded texture size: " + MathUtils.round(this.transcodedData.capacity() / 1024.0f) + "kB");
 
         basisuData.dispose();
         basisuData = null;

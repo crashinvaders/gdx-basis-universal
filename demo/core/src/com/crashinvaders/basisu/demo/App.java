@@ -10,11 +10,15 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
@@ -56,10 +60,12 @@ public class App implements ApplicationListener {
 
         assetManager = new AssetManager();
         assetManager.setLoader(Texture.class, ".basis", new BasisuTextureLoader(assetManager.getFileHandleResolver()));
-        assetManager.load("level_temple0.basis", Texture.class);
+        assetManager.load("screen-stuff-etc1s.basis", Texture.class);   // ETC1S RGBA
+        assetManager.load("screen-stuff-uastc.basis", Texture.class);   // UASTC RGBA
+        assetManager.load("kodim3.basis", Texture.class);               // ETC1S RGB
         assetManager.finishLoading();
 
-        BasisuTextureData basisuData0 = new BasisuTextureData(Gdx.files.internal("kodim3.basis"));
+        BasisuTextureData basisuData0 = new BasisuTextureData(Gdx.files.internal("level_temple0.basis"));  // ETC1S RGBA
         texture0 = new Texture(basisuData0);
 
         // UI actors.
@@ -68,20 +74,52 @@ public class App implements ApplicationListener {
             rootTable.setFillParent(true);
             rootTable.center();
 
-            Image image0 = new Image(new TextureRegionDrawable(texture0), Scaling.fit);
-            image0.setScaling(Scaling.fit);
-            rootTable.add(image0).grow();
-            Image image1 = new Image(new TextureRegionDrawable(assetManager.get("level_temple0.basis", Texture.class)), Scaling.fit);
-            Container containerImage1 = new Container<>(image1);
-            containerImage1.setTransform(true);
-            containerImage1.addAction(Actions.delay(0.25f, Actions.forever(Actions.sequence(
-                            Actions.run(() -> containerImage1.setOrigin(Align.center)),
-                            Actions.rotateBy(360f, 1f, Interpolation.pow3),
-                            Actions.delay(2f)
-            ))));
-            rootTable.add(containerImage1).grow();
+            rootTable.add(new Image(new TextureRegionDrawable(texture0), Scaling.fit, Align.center))
+                    .center()
+                    .height(240f)
+                    .growX();
+
+            rootTable.add(new Image(
+                    new TextureRegionDrawable(assetManager.get("kodim3.basis", Texture.class)),
+                    Scaling.fit,
+                    Align.center))
+                    .center()
+                    .height(240f)
+                    .growX();
+
+            rootTable.row();
+
+            rootTable.add(new Image(
+                    new TextureRegionDrawable(assetManager.get("screen-stuff-etc1s.basis", Texture.class)),
+                    Scaling.fit,
+                    Align.center))
+                    .center()
+                    .height(240f)
+                    .growX();
+
+            rootTable.add(new Image(
+                    new TextureRegionDrawable(assetManager.get("screen-stuff-uastc.basis", Texture.class)),
+                    Scaling.fit,
+                    Align.center))
+                    .center()
+                    .height(240f)
+                    .growX();
+
+
 
             stage.addActor(rootTable);
+
+            rootTable.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    super.clicked(event, x, y);
+                    Group actor = (Group) event.getListenerActor();
+                    actor.setOrigin(Align.center);
+                    actor.setTransform(true);
+                    actor.clearActions();
+                    actor.addAction(Actions.rotateBy(360f, 1f, Interpolation.pow3));
+                }
+            });
         }
     }
 

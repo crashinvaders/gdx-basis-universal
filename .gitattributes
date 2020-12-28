@@ -4,3 +4,4 @@ basisu-wrapper/libs/web/*.wasm filter=lfs diff=lfs merge=lfs -text
 basisu-wrapper/libs/web/*.js filter=lfs diff=lfs merge=lfs -text
 basisu-wrapper/libs/**/*.so filter=lfs diff=lfs merge=lfs -text
 basisu-wrapper/libs/ios32/* filter=lfs diff=lfs merge=lfs -text
+*.basis filter=lfs diff=lfs merge=lfs -text
