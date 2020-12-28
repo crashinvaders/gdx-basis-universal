@@ -1,8 +1,8 @@
 # GDX Basis Universal
 
-Cross-platform support for Binomial's [Basis Universal](https://github.com/BinomialLLC/basis_universal) portable supercompressed GPU textures.
+Cross-platform support for Binomial's [Basis Universal](https://github.com/BinomialLLC/basis_universal) supercompressed GPU textures.
 
-Now you can supply the same [compressed texture](https://en.wikipedia.org/wiki/Texture_compression) assets (`.basis`) for all the LibGDX backends and save sinigicant amount of RAM by using platforms' natively supported GPU compression.
+Now you can use the same intermediate [compressed texture](https://en.wikipedia.org/wiki/Texture_compression) assets (`.basis`) for all the LibGDX backends and save on RAM leveraging the platforms' natively supported GPU compression.
 
 <details>
     <summary>
