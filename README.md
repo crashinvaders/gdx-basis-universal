@@ -31,12 +31,12 @@ Basis Universal is backed by Google, open-source, and now available to everyone!
 </details>
     
 ### Cool, how do I turn my images into Basis textures?
-You can use [the command-line tool](https://github.com/BinomialLLC/basis_universal/releases) or build the encoder from [the sources](https://github.com/BinomialLLC/basis_universal) yourself.
+You can use the [command-line tool](https://github.com/BinomialLLC/basis_universal/releases) or build the encoder from the [sources](https://github.com/BinomialLLC/basis_universal) yourself.
 
 As of now, there's no a web-based encoder or a desktop GUI tool to convert to the Basis format.
 But don't be discouraged, there is a number of convenient options that will be available for that purpose soon.
 
-> Please read ["Texture format notes"](#texture-format-notes) and [Feature support notes](#basis-universal-feature-support-notes) sections before encoding your textures.
+> Please read the ["Texture format notes"](#texture-format-notes) and ["Feature support notes"](#basis-universal-feature-support-notes) sections before encoding your textures.
 
 ## Using the library
 
