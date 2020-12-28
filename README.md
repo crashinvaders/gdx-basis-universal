@@ -1,6 +1,6 @@
 # GDX Basis Universal
 
-The library provides cross-platform support for Binomial's [Basis Universal](https://github.com/BinomialLLC/basis_universal) portable super-compressed GPU textures.
+Cross-platform support for Binomial's [Basis Universal](https://github.com/BinomialLLC/basis_universal) portable super-compressed GPU textures.
 
 It allows you to use the same [compressed texture](https://en.wikipedia.org/wiki/Texture_compression) assets (`.basis`) for all the LibGDX backends while saving tons of GPU RAM on runtime by using platforms' nativelly supported GPU compression.
 
@@ -18,7 +18,7 @@ Here's a list of the limitations you should be aware of when using this library 
 Basis Universal texture transcoder supports a bunch very different GPU compressed texture formats.
 Some of them impose very important limitations and cannot be used (cannot be transcoded to on runtime) unless all the requirements are met.
 
-To have the widest possible native format support, it's highly recommended to encode intermediate Basis texture assets that comply with __ALL__ of these specifics.
+To have the widest possible native format support, it's highly recommended to encode intermediate Basis images that comply with __ALL__ of these specifics.
 
 - __PVRTC1__ requires square textures with power of two sides.
 - __PVRTC1__ transparency is very poor and only suitable for pre-multiplied alpha (check that).
@@ -46,7 +46,8 @@ buildscript {
 ```
 
 And then just add these records to the dependency section of your `build.gradle` files. 
-Don't forget to set `gdxBasisuVersion` property with the correct library version 
+
+> Don't forget to set `gdxBasisuVersion` property with the correct library version 
 (e.g. declaring `gdxBasisuVersion=0.1.0` in the project's root `settings.gradle` file).
 
 #### Core module
