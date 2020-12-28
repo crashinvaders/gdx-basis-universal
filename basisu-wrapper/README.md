@@ -1,13 +1,13 @@
 # Basis Universal wrapper
-Provides a pure Java (no any depencies) abstraction layer over the native libs.
+Provides a pure Java (no dependencies) abstraction layer over the native libs.
 
 The module uses [Basis Universal C/C++ code](https://github.com/BinomialLLC/basis_universal) 
 and [JNI](https://en.wikipedia.org/wiki/Java_Native_Interface) wrappers to connect to LibGDX cross-platform code.
 
-To manage native build configration for all the platforms (except for the web, [read notes below](#Web)) we use [jnigen](https://github.com/libgdx/gdx-jnigen) Gradle plugin.
+To manage native build configuration for all the platforms (except for the web, [read notes below](#Web)) we use [jnigen](https://github.com/libgdx/gdx-jnigen) Gradle plugin.
 See `//region jnigen configuration` section of [`build.gradle`](build.gradle#L28) file for configuration details.
 
-To streamline the native library assembly process, there are bunch of `assemble-natives-<platform>.[sh|bat]` scipts available in the project's root dir.
+To streamline the native library assembly process, there are a bunch of `assemble-natives-<platform>.[sh|bat]` scripts are available in the project's root dir.
 Be aware that some of the ".sh" scripts are OS dependant (read comments in the scripts).
 
 ### Native build requirements
@@ -30,7 +30,7 @@ git submodule update --init --recursive
 - Install `g++-aarch64-linux-gnu` [package](https://packages.debian.org/stretch/g++-aarch64-linux-gnu) (or similar) to build for Linux ARM64 target. 
 
 You can also build Windows natives from under Linux. 
-Read [official LibGDX wiki](https://github.com/libgdx/libgdx/wiki/jnigen#linux) for details.
+Read [the official LibGDX wiki](https://github.com/libgdx/libgdx/wiki/jnigen#linux) for details.
 
 #### Windows
 > All further steps consider you have [Chocolatey](https://chocolatey.org/) installed on the system.
@@ -41,9 +41,9 @@ Read [official LibGDX wiki](https://github.com/libgdx/libgdx/wiki/jnigen#linux) 
     1. `choco install msys2`
 - To build for Win32 target
     1. Install __MinGW32__. The installers are available from their [distribution page](https://sourceforge.net/projects/mingw/files/Installer/).
-    2. Make sure that `g++.exe`, `gcc.exe`, `strip.exe` and `ar.exe` are discoverable from the `PATH`.
+    2. Make sure that `g++.exe`, `gcc.exe`, `strip.exe`, and `ar.exe` are discoverable from the `PATH`.
 
-#### MacOS
+#### macOS
 > To be added soon
 
 #### iOS
@@ -65,4 +65,4 @@ And thus it's all hand-written and needs to be kept in sync with the main config
 
 To be able to assemble natives for this platform you need to:
 - Install the [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html)
-- Make sure the Emscripten compiler executables (__emcc__ and __em++__) are available on the system `PATH`. Usually they are located at `${EMSDK}/upstream/emscripten`.
+- Make sure the Emscripten compiler executables (__emcc__ and __em++__) are available on the system `PATH`. Usually, they are located at `${EMSDK}/upstream/emscripten`.
