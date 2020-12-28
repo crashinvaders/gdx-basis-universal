@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 
+/**
+ * The wrapper over the native Basis Universal transcoder functionality.
+ */
 public class BasisuWrapper {
 
     /*JNI
@@ -22,6 +25,9 @@ public class BasisuWrapper {
 
     */
 
+    /**
+     * Quick header validation - no crc16 checks.
+     */
     public static boolean validateHeader(Buffer data) {
         return validateHeaderNative(data, data.capacity());
     }
@@ -29,6 +35,9 @@ public class BasisuWrapper {
         return basisuWrapper::validateHeader((uint8_t*)data, dataSize);
     */
 
+    /**
+     * Validates the .basis file. This computes a crc16 over the entire file, so it's slow.
+     */
     public static boolean validateChecksum(Buffer data, boolean fullValidation) {
         return validateChecksumNative(data, data.capacity(), fullValidation);
     }
@@ -36,6 +45,9 @@ public class BasisuWrapper {
         return basisuWrapper::validateChecksum((uint8_t*)data, dataSize, fullValidation);
     */
 
+    /**
+     * @return the number of mipmap levels in an image
+     */
     public static int getTotalMipMapLevels(Buffer data) {
         return getTotalMipMapLevelsNative(data, data.capacity());
     }
@@ -43,6 +55,12 @@ public class BasisuWrapper {
         return basisuWrapper::getTotalMipMapLevels((uint8_t*)data, dataSize);
     */
 
+    /**
+     * Decodes a single mipmap level from the .basis file to any of the supported output texture formats.
+     * If the .basis file doesn't have alpha slices, the output alpha blocks will be set to fully opaque (all 255's).
+     * Currently, to decode to PVRTC1 the basis texture's dimensions in pixels must be a power of 2, due to PVRTC1 format requirements.
+     * @return the transcoded texture bytes
+     */
     public static ByteBuffer transcode(Buffer data, int imageIndex, int levelIndex, BasisuTranscoderTextureFormat textureFormat) {
         int format = textureFormat.getId();
         byte[] transcodedData = transcodeNative(data, data.capacity(), imageIndex, levelIndex, format);
@@ -73,6 +91,9 @@ public class BasisuWrapper {
         return byteArray;
     */
 
+    /**
+     * @return a description of the basis file and low-level information about each slice.
+     */
     public static BasisuFileInfo getFileInfo(Buffer data) {
         BasisuFileInfo fileInfo = new BasisuFileInfo();
         getFileInfoNative(data, data.capacity(), fileInfo.addr);
@@ -85,6 +106,9 @@ public class BasisuWrapper {
         }
     */
 
+    /**
+     * @return information about the specified image.
+     */
     public static BasisuImageInfo getImageInfo(Buffer data, int imageIndex) {
         BasisuImageInfo imageInfo = new BasisuImageInfo();
         getImageInfoNative(data, data.capacity(), imageIndex, imageInfo.addr);

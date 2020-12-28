@@ -8,7 +8,7 @@ import com.badlogic.gdx.utils.IntSet;
 import com.crashinvaders.basisu.wrapper.*;
 
 /**
- * Various utility methods required for Basis Universal LibGDX port.
+ * Various utility methods required for Basis Universal LibGDX library.
  * <p/>
  * <b>References for OpenGL extension names and texture format codes</b>
  * <ul>
@@ -148,10 +148,6 @@ public class BasisuGdxUtils {
         }
     }
 
-    public static IntSet getSupportedGlTextureFormats() {
-        return supportedGlTextureFormats;
-    }
-
     /**
      * Checks if the texture format can be transcoded to and if there's a native graphics API support for it as well.
      */
@@ -160,17 +156,32 @@ public class BasisuGdxUtils {
         return isGlTextureFormatSupported(glTextureFormat) && isTranscoderTextureFormatSupported(textureFormat, basisTexFormat);
     }
 
-    public static boolean isGlTextureFormatSupported(int glTextureFormat) {
+    /**
+     * @return the list of GL texture formats supported by the GPU on the runtime.
+     */
+    public static IntSet getSupportedGlTextureFormats() {
         initSupportedGlTextureFormats();
-        return supportedGlTextureFormats.contains(glTextureFormat);
+        return supportedGlTextureFormats;
     }
 
+    /**
+     * Fetches and prepares the supported GL texture format list.
+     * Must be called from the main LibGDX thread.
+     */
     public static synchronized void initSupportedGlTextureFormats() {
         if (supportedGlTextureFormatsInitialized) return;
         supportedGlTextureFormatsInitialized = true;
 
         int[] formats = BasisuGdxGl.getSupportedTextureFormats();
         supportedGlTextureFormats.addAll(formats);
+    }
+
+    /**
+     * Checks if the GL texture format is supported by the GPU on the runtime.
+     */
+    public static boolean isGlTextureFormatSupported(int glTextureFormat) {
+        initSupportedGlTextureFormats();
+        return supportedGlTextureFormats.contains(glTextureFormat);
     }
 
     /**

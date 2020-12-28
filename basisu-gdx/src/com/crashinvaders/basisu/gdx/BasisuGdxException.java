@@ -1,5 +1,8 @@
 package com.crashinvaders.basisu.gdx;
 
+/**
+ * An exception related to gdx-basisu-gdx code.
+ */
 public class BasisuGdxException extends RuntimeException {
     private static final long serialVersionUID = 7954047253558223708L;
 
@@ -16,9 +19,5 @@ public class BasisuGdxException extends RuntimeException {
 
     public BasisuGdxException(Throwable cause) {
         super(cause);
-    }
-
-    public BasisuGdxException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
     }
 }

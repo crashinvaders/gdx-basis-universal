@@ -7,10 +7,21 @@ import com.badlogic.gdx.graphics.TextureData;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.crashinvaders.basisu.wrapper.BasisuFileInfo;
 import com.crashinvaders.basisu.wrapper.BasisuImageInfo;
+import com.crashinvaders.basisu.wrapper.BasisuTextureType;
 import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
 
 import java.nio.Buffer;
 
+/**
+ * Provides support for Basis texture data format for {@link com.badlogic.gdx.graphics.Texture}.
+ * The implementation is based of {@link com.badlogic.gdx.graphics.glutils.ETC1TextureData}.
+ * <p/>
+ * The implementation uses {@link BasisuTextureFormatSelector} to determine
+ * which texture format is preferable for the current platform.
+ * The {@link com.crashinvaders.basisu.gdx.BasisuTextureFormatSelector.Default} selector is used for all the instances
+ * unless another one is specified through {@link #setTextureFormatSelector(BasisuTextureFormatSelector)}.
+ * You can also supply a different default one by updating the value of {@link #defaultFormatSelector}.
+ */
 public class BasisuTextureData implements TextureData {
     private static final String TAG = BasisuTextureData.class.getSimpleName();
 
@@ -37,14 +48,27 @@ public class BasisuTextureData implements TextureData {
     private int height = 0;
     private boolean isPrepared = false;
 
+    /**
+     * @param file the file to load the Basis texture data from
+     */
     public BasisuTextureData(FileHandle file) {
         this(file, 0, 0);
     }
 
+    /**
+     * @param file the file to load the Basis texture data from
+     * @param imageIndex the image index in the Basis file
+     */
     public BasisuTextureData(FileHandle file, int imageIndex) {
         this(file, imageIndex, 0);
     }
 
+    /**
+     * @param file the file to load the Basis texture data from
+     * @param imageIndex the image index in the Basis file
+     * @param mipmapLevel the mipmap level of the image
+     *                    (mipmaps should be enabled by the Basis encoder when you generate the Basis file).
+     */
     public BasisuTextureData(FileHandle file, int imageIndex, int mipmapLevel) {
         this.file = file;
         this.imageIndex = imageIndex;
@@ -53,14 +77,27 @@ public class BasisuTextureData implements TextureData {
         this.basisuData = null;
     }
 
+    /**
+     * @param basisuData the Basis texture data to transcode the texture from
+     */
     public BasisuTextureData(BasisuData basisuData) {
         this(basisuData, 0);
     }
 
+    /**
+     * @param basisuData the Basis texture data to transcode the texture from
+     * @param imageIndex the image index in the Basis file
+     */
     public BasisuTextureData(BasisuData basisuData, int imageIndex) {
         this(basisuData, imageIndex, 0);
     }
 
+    /**
+     * @param basisuData the Basis texture data to transcode the texture from
+     * @param imageIndex the image index in the Basis file
+     * @param mipmapLevel the mipmap level of the image
+     *                    (mipmaps should be enabled by the Basis encoder when you generate the Basis file).
+     */
     public BasisuTextureData(BasisuData basisuData, int imageIndex, int mipmapLevel) {
         this.file = null;
         this.imageIndex = imageIndex;
@@ -69,10 +106,16 @@ public class BasisuTextureData implements TextureData {
         this.basisuData = basisuData;
     }
 
+    /**
+     * @return the GPU compressed texture format selector to be used to select the format to transcode to
+     */
     public BasisuTextureFormatSelector getTextureFormatSelector() {
         return formatSelector;
     }
 
+    /**
+     * @param formatSelector  the GPU compressed texture format selector to be used to select the format to transcode to
+     */
     public void setTextureFormatSelector(BasisuTextureFormatSelector formatSelector) {
         this.formatSelector = formatSelector;
     }
@@ -108,14 +151,20 @@ public class BasisuTextureData implements TextureData {
 
         int totalImages = fileInfo.getTotalImages();
         if (imageIndex < 0 || imageIndex >= totalImages) {
-            throw new IllegalStateException("imageIndex " + imageIndex + " exceeds " +
+            throw new BasisuGdxException("imageIndex " + imageIndex + " exceeds " +
                     "the total number of images (" + totalImages + ") in the basis file.");
         }
 
         int mipmapLevels = fileInfo.getImageMipmapLevels()[imageIndex];
         if (mipmapLevel < 0 || mipmapLevel >= mipmapLevels) {
-            throw new IllegalStateException("mipmapLevel " + mipmapLevel + " exceeds " +
+            throw new BasisuGdxException("mipmapLevel " + mipmapLevel + " exceeds " +
                     "the total number of mipmap levels (" + mipmapLevels + ") in the basis file.");
+        }
+
+        BasisuTextureType textureType = fileInfo.getTextureType();
+        if (textureType != BasisuTextureType.REGULAR_2D) {
+            throw new BasisuGdxException("textureType " + textureType + " is not supported at the moment. " +
+                    "Only BasisuTextureType.REGULAR_2D texture type is allowed.");
         }
 
         BasisuImageInfo imageInfo = basisuData.getImageInfo(imageIndex);

@@ -8,10 +8,13 @@ import java.nio.Buffer;
 import java.nio.IntBuffer;
 
 /**
- * OpenGL functions that are not supported on all the LibGDX backends and thus may be reimplemented.
+ * OpenGL functions that are not supported on all the LibGDX backends and thus may be (re)implemented.
  */
 public class BasisuGdxGl {
 
+    /**
+     * @return the list of the GL texture formats supported by OpenGL on the running platform.
+     */
     public static int[] getSupportedTextureFormats() {
         IntBuffer buffer = BufferUtils.newIntBuffer(64);
         Gdx.gl.glGetIntegerv(GL20.GL_NUM_COMPRESSED_TEXTURE_FORMATS, buffer);
@@ -28,6 +31,11 @@ public class BasisuGdxGl {
         return result;
     }
 
+    /**
+     * Uploads compressed texture data to the OpenGL.
+     * This method exists here only because LibGDX doesn't support it for GWT backend
+     * and basisu-gdx-gwt provides its own implementation.
+     */
     public static void glCompressedTexImage2D(int target, int level, int internalformat,
                                        int width, int height, int border,
                                        int imageSize, Buffer data) {
