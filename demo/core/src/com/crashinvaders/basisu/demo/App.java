@@ -10,10 +10,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Interpolation;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Group;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -53,6 +50,7 @@ public class App implements ApplicationListener {
         viewport = new ExtendViewport(800f, 480f);
         batch = new SpriteBatch();
         stage = new Stage(viewport, batch);
+        Gdx.input.setInputProcessor(stage);
 
         testBasisuClasses();
         printBasisSupportedTextureFormats(BasisuTextureFormat.ETC1S);
@@ -109,6 +107,7 @@ public class App implements ApplicationListener {
 
             stage.addActor(rootTable);
 
+            rootTable.setTouchable(Touchable.enabled);
             rootTable.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
@@ -117,7 +116,10 @@ public class App implements ApplicationListener {
                     actor.setOrigin(Align.center);
                     actor.setTransform(true);
                     actor.clearActions();
-                    actor.addAction(Actions.rotateBy(360f, 1f, Interpolation.pow3));
+                    actor.addAction(Actions.sequence(
+                            Actions.rotateTo(0f),
+                            Actions.rotateBy(360f, 1f, Interpolation.pow3)
+                    ));
                 }
             });
         }
