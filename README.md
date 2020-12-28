@@ -35,48 +35,11 @@ You can use [the command-line tool](https://github.com/BinomialLLC/basis_univers
 As of now, there's no a web-based encoder or a desktop GUI tool to convert to the Basis format.
 But don't be discouraged, there is a number of convenient options that will be available for that purpose soon.
 
-## Basis Universal feature support notes
-
-Most of the essential Basis transcoder features are exposed and implemented for Java (including file validation, transcoding to all the necessary formats, and Basis file/image information lookup methods).
-
-Transcoding from both intermediate formats (__ETC1S__ low-medium quality and __UASTC__ high quality) works as intended.
-
-Basis supports 5 different texture types:
-
-1. __Regular 2D__ - an arbitrary array of 2D RGB or RGBA images with optional mipmaps, array size = # images, each image may have a different resolution and 
-2. __Regular 2D array__ - an array of 2D RGB or RGBA images with optional mipmaps, array size = # images, each image has the same resolution and mipmap levels
-3. __Cubemap array__ - an array of cubemap levels, total # of images must be divisible by 6, in X+, X-, Y+, Y-, Z+, Z- order, with optional mipmaps
-4. __Video frames__ - an array of 2D video frames, with optional mipmaps, # frames = # images, each image has the same resolution and # of mipmap levels
-5. __volume__ - a 3D texture with optional mipmaps, Z dimension = # images, each image has the same resolution and # of mipmap levels
-    
-Out of which support only for __Regular 2D__ is implemented through __BasisuTextureData__ for LibGDX textures.
-
-> I'm not very familiar with 3D related formats like __Cubemap array__ and skipped them for now.
-The data for those is fully available from `basisu-wrapper`, only the LibGDX support is missing.
-If you're in demand for those or may assist with the implementation, please come forward and open an issue with details.
-
-## Platform limitations
-
-Here's a list of the limitations you should be aware of when using this library (on top of regular LibGDX backend limitations).
-
-- __[Android]__ Due to NDK specs, __Android 4.1 (API 16) is the minimum supported version__.
-- __[GWT]__ WebAssembly is available pretty much on every modern browser ([compatibility chart](https://caniuse.com/wasm)). Just for reference, the support is enabled by default as of __Firefox 52__, __Chrome 57__, __Opera 44__, and __Edge 16__.
-
-## Texture format notes
-
-Basis Universal texture transcoder supports a bunch of very different GPU compressed texture formats.
-Some of them impose very important limitations and cannot be used (cannot be transcoded to on runtime) unless all the requirements are met.
-
-To have the widest possible native format support, it's highly recommended to encode intermediate Basis images that comply with __ALL__ of these specifics.
-
-- __PVRTC1__ requires square textures with the power of two sides.
-- __BC1_RGB__ & __BC3_RGBA__ require textures with sides to be multiple of four (superseded by PVRTC1 requirements).
-
-> To round up, always use square images with the power of two dimensions for Basis texture assets.
+> Please read ["Texture format notes"](#texture-format-notes) and [Feature support notes](#basis-universal-feature-support-notes) sections before encoding your textures.
 
 ## Using the library
 
-Once added as Maven dependency to LibGDX project modules, the library is pretty easy to deal with, no extra integration calls are required in the code.
+Once added as Maven dependency to LibGDX project modules, the library is pretty easy to deal with, no global initialization calls are required in the code.
 
 All the official LibGDX backends are fully supported.
 
@@ -172,6 +135,80 @@ assetManager.load("MyTexture.basis", Texture.class);
 // When the asset manager has finished loading, retrieve your texture as usual.
 Texture myTexture = assetManager.get("MyTexture.basis", Texture.class);
 ```
+
+## Platform limitations
+
+Here's the list of the limitations you should be aware of when using this library (on top of regular LibGDX backend limitations).
+
+- __[Android]__ Due to NDK specs, __Android 4.1 (API 16) is the minimum supported version__.
+- __[GWT]__ WebAssembly is available pretty much on every modern browser ([compatibility chart](https://caniuse.com/wasm)). Just for reference, the support is enabled by default as of __Firefox 52__, __Chrome 57__, __Opera 44__, and __Edge 16__.
+
+## Basis Universal feature support notes
+
+Most of the essential Basis transcoder features are exposed and implemented for Java (including file validation, transcoding to all the necessary formats, and Basis file/image information lookup methods).
+
+Transcoding from both intermediate formats (__ETC1S__ low-medium quality and __UASTC__ high quality) works as intended.
+
+### Texture channel layout types
+
+There are four possible texture channel layout types:
+
+1. __RGBA__ - three-color component images with full alpha channel support
+2. __RGB__ - fully opaque three-color component images
+3. __RG__ or __XY__ - luminance and alpha
+4. __R__ - luminance or alpha
+
+The __RGBA__ and __RGB__ types are the general case.
+For these, there are the most variety of transcoder texture formats supported.
+
+The rest two are considered as niche types, and the transcoder has fewer options.
+
+Please be aware, that at the moment the [default texture format selector](#texture-format-resolution-strategy) doesn't recognize __RG__ and __R__ texture types and they will be treated as __RGBA__ and __RGB__ respectively. If you need support for them, provide a custom selector implementation.
+
+### Basis texture types
+
+Basis supports five different texture types:
+
+1. __Regular 2D__ - an arbitrary array of 2D RGB or RGBA images with optional mipmaps, array size = # images, each image may have a different resolution and # of mipmap levels.
+2. __Regular 2D array__ - an array of 2D RGB or RGBA images with optional mipmaps, array size = # images, each image has the same resolution and mipmap levels.
+3. __Cubemap array__ - an array of cubemap levels, total # of images must be divisible by 6, in X+, X-, Y+, Y-, Z+, Z- order, with optional mipmaps.
+4. __Video frames__ - an array of 2D video frames, with optional mipmaps, # frames = # images, each image has the same resolution and # of mipmap levels.
+5. __volume__ - a 3D texture with optional mipmaps, Z dimension = # images, each image has the same resolution and # of mipmap levels.
+    
+Out of which support only for __Regular 2D__ is implemented through __BasisuTextureData__ for LibGDX textures.
+
+> I'm not very familiar with 3D related formats like __Cubemap array__ and skipped them for now.
+The Basis data for those is fully available from `basisu-wrapper`, only the LibGDX support is missing.
+If you're in demand for those or may assist with the implementation, please come forward and open an issue with the details.
+
+## Texture format notes
+
+Basis Universal texture transcoder supports a bunch of very different GPU compressed texture formats.
+Some of them impose very important limitations and cannot be used (cannot be transcoded to on runtime) unless all the requirements are met.
+
+To have the widest possible native format support, it's highly recommended to encode intermediate Basis images that comply with __ALL__ of these specifics.
+
+- __PVRTC1__ requires square textures with the power of two sides.
+- __BC1_RGB__ and __BC3_RGBA__ require textures with sides to be multiple of four (superseded by PVRTC1 requirements).
+
+> To round up, always use square images with the power of two dimensions for Basis texture assets.
+
+## Texture format resolution strategy
+
+Basis textures can be easily transcoded to many other texture formats. This is great, but another challenge here is to transcode to the format that is most appropriate for the current runtime platform.
+
+Here are all the criteria we should respect in making such a decision (the most important ones at the top):
+- Intermediate texture channel layout (RGBA/RGB/RG/R).
+- OpenGL/hardware support for the texture format.
+- Basis transcoder support for the texture format (to save up on the native library size, some of the transcoder formats are disabled per platform).
+- Whether the intermediate image meets the target format's requirements (see [Texture format notes](#texture-format-notes) section).
+- The target format quality loss and/or transcoding speed.
+
+The [default texture format selector](basisu-gdx/src/com/crashinvaders/basisu/gdx/BasisuTextureFormatSelector.java#L40) logic is implemented based on these. That way it should always pick the best available option. In case there are none of the texture formats are passing the check, the selector fallbacks to the uncompressed texture formats (RGBA8888/RGB888). Which are pretty much regular LibGDX texture formats and have guaranteed support on all the platforms.
+
+If your case requires a different selection strategy, you can always create a custom implementation for `BasisuTextureFormatSelector` and use it selectively with `BasisuTextureData#setTextureFormatSelector()` methods or set it to be used as the default selector by updating the `BasisuTextureDatastatic#defaultFormatSelector` static field.
+
+> Please be aware, that at the moment the default texture format selector doesn't recognize __RG__ and __R__ texture types and they will be treated as __RGBA__ and __RGB__ respectively. If you need support for them, provide a custom selector implementation.
 
 ## Native dependencies
 
