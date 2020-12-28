@@ -35,6 +35,26 @@ You can use [the command-line tool](https://github.com/BinomialLLC/basis_univers
 As of now, there's no a web-based encoder or a desktop GUI tool to convert to the Basis format.
 But don't be discouraged, there is a number of convenient options that will be available for that purpose soon.
 
+## Basis Universal feature support notes
+
+Most of the essential Basis transcoder features are exposed and implemented for Java (including file validation, transcoding to all the necessary formats, and Basis file/image information lookup methods).
+
+Transcoding from both intermediate formats (__ETC1S__ low-medium quality and __UASTC__ high quality) works as intended.
+
+Basis supports 5 different texture types:
+
+1. __Regular 2D__ - an arbitrary array of 2D RGB or RGBA images with optional mipmaps, array size = # images, each image may have a different resolution and 
+2. __Regular 2D array__ - an array of 2D RGB or RGBA images with optional mipmaps, array size = # images, each image has the same resolution and mipmap levels
+3. __Cubemap array__ - an array of cubemap levels, total # of images must be divisible by 6, in X+, X-, Y+, Y-, Z+, Z- order, with optional mipmaps
+4. __Video frames__ - an array of 2D video frames, with optional mipmaps, # frames = # images, each image has the same resolution and # of mipmap levels
+5. __volume__ - a 3D texture with optional mipmaps, Z dimension = # images, each image has the same resolution and # of mipmap levels
+    
+Out of which support only for __Regular 2D__ is implemented through __BasisuTextureData__ for LibGDX textures.
+
+> I'm not very familiar with 3D related formats like __Cubemap array__ and skipped them for now.
+The data for those is fully available from `basisu-wrapper`, only the LibGDX support is missing.
+If you're in demand for those or may assist with the implementation, please come forward and open an issue with details.
+
 ## Platform limitations
 
 Here's a list of the limitations you should be aware of when using this library (on top of regular LibGDX backend limitations).
@@ -50,7 +70,6 @@ Some of them impose very important limitations and cannot be used (cannot be tra
 To have the widest possible native format support, it's highly recommended to encode intermediate Basis images that comply with __ALL__ of these specifics.
 
 - __PVRTC1__ requires square textures with the power of two sides.
-- __PVRTC1__ transparency is very poor and only suitable for pre-multiplied alpha (check that).
 - __BC1_RGB__ & __BC3_RGBA__ require textures with sides to be multiple of four (superseded by PVRTC1 requirements).
 
 > To round up, always use square images with the power of two dimensions for Basis texture assets.
