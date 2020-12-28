@@ -4,7 +4,7 @@ Provides a pure Java (no any depencies) abstraction layer over the native libs.
 The module uses [Basis Universal C/C++ code](https://github.com/BinomialLLC/basis_universal) 
 and [JNI](https://en.wikipedia.org/wiki/Java_Native_Interface) wrappers to connect to LibGDX cross-platform code.
 
-To manage native build configration for all the platforms (except for web, [read notes below](#Web)) we use [jnigen](https://github.com/libgdx/gdx-jnigen) Gradle plugin.
+To manage native build configration for all the platforms (except for the web, [read notes below](#Web)) we use [jnigen](https://github.com/libgdx/gdx-jnigen) Gradle plugin.
 See `//region jnigen configuration` section of [`build.gradle`](build.gradle#L28) file for configuration details.
 
 To streamline the native library assembly process, there are bunch of `assemble-natives-<platform>.[sh|bat]` scipts available in the project's root dir.
