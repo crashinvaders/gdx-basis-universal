@@ -1,10 +1,39 @@
 # GDX Basis Universal
 
-Cross-platform support for Binomial's [Basis Universal](https://github.com/BinomialLLC/basis_universal) portable super-compressed GPU textures.
+Cross-platform support for Binomial's [Basis Universal](https://github.com/BinomialLLC/basis_universal) portable supercompressed GPU textures.
 
-It allows you to use the same [compressed texture](https://en.wikipedia.org/wiki/Texture_compression) assets (`.basis`) for all the LibGDX backends while saving tons of GPU RAM on runtime by using platforms' natively supported GPU compression.
+Now you can supply the same [compressed texture](https://en.wikipedia.org/wiki/Texture_compression) assets (`.basis`) for all the LibGDX backends and save sinigicant amount of RAM by using platforms' natively supported GPU compression.
 
-_Work in progress. The first beta release is on the way..._
+<details>
+    <summary>
+        If you've never heard of Basis Universal project or unfamiliar with the "supercompressed texture" term, this is how it works...
+    </summary>
+    
+#### The problem
+When using traditional image formats (like PNG, JPG, TIFF, etc), they all get decoded to plain (uncompressed) RGB/RGBA representation before supplied to the OpenGL and loaded to the RAM. This is mostly fine, but once you get to the point when you need to use lots of simultaneously loaded huge textures you may easily run out of memory (especially on mobile devices). To give a better idea, a 4096x4096 RGBA32 (8 bits per channel) texture being loaded into the GPU will hold roughly 67.1MB of memory. Stack a few of those and you're pretty much screwed.
+    
+#### The solution(?)
+To address this issue many GPU manufacturers introduced their texture compression formats that are available on their hardware.
+Some may help you to chop down the memory footprint with the compression ratio of impressive 8 times, if you're agreed on a small trade-off in image quality (most of the texture compression formats are lossy).
+    
+The only downside is there is no one universal texture compression format that guarantees to work on every single platform/hardware. And if you're up for the game of supplying GPU compressed textures for your game, you have to pack your distributions with a whole lot of specific types of compressed textures per device hardware support for them (to mention, what in a way [Unity practices](https://docs.unity3d.com/Manual/class-TextureImporterOverride.html) for quite a while).
+    
+#### The compromise
+To address this issue, [Binomial LLC](http://www.binomial.info/) founded their Basis Universal project.
+The solution is to use one intermediate compressed texture format (supercompressed) and transcode it on runtime to one of the supported texture formats by the running platform.
+The Basis transcoder is capable of transcoding a Basis texture to one of the dozen native GPU compressed formats and covers all the modern platforms that way.
+There's a little overhead price for processing the texture data, but the transcoding operation is highly optimized and, to say, only should happen once upon asset loading.
+    
+The transcoder uses a number of transcoding tables to port data across different formats. Some of them pretty bulky and thus being dropped from compilation for specific platforms (e.g. there's no reason to support mobile-only formats like PVRTC1 on desktop). So this library maintains the selection logic as well, leaving you with a simple portable compressed texture format that will transparently work everywhere.
+    
+Basis Universal is backed by Google, open-source, and now available to everyone!
+</details>
+    
+### Cool, how do I turn my images into Basis textures?
+You can use [the command-line tool](https://github.com/BinomialLLC/basis_universal/releases) or build the encoder from [the sources](https://github.com/BinomialLLC/basis_universal) yourself.
+
+As of now, there's no a web-based encoder or a desktop GUI tool to convert to the Basis format.
+But don't be discouraged, there is a number of convenient options that will be available for that purpose soon.
 
 ## Platform limitations
 
