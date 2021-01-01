@@ -11,7 +11,7 @@ Use the same intermediate [compressed texture](https://en.wikipedia.org/wiki/Tex
     </summary>
     
 #### The problem
-When using traditional image formats (like PNG, JPG, TIFF, etc), they all get decoded to plain (uncompressed) RGB/RGBA representation before supplied to the OpenGL and loaded to the RAM. This is mostly fine, but once you get to the point when you need to use lots of simultaneously loaded huge textures you may easily run out of memory (especially on mobile devices). To give a better idea, a 4096x4096 RGBA32 (8 bits per channel) texture being loaded into the GPU will hold roughly 64MB of memory. Stack a few of those and you're pretty much screwed.
+When using traditional image formats (like PNG, JPG, TIFF, etc), they all get decoded to plain (uncompressed) RGB/RGBA representation before supplied to the OpenGL and loaded to the RAM. This is mostly fine, but once you get to the point when you need to use lots of simultaneously loaded huge textures you may easily run out of memory (especially on mobile devices). To give a better idea, a 4096x4096 RGBA32 (8 bits per channel) texture, being loaded into the GPU, holds roughly 64MB of memory. Stack a few of those and you're pretty much screwed.
     
 #### The solution(?)
 To address this issue many GPU manufacturers introduced their texture compression formats that are available on their hardware.
