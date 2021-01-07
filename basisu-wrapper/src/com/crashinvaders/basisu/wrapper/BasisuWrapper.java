@@ -14,7 +14,7 @@ public class BasisuWrapper {
 
     /*JNI
 
-    #include<cstring>
+    #include <cstring>
 
     #include "basisu_transcoder.h"
     #include "basisu_wrapper.h"
@@ -81,8 +81,7 @@ public class BasisuWrapper {
         std::vector<uint8_t> transcodedData;
 
         if (!basisuWrapper::transcode(transcodedData, data, dataSize, imageIndex, levelIndex, format)) {
-            basisuUtils::logError(LOG_TAG, "Error during image transcoding!");
-            basisuUtils::throwException(env, "Error during image transcoding!");
+            basisuUtils::throwException(env, "Error during image transcoding.");
             return 0;
         };
 

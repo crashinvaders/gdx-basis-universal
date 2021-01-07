@@ -109,4 +109,31 @@ public class TestUtils {
     public static boolean isSquareAndPowerOfTwo(int width, int height) {
         return width == height && (width != 0 && (width & width - 1) == 0);
     }
+
+    public static void writeBytesToTextFile(ByteBuffer bytes, String path) {
+        try (PrintWriter pw = new PrintWriter(path, "UTF-8")) {
+
+            bytes.position(0);
+            while (bytes.hasRemaining()) {
+                pw.append("0x");
+
+                String value = Integer.toHexString(bytes.get());
+                if (value.length() > 2) {
+                    value = value.substring(value.length() - 2);
+                }
+                while (value.length() < 2) {
+                    value = "0" + value;
+                }
+
+                pw.append(value);
+
+                if (bytes.hasRemaining()) {
+                    pw.append(", ");
+                }
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
