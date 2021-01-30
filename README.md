@@ -31,10 +31,11 @@ Basis Universal is backed by Google, open-source, and now available to everyone!
 </details>
     
 ### Cool, how do I turn my images into Basis textures?
-You can use the [command-line tool](https://github.com/BinomialLLC/basis_universal/releases) or build the encoder from the [sources](https://github.com/BinomialLLC/basis_universal) yourself.
+[GDX Texture Packer GUI](https://github.com/crashinvaders/gdx-texture-packer-gui) has full support for encoding the atlases as Basis Universal files.
 
-As of now, there's no a web-based encoder or a desktop GUI tool to convert to the Basis format.
-But don't be discouraged, there is a number of convenient options that will be available for that purpose soon.
+You can also use the official [command-line tool](https://github.com/BinomialLLC/basis_universal/releases) or build the encoder from the [sources](https://github.com/BinomialLLC/basis_universal) yourself.
+
+There could be some other options (even potentially encoding in the browser), but I'm not aware ATM and it's worth googling.
 
 > Please read the ["Texture format notes"](#texture-format-notes) and ["Feature support notes"](#basis-universal-feature-support-notes) sections before encoding your textures.
 
