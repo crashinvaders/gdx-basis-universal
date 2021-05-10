@@ -96,7 +96,7 @@ dependencies {
 
 #### Web module ([GWT](https://github.com/libgdx/libgdx/tree/master/backends/gdx-backends-gwt) backend)
 
-As usual, GWT backed requires a bit more dance around.
+As usual, GWT module requires a bit more dance around.
 You need to declare an extra dependency and the sources for all the used jars.
 ```gradle
 dependencies {
