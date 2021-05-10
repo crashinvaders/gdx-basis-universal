@@ -217,3 +217,11 @@ If your case requires a different selection strategy, you can always create a cu
 The project is using [Basis Universal C/C++ code](https://github.com/BinomialLLC/basis_universal) and [JNI](https://en.wikipedia.org/wiki/Java_Native_Interface) wrappers to connect to LibGDX cross-platform code. [basisu-wrapper](basisu-wrapper) module provides a pure Java (no dependencies) abstraction layer over the native libs.
 
 Read more about the module and the native library building notes on [the module's page](basisu-wrapper).
+
+
+## Development notes
+1. `basisu-gdx-gwt` module is broken seems to be broken if compiled with JDK 9+.
+   It's recommended to build the entire project with JDK 8. 
+   There are number of _"cannot find symbol"_ errors pointing to GWT emulated classes like 
+   `HasArrayBufferView`, `DirectReadWriteByteBuffer` and even locally emulated `BasisuGwtBufferUtil`. 
+   The problem may be related to the Java 9+ Jigsaw project - https://stackoverflow.com/questions/60204182 
