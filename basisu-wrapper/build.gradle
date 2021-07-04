@@ -98,6 +98,9 @@ jnigen {
     add(Linux, x64, ARM) {
         cppFlags += desktopUnsupportedFormats
     }
+    add(MacOsX, x64, ARM) {
+        cppFlags += desktopUnsupportedFormats
+    }
     add(MacOsX, x64) {
         cppFlags += desktopUnsupportedFormats
     }
