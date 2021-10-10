@@ -59,7 +59,7 @@ Read [the official LibGDX wiki](https://github.com/libgdx/libgdx/wiki/jnigen#lin
 We use [Emscripten](https://emscripten.org/) to compile C/C++ code to WASM/JS and then connect it through [JSNI](http://www.gwtproject.org/doc/latest/DevGuideCodingBasicsJSNI.html) to the LibGDX GWT backend.
 
 It's important to note here that we don't use __jnigen__ for configuring [the Ant build script for web natives](jni/build-web.xml), __jnigen__ doesn't support this platform.
-And thus it's all hand-written and needs to be kept in sync with the main configuration in `build.gradle`.
+And thus it's all hand-written and needs to be kept in sync with jnigen configuration for other platforms in `build.gradle`.
 
 > The build was only tested with Emscripten SDK 2.0.9.
 
