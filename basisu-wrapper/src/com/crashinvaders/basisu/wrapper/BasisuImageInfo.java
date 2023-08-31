@@ -36,15 +36,14 @@ public class BasisuImageInfo implements Closeable {
         addr = 0;
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        if (addr != 0) {
-            System.err.println(this + " object was GC'ed but never closed!");
-            close();
-        }
-        super.finalize();
-    }
-
+//    @Override
+//    protected void finalize() throws Throwable {
+//        if (addr != 0) {
+//            System.err.println(this + " object was GC'ed but never closed!");
+//            close();
+//        }
+//        super.finalize();
+//    }
 
     public int getImageIndex() { return jniGetImageIndex(addr); }
     private native int jniGetImageIndex(long addr); /*
