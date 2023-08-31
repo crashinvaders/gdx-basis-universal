@@ -5,6 +5,7 @@ import com.badlogic.gdx.assets.AssetLoaderParameters;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.AsynchronousAssetLoader;
 import com.badlogic.gdx.assets.loaders.FileHandleResolver;
+import com.badlogic.gdx.assets.loaders.TextureLoader;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
@@ -23,7 +24,7 @@ import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
  * <br/>
  * And after that call to <code>assetManager.load("MyImage.basis", Texture.class);</code> will post the texture for loading.
  */
-public class BasisuTextureLoader extends AsynchronousAssetLoader<Texture, BasisuTextureLoader.BasisuTextureParameter> {
+public class BasisuTextureLoader extends AsynchronousAssetLoader<Texture, TextureLoader.TextureParameter> {
 
     BasisuTextureData textureData;
 
@@ -34,13 +35,13 @@ public class BasisuTextureLoader extends AsynchronousAssetLoader<Texture, Basisu
         BasisuGdxUtils.initSupportedGlTextureFormats();
     }
 
-    public void loadAsync(AssetManager manager, String fileName, FileHandle fileHandle, BasisuTextureParameter parameter) {
+    public void loadAsync(AssetManager manager, String fileName, FileHandle fileHandle, TextureLoader.TextureParameter parameter) {
         BasisuTextureData data;
-
-        if (parameter != null) {
-            data = new BasisuTextureData(fileHandle, parameter.imageIndex, parameter.mipmapLevel);
-            if (parameter.formatSelector != null) {
-                textureData.setTextureFormatSelector(parameter.formatSelector);
+        if (parameter instanceof BasisuTextureParameter) {
+            BasisuTextureParameter basisParameter = (BasisuTextureParameter) parameter;
+            data = new BasisuTextureData(fileHandle, basisParameter.imageIndex, basisParameter.mipmapLevel);
+            if (basisParameter.formatSelector != null) {
+                textureData.setTextureFormatSelector(basisParameter.formatSelector);
             }
         } else {
             data = new BasisuTextureData(fileHandle);
@@ -49,7 +50,7 @@ public class BasisuTextureLoader extends AsynchronousAssetLoader<Texture, Basisu
         textureData = data;
     }
 
-    public Texture loadSync(AssetManager manager, String fileName, FileHandle fileHandle, BasisuTextureParameter parameter) {
+    public Texture loadSync(AssetManager manager, String fileName, FileHandle fileHandle, TextureLoader.TextureParameter parameter) {
         Texture texture = new Texture(this.textureData);
         this.textureData = null;
 
@@ -61,18 +62,17 @@ public class BasisuTextureLoader extends AsynchronousAssetLoader<Texture, Basisu
         return texture;
     }
 
-    public Array<AssetDescriptor> getDependencies(String fileName, FileHandle fileHandle, BasisuTextureParameter parameter) {
+    public Array<AssetDescriptor> getDependencies(String fileName, FileHandle fileHandle, TextureLoader.TextureParameter parameter) {
         return null;
     }
 
-    public static class BasisuTextureParameter extends AssetLoaderParameters<Texture> {
+    /**
+     * Parameter class is an optional extension for the standard {@link com.badlogic.gdx.assets.loaders.TextureLoader.TextureParameter}.
+     */
+    public static class BasisuTextureParameter extends TextureLoader.TextureParameter {
         public int imageIndex = 0;
         public int mipmapLevel = 0;
         public BasisuTextureFormatSelector formatSelector = null;
-        public TextureFilter minFilter = TextureFilter.Nearest;
-        public TextureFilter magFilter = TextureFilter.Nearest;
-        public TextureWrap wrapU = TextureWrap.ClampToEdge;
-        public TextureWrap wrapV = TextureWrap.ClampToEdge;
 
         public BasisuTextureParameter() {
         }
