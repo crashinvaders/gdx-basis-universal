@@ -1,11 +1,3 @@
-apply plugin: 'java-library'
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
-
-compileJava.options.incremental = true
 compileJava.options.headerOutputDirectory.set(file('jni'))
 
 sourceSets.main.java.srcDirs += ['src']
@@ -84,9 +76,6 @@ jnigen {
         compilerSuffix = '.exe'
 
         linkerFlags += ' -s '   // Strip debug symbols.
-        cppFlags += desktopUnsupportedFormats
-    }
-    add(Linux, x32) {
         cppFlags += desktopUnsupportedFormats
     }
     add(Linux, x64) {

@@ -1,4 +1,4 @@
 #!/bin/bash
 mkdir build
 cd build || exit
-cmake .. && cmake --build . && cd .. && ./build/jnigen-test
+cmake .. && cmake --build . && cd .. && ./build/basisu-wrapper-test

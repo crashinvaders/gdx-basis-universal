@@ -11,12 +11,14 @@ if(EMSCRIPTEN)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MODULARIZE=1 -s EXPORT_NAME=createBasisuGdxModule -s ENVIRONMENT=web -s WASM=1 --closure 1 --bind -mnontrapping-fptoint")
 endif()
 
-include_directories("include")
+# add_subdirectory("basis-universal")
+
+include_directories("." "basis-universal/transcoder")
 
 file(GLOB SOURCES
-    "src/basisu_native_utils.cpp"
-    "src/basisu_transcoder.cpp"
-    "src/basisu_wrapper.cpp"
+    "basisu_native_utils.cpp"
+    "basisu_wrapper.cpp"
+    "basis-universal/transcoder/basisu_transcoder.cpp"
 )
 
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCES})

@@ -45,31 +45,32 @@ dependencies {
     }
 }
 
-def HttpFileServer server = null
-def httpFilePort = 8080
-task startHttpServer() {
-    dependsOn draftCompileGwt
-    String output = project.buildDir.path + "/gwt/draftOut"
-    doLast {
-        copy {
-            from "webapp"
-            into output
-        }
-        copy {
-            from "war"
-            into output
-        }
-        server = new SimpleHttpFileServerFactory().start(new File(output), httpFilePort)
-        println "Server started in directory ${server.getContentRoot()}, http://localhost:${server.getPort()}/index.html"
-    }
-}
-
-task superDev(type: org.wisepersist.gradle.plugins.gwt.GwtSuperDev) {
-    dependsOn startHttpServer
-    doFirst {
-        gwt.modules = gwt.devModules
-    }
-}
+//TODO Find a Gradle 7+ web server replacement.
+//def HttpFileServer server = null
+//def httpFilePort = 8080
+//task startHttpServer() {
+//    dependsOn draftCompileGwt
+//    String output = project.buildDir.path + "/gwt/draftOut"
+//    doLast {
+//        copy {
+//            from "webapp"
+//            into output
+//        }
+//        copy {
+//            from "war"
+//            into output
+//        }
+//        server = new SimpleHttpFileServerFactory().start(new File(output), httpFilePort)
+//        println "Server started in directory ${server.getContentRoot()}, http://localhost:${server.getPort()}/index.html"
+//    }
+//}
+//
+//task superDev(type: org.wisepersist.gradle.plugins.gwt.GwtSuperDev) {
+//    dependsOn startHttpServer
+//    doFirst {
+//        gwt.modules = gwt.devModules
+//    }
+//}
 
 task dist(dependsOn: [clean, compileGwt]) {
     doLast {

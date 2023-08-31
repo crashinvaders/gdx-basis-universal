@@ -220,7 +220,7 @@ Read more about the module and the native library building notes on [the module'
 
 
 ## Development notes
-1. `basisu-gdx-gwt` module is broken seems to be broken if compiled with JDK 9+.
+1. `basisu-gdx-gwt` module seems to be broken if compiled with JDK 9+.
    It's recommended to build the entire project with JDK 8. 
    There are number of _"cannot find symbol"_ errors pointing to GWT emulated classes like 
    `HasArrayBufferView`, `DirectReadWriteByteBuffer` and even locally emulated `BasisuGwtBufferUtil`. 

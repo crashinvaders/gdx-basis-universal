@@ -3,7 +3,6 @@ buildscript {
         google()
         mavenLocal()
         mavenCentral()
-        jcenter()
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
         maven { url 'https://plugins.gradle.org/m2/' }
     }
@@ -19,16 +18,16 @@ allprojects {
         google()
         mavenLocal()
         mavenCentral()
-        jcenter()
         maven { url "https://repo1.maven.org/maven2/" }
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         maven { url "https://oss.sonatype.org/content/repositories/releases/" }
     }
 
     ext {
+        projectGroup = 'com.crashinvaders.basisu'
         versionName = '0.1.0'
-        snapshotVersion = false
-        version = "$versionName${snapshotVersion ? '-SNAPSHOT' : ''}"
+        isSnapshot = false
+        version = "$versionName${isSnapshot ? '-SNAPSHOT' : ''}"
     }
 }
 
@@ -51,15 +50,28 @@ resolveProperty('ossrhPassword', 'OSSRH_PASSWORD')
 resolveProperty('githubUsername', 'GITHUB_USERNAME')
 resolveProperty('githubAccessToken', 'GITHUB_ACCESS_TOKEN')
 
-def basisuLibProjects = subprojects.findAll { subproject -> subproject.name.startsWith('basisu-') }
+def basisuLibProjects = [ project(':basisu-wrapper'), project(':basisu-gdx'), project(':basisu-gdx-gwt') ]
 
 configure(basisuLibProjects) {
     apply plugin: 'java-library'
-    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
     apply plugin: 'signing'
 
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    compileJava.options.incremental = true
+
     version = ext.version
-    group 'com.crashinvaders.basisu'
+    group = ext.projectGroup
+
+    jar {
+        from project.sourceSets.main.output
+        from(project.sourceSets.main.allSource) {
+            include '**/*.xml'
+        }
+        baseName = project.name
+        duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    }
 
     task sourcesJar(type: Jar) {
         archiveClassifier.set('sources')
@@ -71,75 +83,91 @@ configure(basisuLibProjects) {
         from javadoc.destinationDir
     }
 
-    artifacts {
-        archives jar
-        archives sourcesJar
-        archives javadocJar
+    java {
+        withJavadocJar()
+        withSourcesJar()
     }
 
-    signing {
-        required { !snapshotVersion && gradle.taskGraph.hasTask("uploadArchives") }
-        sign configurations.archives
-    }
-
-    uploadArchives {
+    publishing {
         repositories {
-            mavenDeployer {
-                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                    authentication(userName: ossrhUsername, password: ossrhPassword)
+            maven {
+                def urlRelease = '"https://oss.sonatype.org/service/local/staging/deploy/maven2/"'
+                def urlSnapshot = 'https://oss.sonatype.org/content/repositories/snapshots/'
+                url = isSnapshot ? urlSnapshot : urlRelease
+                credentials {
+                    username ossrhUsername
+                    password ossrhPassword
                 }
+            }
 
-                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                    authentication(userName: ossrhUsername, password: ossrhPassword)
-                }
+//              maven {
+//                  name = "MavenLocalExplicit"
+//                  url = "file://${System.properties['user.home']}/.m2/repository"
+//              }
 
-//                // Read about setting up a personal GitHub access token if you don't have one.
-//                // https://docs.github.com/en/free-pro-team@latest/packages/learn-github-packages/about-github-packages#authenticating-to-github-packages
-//                repository(url: "https://maven.pkg.github.com/crashinvaders/gdx-basis-universal") {
-//                    authentication(userName: project.githubUsername, password: project.githubAccessToken)
-//                }
+//              // Read about setting up a personal GitHub access token if you don't have one.
+//              // https://docs.github.com/en/free-pro-team@latest/packages/learn-github-packages/about-github-packages#authenticating-to-github-packages
+//              repository(url: "https://maven.pkg.github.com/crashinvaders/gdx-basis-universal") {
+//                  authentication(userName: project.githubUsername, password: project.githubAccessToken)
+//              }
+        }
 
-                pom.project {
+        publications {
+            mavenJava(MavenPublication) {
+
+                artifactId = project.name
+                from components.java
+
+                pom {
                     name = project.name
-                    artifactId = project.name
                     description = project.description
-                    packaging = 'jar'
                     url = 'http://github.com/crashinvaders/gdx-basis-universal'
 
                     licenses {
                         license {
-                            name 'The Apache License, Version 2.0'
-                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
                         }
-                    }
-
-                    scm {
-                        connection 'scm:git:git@github.com:crashinvaders/gdx-basis-universal.git'
-                        developerConnection 'scm:git:git@github.com:crashinvaders/gdx-basis-universal.git'
-                        url 'http://github.com/crashinvaders/gdx-basis-universal'
                     }
 
                     developers {
                         developer {
-                            id 'metaphore'
-                            name 'Anton Chekulaev'
-                            email 'metaphore@crashinvaders.com'
+                            id = 'metaphore'
+                            name = 'Anton Chekulaev'
+                            email = 'metaphore@crashinvaders.com'
                         }
+                    }
+
+                    scm {
+                        connection = 'scm:git:git@github.com:crashinvaders/gdx-basis-universal.git'
+                        developerConnection = 'scm:git:git@github.com:crashinvaders/gdx-basis-universal.git'
+                        url = 'http://github.com/crashinvaders/gdx-basis-universal'
                     }
                 }
             }
         }
     }
 
-    // Invokes uploadArchives task if the version is a snapshot.
-    task uploadSnapshotArchives() {
-        if (!snapshotVersion) {
-            return;
+    signing {
+//      required { !isSnapshot && gradle.taskGraph.hasTask("publish") }
+        sign publishing.publications.mavenJava
+    }
+
+    // Simply using "required" in signing block doesn't work because taskGraph isn't ready yet.
+    gradle.taskGraph.whenReady {
+        tasks.withType(Sign) {
+            onlyIf { !isSnapshot }
+//          onlyIf { !isSnapshot && gradle.taskGraph.hasTask("publish") }
         }
-        dependsOn 'build'
-        dependsOn 'uploadArchives'
+    }
+
+    // Invokes publish task if the version is a snapshot.
+    task publishSnapshot() {
+        if (!isSnapshot) {
+            return
+        }
+        dependsOn project.assemble
+        dependsOn project.publish
     }
 }
 
@@ -148,9 +176,9 @@ task publishAll {
     description 'Publish all the Maven artifacts to the public repos.'
 
     basisuLibProjects.forEach {project ->
-        dependsOn project.uploadArchives
+        dependsOn project.build
+        dependsOn project.publish
     }
-
 }
 
 task publishAllSnapshots {
@@ -159,7 +187,8 @@ task publishAllSnapshots {
             'This task will only be execute if the current version is a snapshot.'
 
     basisuLibProjects.forEach {project ->
-        dependsOn project.uploadSnapshotArchives
+        dependsOn project.build
+        dependsOn project.publishSnapshot
     }
 }
 
@@ -168,6 +197,7 @@ task installAll {
     description 'Installes all the Maven artifacts to the local Maven repo.'
 
     basisuLibProjects.forEach {project ->
-        dependsOn project.install
+        dependsOn project.build
+        dependsOn project.publishToMavenLocal
     }
 }
