@@ -90,6 +90,9 @@ jnigen {
     add(MacOsX, x64) {
         cppFlags += desktopUnsupportedFormats
     }
+    add(MacOsX, x64, ARM) {
+        cppFlags += desktopUnsupportedFormats
+    }
     add(Android) {
         linkerFlags += ' -llog '  // We use "log.h" lib and should explicitly declare it.
 
@@ -104,7 +107,6 @@ jnigen {
     }
     add(IOS) {
         cppFlags += ' -stdlib=libc++ '  // iOS compiler toolchain is pretty whiny about this...
-
 
         // iOS
         // SUPPORTED TEXTURES: [ASTC, ETC1, ETC2, PVRTC1]
