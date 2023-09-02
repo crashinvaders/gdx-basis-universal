@@ -1,15 +1,17 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.2"
+    namespace = "com.crashinvaders.basisu.demo"
+    compileSdk = 33
+    buildToolsVersion "33.0.2"
 
     defaultConfig {
-        applicationId "com.crashinvaders.basisu.demo"
-        minSdkVersion 16
-        targetSdkVersion 30
-        versionCode 1
-        versionName version
+        applicationId = "com.crashinvaders.basisu.demo"
+        minSdk = 16
+        targetSdk = 33
+        versionCode = 1
+        versionName = project.version
+        multiDexEnabled = true
 
 //        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -42,8 +44,19 @@ android {
     }
 
     packagingOptions {
+        // Preventing from license violations (more or less):
+        pickFirst 'META-INF/LICENSE.txt'
+        pickFirst 'META-INF/LICENSE'
+        pickFirst 'META-INF/license.txt'
+        pickFirst 'META-INF/LGPL2.1'
+        pickFirst 'META-INF/NOTICE.txt'
+        pickFirst 'META-INF/NOTICE'
+        pickFirst 'META-INF/notice.txt'
+        // Excluding unnecessary meta-data:
         exclude 'META-INF/robovm/ios/robovm.xml'
-        exclude 'LICENSE.txt'
+        exclude 'META-INF/DEPENDENCIES.txt'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/dependencies.txt'
     }
 }
 
@@ -53,7 +66,6 @@ dependencies {
     implementation project(':demo:core')
 
     implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
-    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi"
     natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
     natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-arm64-v8a"
     natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
@@ -87,17 +99,15 @@ dependencies {
 // the natives configuration, and extracts them to the proper libs/ folders
 // so they get packed with the APK.
 task copyAndroidNatives() {
-    file("libs/armeabi/").mkdirs();
-    file("libs/armeabi-v7a/").mkdirs();
-    file("libs/arm64-v8a/").mkdirs();
-    file("libs/x86_64/").mkdirs();
-    file("libs/x86/").mkdirs();
+    file("libs/armeabi-v7a/").mkdirs()
+    file("libs/arm64-v8a/").mkdirs()
+    file("libs/x86_64/").mkdirs()
+    file("libs/x86/").mkdirs()
 
     configurations.natives.files.each { jar ->
         def outputDir = null
-        if(jar.name.endsWith("natives-arm64-v8a.jar")) outputDir = file("libs/arm64-v8a")
         if(jar.name.endsWith("natives-armeabi-v7a.jar")) outputDir = file("libs/armeabi-v7a")
-        if(jar.name.endsWith("natives-armeabi.jar")) outputDir = file("libs/armeabi")
+        if(jar.name.endsWith("natives-arm64-v8a.jar")) outputDir = file("libs/arm64-v8a")
         if(jar.name.endsWith("natives-x86_64.jar")) outputDir = file("libs/x86_64")
         if(jar.name.endsWith("natives-x86.jar")) outputDir = file("libs/x86")
         if(outputDir != null && jar.exists()) {
@@ -109,11 +119,8 @@ task copyAndroidNatives() {
         }
     }
 }
-
-tasks.whenTaskAdded { packageTask ->
-    if (packageTask.name.contains("package")) {
-        packageTask.dependsOn 'copyAndroidNatives'
-    }
+tasks.matching { it.name.contains("merge") && it.name.contains("JniLibFolders") }.configureEach { packageTask ->
+    packageTask.dependsOn 'copyAndroidNatives'
 }
 
 task run(type: Exec) {
@@ -136,27 +143,4 @@ task run(type: Exec) {
 
     def adb = path + "/platform-tools/adb"
     commandLine "$adb", 'shell', 'am', 'start', '-n', 'com.crashinvaders.basisu.demo/com.crashinvaders.basisu.demo.android.AndroidLauncher'
-}
-
-// sets up the Android Idea project, using the old Ant based build.
-idea {
-    module {
-        sourceDirs += file("src");
-        scopes = [ COMPILE: [plus:[project.configurations.compile]]]
-
-        iml {
-            withXml {
-                def node = it.asNode()
-                def builder = NodeBuilder.newInstance();
-                builder.current = node;
-                builder.component(name: "FacetManager") {
-                    facet(type: "android", name: "Android") {
-                        configuration {
-                            option(name: "UPDATE_PROPERTY_FILES", value:"true")
-                        }
-                    }
-                }
-            }
-        }
-    }
 }

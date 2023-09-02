@@ -5,13 +5,13 @@ dependencies {
     implementation "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion"
 }
 
-compileJava {
-    doFirst {
-        def javaVersion = JavaVersion.current()
-        if (javaVersion.ordinal() > JavaVersion.VERSION_1_8.ordinal()) {
-            throw new RuntimeException("The \"basisu-gdx-gwt\" can only be built with JDK 8. " +
-                    "You're using JDK $javaVersion, which is newer than the maximum supported JDK for the module. " +
-                    "Please read the dev notes section at https://github.com/crashinvaders/gdx-basis-universal#development-notes")
-        }
-    }
-}
+//compileJava {
+//    doFirst {
+//        def javaVersion = JavaVersion.current()
+//        if (javaVersion.ordinal() > JavaVersion.VERSION_1_8.ordinal()) {
+//            throw new RuntimeException("The \"basisu-gdx-gwt\" can only be built with JDK 8. " +
+//                    "You're using JDK $javaVersion, which is newer than the maximum supported JDK for the module. " +
+//                    "Please read the dev notes section at https://github.com/crashinvaders/gdx-basis-universal#development-notes")
+//        }
+//    }
+//}
