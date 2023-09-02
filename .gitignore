@@ -18,6 +18,7 @@ robovm-build
 /basisu-wrapper/jni/com_crashinvaders_basisu_wrapper_*.h
 /basisu-wrapper/jni/robovm.xml
 /basisu-wrapper/jni/memcpy_wrap.c
+/basisu-wrapper/jni/Info.plist
 !/basisu-wrapper/jni/build-web.xml
 !/basisu-wrapper/jni/CMakeLists.txt
 
