@@ -41,10 +41,8 @@ Read [the official LibGDX wiki](https://github.com/libgdx/libgdx/wiki/jnigen#lin
     1. `choco install ant`
     2. Add ant's bin dir to the `PATH` (_Chocolatey_ creates an `ant.exe` shortcut file, but __jnigen__ expects `ant.bat` to be on the `PATH`).
 - To build for Win64 target
-    1. `choco install msys2`
-- To build for Win32 target
-    1. Install __MinGW32__. The installers are available from their [distribution page](https://sourceforge.net/projects/mingw/files/Installer/).
-    2. Make sure that `g++.exe`, `gcc.exe`, `strip.exe`, and `ar.exe` are discoverable from the `PATH`.
+    1. Download and unpack [MinGW64](https://github.com/niXman/mingw-builds-binaries/releases/download/13.1.0-rt_v11-rev1/x86_64-13.1.0-release-posix-seh-msvcrt-rt_v11-rev1.7z) or the latest release. It's important to download `posix` version of MinGW distribution.
+    2. Make sure `g++.exe`, `gcc.exe`, `strip.exe`, and `ar.exe` are discoverable from the `PATH`
 
 #### macOS
 > To be added soon
