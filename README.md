@@ -125,18 +125,27 @@ Texture myTexture = new Texture(new BasisuTextureData(Gdx.files.internal("MyText
 
 From now on, it's safe to use the texture instance as usual and it already should hold the data transcoded to the best suited native GPU compressed texture format for your platform.
 
-If you're using `AssetManager` to load game textures, you can easily integrate with it as well using `BasisuTextureLoader` class.
+#### Asset manager integration
+
+If you're using `AssetManager` to load game asset, you can easily integrate with it as well using `BasisuTextureLoader` class.
 
 ```java
 // Register the texture loader for the ".basis" file extension.
 assetManager.setLoader(Texture.class, ".basis", new BasisuTextureLoader(assetManager.getFileHandleResolver()));
-// ...
+
 // Post your texture assets for loading as usual.
 assetManager.load("MyTexture.basis", Texture.class);
-// ...
-// When the asset manager has finished loading, retrieve your texture as usual.
+
+// You can also use basis-texture-based atlases.
+The Basis textures will be automatically resolved and loaded.
+assetManager.load("MyAtlas.atlas", TextureAtlas.class);
+
+// When the asset manager has finished loading, retrieve the assets as usual.
 Texture myTexture = assetManager.get("MyTexture.basis", Texture.class);
+TextureAtlas myAtlas = assetManager.get("MyAtlas.atlas", TextureAtlas.class);
 ```
+
+> You can use [`gdx-texture-packer-gui`](https://github.com/crashinvaders/gdx-texture-packer-gui) to create Basis based texture atlases.
 
 ## Platform limitations
 
