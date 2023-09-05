@@ -135,9 +135,8 @@ assetManager.setLoader(Texture.class, ".basis", new BasisuTextureLoader(assetMan
 
 // Post your texture assets for loading as usual.
 assetManager.load("MyTexture.basis", Texture.class);
-
 // You can also use basis-texture-based atlases.
-The Basis textures will be automatically resolved and loaded.
+// The Basis textures will be automatically resolved and loaded.
 assetManager.load("MyAtlas.atlas", TextureAtlas.class);
 
 // When the asset manager has finished loading, retrieve the assets as usual.
