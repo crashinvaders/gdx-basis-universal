@@ -3,7 +3,7 @@
 
 Cross-platform support for Binomial's [Basis Universal](https://github.com/BinomialLLC/basis_universal) supercompressed GPU textures.
 
-Use the same intermediate [compressed texture](https://en.wikipedia.org/wiki/Texture_compression) assets (`.basis`) for all the [LibGDX](https://github.com/libgdx/libgdx) backends and save on RAM leveraging the platforms' natively supported GPU compression.
+Use the same intermediate [compressed texture](https://en.wikipedia.org/wiki/Texture_compression) assets (`.basis`) for all the [libGDX](https://github.com/libGDX/libGDX) backends and save on RAM leveraging the platforms' natively supported GPU compression.
 
 <details>
     <summary>
@@ -41,9 +41,9 @@ There could be some other options (even potentially encoding in the browser), bu
 
 ## Using the library
 
-Once added as Maven dependency to LibGDX project modules, the library is pretty easy to deal with, no global initialization calls are required in the code.
+Once added as Maven dependency to libGDX project modules, the library is pretty easy to deal with, no global initialization calls are required in the code.
 
-All the official LibGDX backends are fully supported.
+All the official libGDX backends are fully supported.
 
 ### Connecting dependencies (Gradle)
 
@@ -70,14 +70,14 @@ dependencies {
 }
 ```
 
-#### Desktop module ([LWJGL](https://github.com/libgdx/libgdx/tree/master/backends/gdx-backend-lwjgl), [LWJGL3](https://github.com/libgdx/libgdx/tree/master/backends/gdx-backend-lwjgl3), [Headless](https://github.com/libgdx/libgdx/tree/master/backends/gdx-backend-headless) backends)
+#### Desktop module ([LWJGL](https://github.com/libGDX/libGDX/tree/master/backends/gdx-backend-lwjgl), [LWJGL3](https://github.com/libGDX/libGDX/tree/master/backends/gdx-backend-lwjgl3), [Headless](https://github.com/libGDX/libGDX/tree/master/backends/gdx-backend-headless) backends)
 ```gradle
 dependencies {
     runtimeOnly "com.crashinvaders.basisu:basisu-wrapper:$gdxBasisuVersion:natives-desktop"
 }
 ```
 
-#### Android module ([Android](https://github.com/libgdx/libgdx/tree/master/backends/gdx-backend-android) backend)
+#### Android module ([Android](https://github.com/libGDX/libGDX/tree/master/backends/gdx-backend-android) backend)
 ```gradle
 dependencies {
     natives "com.crashinvaders.basisu:basisu-wrapper:$gdxBasisuVersion:natives-armeabi-v7a"
@@ -87,14 +87,14 @@ dependencies {
 }
 ```
 
-#### iOS module ([RoboVM](https://github.com/libgdx/libgdx/tree/master/backends/gdx-backend-robovm) backend)
+#### iOS module ([RoboVM](https://github.com/libGDX/libGDX/tree/master/backends/gdx-backend-robovm) backend)
 ```gradle
 dependencies {
     runtimeOnly "com.crashinvaders.basisu:basisu-wrapper:$gdxBasisuVersion:natives-ios"
 }
 ```
 
-#### Web module ([GWT](https://github.com/libgdx/libgdx/tree/master/backends/gdx-backends-gwt) backend)
+#### Web module ([GWT](https://github.com/libGDX/libGDX/tree/master/backends/gdx-backends-gwt) backend)
 
 As usual, GWT module requires a bit more dance around.
 You need to declare an extra dependency and the sources for all the used jars.
@@ -117,7 +117,7 @@ Don't forget to add a GWT module entry to your `GdxDefinition.gwt.xml` file.
 
 ### Example code
 
-The library provides transparent support for `Basis` format textures using `BasisuTextureData` class, which acts very similar to LibGDX's implementation of `ETC1TextureData`. The only difference is LibGDX doesn't know how to load `.basis` texture files out of the box, so you have to explicitly use the proper texture data class when creating a texture.
+The library provides transparent support for `Basis` format textures using `BasisuTextureData` class, which acts very similar to libGDX's implementation of `ETC1TextureData`. The only difference is libGDX doesn't know how to load `.basis` texture files out of the box, so you have to explicitly use the proper texture data class when creating a texture.
 
 ```java
 Texture myTexture = new Texture(new BasisuTextureData(Gdx.files.internal("MyTexture.basis")));
@@ -148,9 +148,9 @@ TextureAtlas myAtlas = assetManager.get("MyAtlas.atlas", TextureAtlas.class);
 
 ## Platform limitations
 
-Here's the list of the limitations you should be aware of when using this library (on top of regular LibGDX backend limitations).
+Here's the list of the limitations you should be aware of when using this library (on top of regular libGDX backend limitations).
 
-- __[Android]__ Due to NDK specs, __Android 4.1 (API 16) is the minimum supported version__.
+- __[Android]__ Due to NDK specs, __Android 5.0 (API 21) is the minimum supported version__.
 - __[GWT]__ WebAssembly is available pretty much on every modern browser ([compatibility chart](https://caniuse.com/wasm)). Just for reference, the support is enabled by default as of __Firefox 52__, __Chrome 57__, __Opera 44__, and __Edge 16__.
 
 ## Basis Universal feature support notes
@@ -185,10 +185,10 @@ Basis supports five different texture types:
 4. __Video frames__ - an array of 2D video frames, with optional mipmaps, # frames = # images, each image has the same resolution and # of mipmap levels.
 5. __volume__ - a 3D texture with optional mipmaps, Z dimension = # images, each image has the same resolution and # of mipmap levels.
     
-Out of which support only for __Regular 2D__ is implemented through __BasisuTextureData__ for LibGDX textures.
+Out of which support only for __Regular 2D__ is implemented through __BasisuTextureData__ for libGDX textures.
 
 > I'm not very familiar with 3D related formats like __Cubemap array__ and skipped them for now.
-The Basis data for those is fully available from `basisu-wrapper`, only the LibGDX support is missing.
+The Basis data for those is fully available from `basisu-wrapper`, only the libGDX support is missing.
 If you're in demand for those or may assist with the implementation, please come forward and open an issue with the details.
 
 ## Texture format notes
@@ -214,7 +214,7 @@ Here are all the criteria we should respect in making such a decision (the most 
 - Whether the intermediate image meets the target format's requirements (see [Texture format notes](#texture-format-notes) section).
 - The target format quality loss and/or transcoding speed.
 
-The [default texture format selector](basisu-gdx/src/com/crashinvaders/basisu/gdx/BasisuTextureFormatSelector.java#L40) logic is implemented based on these. That way it should always pick the best available option. In case there are none of the texture formats are passing the check, the selector fallbacks to the uncompressed texture formats (RGBA8888/RGB888). Which are pretty much regular LibGDX texture formats and have guaranteed support on all the platforms.
+The [default texture format selector](basisu-gdx/src/com/crashinvaders/basisu/gdx/BasisuTextureFormatSelector.java#L40) logic is implemented based on these. That way it should always pick the best available option. In case there are none of the texture formats are passing the check, the selector fallbacks to the uncompressed texture formats (RGBA8888/RGB888). Which are pretty much regular libGDX texture formats and have guaranteed support on all the platforms.
 
 If your case requires a different selection strategy, you can always create a custom implementation for `BasisuTextureFormatSelector` and use it selectively with `BasisuTextureData#setTextureFormatSelector()` methods or set it to be used as the default selector by updating the `BasisuTextureDatastatic#defaultFormatSelector` static field.
 
@@ -222,7 +222,7 @@ If your case requires a different selection strategy, you can always create a cu
 
 ## Native dependencies
 
-The project is using [Basis Universal C/C++ code](https://github.com/BinomialLLC/basis_universal) and [JNI](https://en.wikipedia.org/wiki/Java_Native_Interface) wrappers to connect to LibGDX cross-platform code. [basisu-wrapper](basisu-wrapper) module provides a pure Java (no dependencies) abstraction layer over the native libs.
+The project is using [Basis Universal C/C++ code](https://github.com/BinomialLLC/basis_universal) and [JNI](https://en.wikipedia.org/wiki/Java_Native_Interface) wrappers to connect to libGDX cross-platform code. [basisu-wrapper](basisu-wrapper) module provides a pure Java (no dependencies) abstraction layer over the native libs.
 
 Read more about the module and the native library building notes on [the module's page](basisu-wrapper).
 

@@ -50,7 +50,7 @@ dependencies {
 //def httpFilePort = 8080
 //task startHttpServer() {
 //    dependsOn draftCompileGwt
-//    String output = project.buildDir.path + "/gwt/draftOut"
+//    String output = "${project.layout.buildDirectory.get()}/gwt/draftOut"
 //    doLast {
 //        copy {
 //            from "webapp"

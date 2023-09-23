@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     namespace = "com.crashinvaders.basisu.demo"
     compileSdk = 33
-    buildToolsVersion "33.0.2"
+    buildToolsVersion = "33.0.2"
 
     defaultConfig {
         applicationId = "com.crashinvaders.basisu.demo"
@@ -32,6 +32,10 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildFeatures {
+        buildConfig true
     }
 
     buildTypes {
@@ -82,10 +86,12 @@ dependencies {
         // But in order to provide these dependency JARs we need to build them first from another modules
         // (basisu-wrapper:jnigen basisu-wrapper:jnigenBuildAndroid basisu-wrapper:jnigenJarNativesAndroid).
         // So here's conditional dependency declaration...
-        files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${gdxBasisuVersion}-natives-armeabi-v7a.jar",
-              "${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${gdxBasisuVersion}-natives-arm64-v8a.jar",
-              "${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${gdxBasisuVersion}-natives-x86.jar",
-              "${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${gdxBasisuVersion}-natives-x86_64.jar")
+        def buildDir = project(':basisu-wrapper').layout.buildDirectory.get()
+        println "BUILD DIR: " + buildDir
+        files("$buildDir/libs/basisu-wrapper-${gdxBasisuVersion}-natives-armeabi-v7a.jar",
+              "$buildDir/libs/basisu-wrapper-${gdxBasisuVersion}-natives-arm64-v8a.jar",
+              "$buildDir/libs/basisu-wrapper-${gdxBasisuVersion}-natives-x86.jar",
+              "$buildDir/libs/basisu-wrapper-${gdxBasisuVersion}-natives-x86_64.jar")
               .filter { file -> file.exists() }
               .forEach { file -> natives files(file.getAbsolutePath()) }
     }

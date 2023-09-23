@@ -102,6 +102,14 @@ jnigen {
     add(Android) {
         linkerFlags += ' -llog '  // We use "log.h" lib and should explicitly declare it.
 
+        // NDK doesn't include a standard lib, we should explicitly ask for it.
+        androidApplicationMk += 'APP_STL := c++_static'
+        // This min SDK comes from the NDK 26 itself.
+        androidApplicationMk += 'APP_PLATFORM := android-26'
+
+//        cppFlags += ' -fexceptions '
+//        cppFlags += ' -frtti '
+
         // Android
         // SUPPORTED TEXTURES: [ASTC, ETC1, ETC2, DXT, ATC, PVRTC1 and PVRTC2]
         cppFlags += ' -DBASISD_SUPPORT_BC7=0 '

@@ -2,9 +2,9 @@
 Provides a pure Java (no dependencies) abstraction layer over the native libs.
 
 The module uses [Basis Universal C/C++ code](https://github.com/BinomialLLC/basis_universal) 
-and [JNI](https://en.wikipedia.org/wiki/Java_Native_Interface) wrappers to connect to LibGDX cross-platform code.
+and [JNI](https://en.wikipedia.org/wiki/Java_Native_Interface) wrappers to connect to libGDX cross-platform code.
 
-To manage native build configuration for all the platforms (except for the web, [read notes below](#Web)) we use [jnigen](https://github.com/libgdx/gdx-jnigen) Gradle plugin.
+To manage native build configuration for all the platforms (except for the web, [read notes below](#Web)) we use [jnigen](https://github.com/libGDX/gdx-jnigen) Gradle plugin.
 See `//region jnigen configuration` section of [`build.gradle`](build.gradle#L28) file for configuration details.
 
 To streamline the native library assembly process, there are a bunch of `assemble-natives-<platform>.[sh|bat]` scripts are available in the project's root dir.
@@ -53,16 +53,21 @@ sudo apt install g++-mingw-w64-x86-64
 > To be added soon
 
 #### Android
-> The build was only tested with NDK 21.3.6528147 and may not work with any other version. It's recommended that you install and use the same NDK release.
-- Install the NDK (using IntelliJ Idea/Android Studio's Android SDK manager or from [the official web page](https://developer.android.com/ndk/downloads)).
+> The build is configured and tested with NDK 26.0.10792818 and may not work with any other version. It's recommended that you install and use this exact NDK release.
+- Install the NDK (using `sdkmanager` or IntelliJ Idea/Android Studio's Android SDK manager or from [the official web page](https://developer.android.com/ndk/downloads)).
 - Create an environment variable `NDK_HOME` pointing to the installed NDK location.
 
+> Follow steps from [this answer](https://stackoverflow.com/a/62914315/3802890) to install `sdkmanager` on a Debian based Linux system.
+```shell
+sdkmanager --install "ndk;26.0.10792818" 
+export NDK_HOME='/usr/lib/android-sdk/ndk/26.0.10792818'
+```
 
 #### Web
-We use [Emscripten](https://emscripten.org/) to compile C/C++ code to WASM/JS and then connect it through [JSNI](http://www.gwtproject.org/doc/latest/DevGuideCodingBasicsJSNI.html) to the LibGDX GWT backend.
+We use [Emscripten](https://emscripten.org/) to compile C/C++ code to WASM/JS and then connect it through [JSNI](http://www.gwtproject.org/doc/latest/DevGuideCodingBasicsJSNI.html) to the libGDX GWT backend.
 
-It's important to note here that we don't use __jnigen__ for configuring [the Ant build script for web natives](jni/build-web.xml), __jnigen__ doesn't support this platform.
-And thus it's all hand-written and needs to be kept in sync with jnigen configuration for other platforms in `build.gradle`.
+It's important to note, that we don't use __jnigen__ to configure [the Ant build script for web natives](jni/build-web.xml), __jnigen__ doesn't support this platform.
+And thus it's all handwritten and needs to be kept in sync with jnigen configuration for other platforms in `build.gradle`.
 
 > The build was only tested with Emscripten SDK 2.0.9.
 
