@@ -25,15 +25,17 @@ git submodule update --init --recursive
 
 #### Linux
 Install required packages onto the x64 based system. Example for Debian/Ubuntu:
-```bash
+```shell
 sudo apt install ant gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 ```
 > The dependencies are for Debian/Ubuntu packages, but their other package system counterparts should be available pretty much everywhere.
 > `gcc-arm-linux-gnueabihf` (or similar) is required to build for Linux ARM32 target. 
 > `gcc-aarch64-linux-gnu` (or similar) is required to build for Linux ARM64 target. 
 
-You can also build Windows natives from under Linux. 
-Read [the official LibGDX wiki](https://github.com/libgdx/libgdx/wiki/jnigen#linux) for details.
+You can also build Windows natives from under Linux. Install the mingw64 package.
+```shell
+sudo apt install g++-mingw-w64-x86-64
+```
 
 #### Windows
 > All further steps consider you have [Chocolatey](https://chocolatey.org/) installed on the system.

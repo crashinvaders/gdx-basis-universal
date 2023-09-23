@@ -68,16 +68,18 @@ jnigen {
         extraLib "libs/libgdx-basis-universal.a"
         // extraXCFramework "libs/libgdx-basis-universal.xcframework"
     }
-    add(Windows, x32) {
-        compilerPrefix = 'mingw32-'
-        compilerSuffix = '.exe'
-
-        linkerFlags += ' -s '   // Strip debug symbols.
-        cppFlags += desktopUnsupportedFormats
-
-    }
+//    add(Windows, x32) {
+//        compilerPrefix = 'mingw32-'
+//        compilerSuffix = '.exe'
+//
+//        linkerFlags += ' -s '   // Strip debug symbols.
+//        cppFlags += desktopUnsupportedFormats
+//    }
     add(Windows, x64) {
-        compilerSuffix = '.exe'
+        def os = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.currentOperatingSystem
+        if (os.isWindows()) {
+            compilerSuffix = '.exe'
+        }
 
         linkerFlags += ' -s '   // Strip debug symbols.
         cppFlags += desktopUnsupportedFormats
