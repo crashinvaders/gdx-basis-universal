@@ -69,7 +69,7 @@ configure(basisuLibProjects) {
         from(project.sourceSets.main.allSource) {
             include '**/*.xml'
         }
-        baseName = project.name
+        archiveBaseName = project.name
         duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
     }
 
