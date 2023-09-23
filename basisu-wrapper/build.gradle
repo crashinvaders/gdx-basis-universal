@@ -64,10 +64,6 @@ jnigen {
         // Enable for Basis Universal debug messages.
         // cppFlags += ' -DBASISU_FORCE_DEVEL_MESSAGES=1 '
     }
-    robovm {
-        extraLib "libs/libgdx-basis-universal.a"
-        // extraXCFramework "libs/libgdx-basis-universal.xcframework"
-    }
 //    add(Windows, x32) {
 //        compilerPrefix = 'mingw32-'
 //        compilerSuffix = '.exe'

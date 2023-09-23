@@ -1,13 +1,13 @@
-apply plugin: 'java'
 apply plugin: 'robovm'
+apply plugin: 'java-library'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-sourceSets.main.java.srcDirs = [ 'src' ]
-sourceSets.main.resources.srcDirs = [ '../assets' ]
+sourceSets.main.java.srcDirs += ['src/']
+sourceSets.main.resources.srcDirs += ['../assets']
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
@@ -19,25 +19,18 @@ dependencies {
     implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-ios"
 
     if (useGdxBasisuMavenArtifacts) {
-        runtimeOnly "com.crashinvaders.basisu:basisu-wrapper:$gdxBasisuVersion:natives-ios"
+        implementation "com.crashinvaders.basisu:basisu-wrapper:$gdxBasisuVersion:natives-ios"
     } else {
-        runtimeOnly files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${gdxBasisuVersion}-natives-ios.jar")
+        def wrapperBuildDir = project(':basisu-wrapper').layout.buildDirectory.get()
+        implementation files("${wrapperBuildDir}/libs/basisu-wrapper-${gdxBasisuVersion}-natives-ios.jar")
     }
+}
+
+robovm {
+    archs = "arm64"
 }
 
 launchIPhoneSimulator.dependsOn build
 launchIPadSimulator.dependsOn build
 launchIOSDevice.dependsOn build
 createIPA.dependsOn build
-
-//robovm {
-//    if (project.hasProperty('iosSignIdentityValue')) {
-//        iosSignIdentity = iosSignIdentityValue
-//    }
-//    if (project.hasProperty('iosProvisioningProfileValue')) {
-//        iosProvisioningProfile = iosProvisioningProfileValue
-//    }
-////    archs = "thumbv7:arm64"
-//    arch = "arm64"
-////    arch = "thumbv7"
-//}

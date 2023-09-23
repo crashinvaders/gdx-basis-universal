@@ -46,18 +46,19 @@ sudo apt install g++-mingw-w64-x86-64
     1. Download and unpack [MinGW64](https://github.com/niXman/mingw-builds-binaries/releases/download/13.1.0-rt_v11-rev1/x86_64-13.1.0-release-posix-seh-msvcrt-rt_v11-rev1.7z) or the latest release. It's important to download `posix` version of MinGW distribution.
     2. Make sure `g++.exe`, `gcc.exe`, `strip.exe`, and `ar.exe` are discoverable from the `PATH`
 
-#### macOS
-> To be added soon
-
-#### iOS
-> To be added soon
+#### macOS & iOS
+Nothing special is required, you only need the latest XCode (install from App Store) along with JDK and Ant.
+```shell
+brew install temurin ant
+```
 
 #### Android
-> The build is configured and tested with NDK 26.0.10792818 and may not work with any other version. It's recommended that you install and use this exact NDK release.
+> The build is configured and tested for NDK 26.0.10792818 and may not work with any other version. 
+> It's recommended that you install and use this exact NDK release.
 - Install the NDK (using `sdkmanager` or IntelliJ Idea/Android Studio's Android SDK manager or from [the official web page](https://developer.android.com/ndk/downloads)).
 - Create an environment variable `NDK_HOME` pointing to the installed NDK location.
 
-> Follow steps from [this answer](https://stackoverflow.com/a/62914315/3802890) to install `sdkmanager` on a Debian based Linux system.
+> Follow the steps from [this answer](https://stackoverflow.com/a/62914315/3802890) to install `sdkmanager` on a Debian based Linux system.
 ```shell
 sdkmanager --install "ndk;26.0.10792818" 
 export NDK_HOME='/usr/lib/android-sdk/ndk/26.0.10792818'
