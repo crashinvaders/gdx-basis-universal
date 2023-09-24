@@ -2,7 +2,8 @@
 - Updated to libGDX 1.12.0
 - Updated to Basis Universal 1.16.4
 - Fixed: texture atlases with Basis pages fail to load through `AssetManager`. See #1
-- Support for Linux32 and Windows32 targets have been dropped (the lib no longer provides native dependencies for these platforms).
+- Removed: support for Linux x86 and Windows x86 targets (the lib no longer provides native dependencies for these platforms).
+- Added: support for macOS arm64 target.
 
 ### 0.1.0
 
