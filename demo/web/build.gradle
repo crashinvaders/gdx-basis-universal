@@ -47,7 +47,7 @@ dependencies {
 }
 
 gretty.httpPort = 8080
-gretty.resourceBase = project.buildDir.path + "/gwt/draftOut"
+gretty.resourceBase = "${project.layout.buildDirectory.get()}/gwt/draftOut"
 gretty.contextPath = "/"
 gretty.portPropertiesFileName = "TEMP_PORTS.properties"
 

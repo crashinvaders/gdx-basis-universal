@@ -88,17 +88,18 @@ configure(basisuLibProjects) {
         withSourcesJar()
     }
 
-    publishing {
-        repositories {
-            maven {
-                def urlRelease = '"https://oss.sonatype.org/service/local/staging/deploy/maven2/"'
-                def urlSnapshot = 'https://oss.sonatype.org/content/repositories/snapshots/'
-                url = isSnapshot ? urlSnapshot : urlRelease
-                credentials {
-                    username ossrhUsername
-                    password ossrhPassword
+    afterEvaluate { project ->
+        publishing {
+            repositories {
+                maven {
+                    def urlRelease = '"https://oss.sonatype.org/service/local/staging/deploy/maven2/"'
+                    def urlSnapshot = 'https://oss.sonatype.org/content/repositories/snapshots/'
+                    url = isSnapshot ? urlSnapshot : urlRelease
+                    credentials {
+                        username ossrhUsername
+                        password ossrhPassword
+                    }
                 }
-            }
 
 //              maven {
 //                  name = "MavenLocalExplicit"
@@ -110,54 +111,85 @@ configure(basisuLibProjects) {
 //              repository(url: "https://maven.pkg.github.com/crashinvaders/gdx-basis-universal") {
 //                  authentication(userName: project.githubUsername, password: project.githubAccessToken)
 //              }
-        }
+            }
+            publications {
+                mavenJava(MavenPublication) {
 
-        publications {
-            mavenJava(MavenPublication) {
+                    artifactId = project.name
+                    from components.java
 
-                artifactId = project.name
-                from components.java
-
-                pom {
-                    name = project.name
-                    description = project.description
-                    url = 'http://github.com/crashinvaders/gdx-basis-universal'
-
-                    licenses {
-                        license {
-                            name = 'The Apache License, Version 2.0'
-                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    pom {
+                        name = project.name
+                        description = project.description
+                        url = POM_URL
+                        licenses {
+                            license {
+                                name = POM_LICENCE_NAME
+                                url = POM_LICENCE_URL
+                                distribution = POM_LICENCE_DIST
+                            }
+                        }
+                        developers {
+                            developer {
+                                id = POM_DEV0_ID
+                                name = POM_DEV0_NAME
+                                email = POM_DEV0_EMAIL
+                            }
+                        }
+                        scm {
+                            connection = POM_SCM_CONNECTION
+                            developerConnection = POM_SCM_DEV_CONNECTION
+                            url = POM_SCM_URL
                         }
                     }
-
-                    developers {
-                        developer {
-                            id = 'metaphore'
-                            name = 'Anton Chekulaev'
-                            email = 'metaphore@crashinvaders.com'
+                }
+                // libGDX natives all follow the "$name-platform" artifact structure.
+                if (project.tasks.findByName('jnigen')) {
+                    mavenPlatform(MavenPublication) {
+                        artifactId = project.name
+                        project.tasks.findByName('jnigenJarNativesAll').dependsOn.forEach { jarNativesTask ->
+                            artifact jarNativesTask
                         }
-                    }
-
-                    scm {
-                        connection = 'scm:git:git@github.com:crashinvaders/gdx-basis-universal.git'
-                        developerConnection = 'scm:git:git@github.com:crashinvaders/gdx-basis-universal.git'
-                        url = 'http://github.com/crashinvaders/gdx-basis-universal'
+                        pom {
+                            name = project.name + " Native Libraries"
+                            description = project.description
+                            url = POM_URL
+                            licenses {
+                                license {
+                                    name = POM_LICENCE_NAME
+                                    url = POM_LICENCE_URL
+                                    distribution = POM_LICENCE_DIST
+                                }
+                            }
+                            developers {
+                                developer {
+                                    id = POM_DEV0_ID
+                                    name = POM_DEV0_NAME
+                                    email = POM_DEV0_EMAIL
+                                }
+                            }
+                            scm {
+                                connection = POM_SCM_CONNECTION
+                                developerConnection = POM_SCM_DEV_CONNECTION
+                                url = POM_SCM_URL
+                            }
+                        }
                     }
                 }
             }
         }
-    }
 
-    signing {
+        signing {
 //      required { !isSnapshot && gradle.taskGraph.hasTask("publish") }
-        sign publishing.publications.mavenJava
-    }
+            sign publishing.publications.mavenJava
+        }
 
-    // Simply using "required" in signing block doesn't work because taskGraph isn't ready yet.
-    gradle.taskGraph.whenReady {
-        tasks.withType(Sign) {
-            onlyIf { !isSnapshot }
+        // Simply using "required" in signing block doesn't work because taskGraph isn't ready yet.
+        gradle.taskGraph.whenReady {
+            tasks.withType(Sign) {
+                onlyIf { !isSnapshot }
 //          onlyIf { !isSnapshot && gradle.taskGraph.hasTask("publish") }
+            }
         }
     }
 

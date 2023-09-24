@@ -18,7 +18,8 @@ dependencies {
     if (useGdxBasisuMavenArtifacts) {
         runtimeOnly "com.crashinvaders.basisu:basisu-wrapper:$gdxBasisuVersion:natives-desktop"
     } else {
-        runtimeOnly files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${gdxBasisuVersion}-natives-desktop.jar")
+        def buildDir = project(':basisu-wrapper').layout.buildDirectory.get()
+        runtimeOnly files("$buildDir/libs/basisu-wrapper-${gdxBasisuVersion}-natives-desktop.jar")
     }
 }
 

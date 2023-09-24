@@ -87,7 +87,6 @@ dependencies {
         // (basisu-wrapper:jnigen basisu-wrapper:jnigenBuildAndroid basisu-wrapper:jnigenJarNativesAndroid).
         // So here's conditional dependency declaration...
         def buildDir = project(':basisu-wrapper').layout.buildDirectory.get()
-        println "BUILD DIR: " + buildDir
         files("$buildDir/libs/basisu-wrapper-${gdxBasisuVersion}-natives-armeabi-v7a.jar",
               "$buildDir/libs/basisu-wrapper-${gdxBasisuVersion}-natives-arm64-v8a.jar",
               "$buildDir/libs/basisu-wrapper-${gdxBasisuVersion}-natives-x86.jar",

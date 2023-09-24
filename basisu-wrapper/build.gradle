@@ -7,7 +7,7 @@ sourceSets.test.resources.srcDirs += ['test-resources']
 dependencies {
     testImplementation "junit:junit:$junitVersion"
     testImplementation "com.badlogicgames.gdx:gdx-jnigen-loader:$jnigenVersion"
-    testRuntimeOnly files("${project(':basisu-wrapper').buildDir}/libs/basisu-wrapper-${version}-natives-desktop.jar")
+    testRuntimeOnly files("${project.layout.buildDirectory.get()}/libs/basisu-wrapper-${version}-natives-desktop.jar")
 }
 
 test {
@@ -20,7 +20,7 @@ apply plugin: 'com.badlogicgames.gdx.gdx-jnigen'
 
 // The set of supported native GPU texture formats varies based on the platform.
 // "-DBASISD_SUPPORT_*" flag params disable specific transcoder texture tables to save up space.
-// Unity docs have a nice reference page - https://docs.unity3d.com/Manual/class-TextureImporterOverride.html
+// Unity Engine docs have a nice reference page - https://docs.unity3d.com/Manual/class-TextureImporterOverride.html
 //
 // Desktop
 // Essentially supports everything (or it's more accurate to say ANYTHING), so we need them all.
@@ -185,6 +185,8 @@ task jnigenJarNativesWeb(type: Jar) {
 
     from "${projectDir}/${jnigen.libsDir}/web"
     from "${projectDir}/${jnigen.jniDir}/BasisuWrapperNatives.gwt.xml"
+
+    mustRunAfter compileJava
 }
 
 task jnigenJarNativesAll {
@@ -200,14 +202,6 @@ task jnigenJarNativesAll {
     }
 }
 
-//// Android native jar tasks are all have pretty misleading classifier of "natives-$ABI".
-//// Lets patch it up to make the naming a bit more canonical (e.g. "natives-android-$ABI").
-//jnigenJarNativesAndroid.dependsOn.forEach { task ->
-//    String origClassifier = task.archiveClassifier.get()
-//    String patchedClassifier = origClassifier.replace('natives-', 'natives-android-')
-//    task.archiveClassifier = patchedClassifier
-//}
-
 //// Import native build Ant tasks.
 //if (file('jni/build.xml').exists()) {
 //    println 'Importing ANT tasks from \"jni/build.xml\"'
@@ -218,11 +212,6 @@ task jnigenJarNativesAll {
 //    }
 //}
 
-//endregion
+test.dependsOn jnigenJarNativesDesktop
 
-// Define all the natives jars so Maven can pickup those and publish.
-artifacts {
-    jnigenJarNativesAll.dependsOn.forEach { jarNativesTask ->
-        archives jarNativesTask
-    }
-}
+//endregion
