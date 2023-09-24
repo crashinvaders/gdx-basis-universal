@@ -92,7 +92,7 @@ configure(basisuLibProjects) {
         publishing {
             repositories {
                 maven {
-                    def urlRelease = '"https://oss.sonatype.org/service/local/staging/deploy/maven2/"'
+                    def urlRelease = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
                     def urlSnapshot = 'https://oss.sonatype.org/content/repositories/snapshots/'
                     url = isSnapshot ? urlSnapshot : urlRelease
                     credentials {
@@ -145,7 +145,7 @@ configure(basisuLibProjects) {
                 }
                 // libGDX natives all follow the "$name-platform" artifact structure.
                 if (project.tasks.findByName('jnigen')) {
-                    mavenPlatform(MavenPublication) {
+                    mavenNatives(MavenPublication) {
                         artifactId = project.name
                         project.tasks.findByName('jnigenJarNativesAll').dependsOn.forEach { jarNativesTask ->
                             artifact jarNativesTask
@@ -180,15 +180,16 @@ configure(basisuLibProjects) {
         }
 
         signing {
-//      required { !isSnapshot && gradle.taskGraph.hasTask("publish") }
             sign publishing.publications.mavenJava
+
+            if(project.tasks.findByName('jnigen'))
+                sign publishing.publications.mavenNatives
         }
 
         // Simply using "required" in signing block doesn't work because taskGraph isn't ready yet.
         gradle.taskGraph.whenReady {
             tasks.withType(Sign) {
                 onlyIf { !isSnapshot }
-//          onlyIf { !isSnapshot && gradle.taskGraph.hasTask("publish") }
             }
         }
     }
