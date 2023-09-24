@@ -7,19 +7,19 @@ out
 robovm-build
 .DS_Store
 
-/basisu-wrapper/obj
-/basisu-wrapper/test-output
-/basisu-wrapper/jni/jni-headers
-/basisu-wrapper/jni/target
-/basisu-wrapper/jni/build
+/basisu-wrapper/obj/**
+/basisu-wrapper/test-output/**
+/basisu-wrapper/jni/jni-headers/**
+/basisu-wrapper/jni/target/**
+/basisu-wrapper/jni/build/**
 /basisu-wrapper/jni/*.mk
-/basisu-wrapper/jni/*.xml
+/basisu-wrapper/jni/build*.xml
+!/basisu-wrapper/jni/build-web.xml
 /basisu-wrapper/jni/com_crashinvaders_basisu_wrapper_*.cpp
 /basisu-wrapper/jni/com_crashinvaders_basisu_wrapper_*.h
 /basisu-wrapper/jni/robovm.xml
 /basisu-wrapper/jni/memcpy_wrap.c
 /basisu-wrapper/jni/Info.plist
-!/basisu-wrapper/jni/build-web.xml
 !/basisu-wrapper/jni/CMakeLists.txt
 
 /demo/android/libs
