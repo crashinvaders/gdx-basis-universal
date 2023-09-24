@@ -70,8 +70,8 @@ We use [Emscripten](https://emscripten.org/) to compile C/C++ code to WASM/JS an
 It's important to note, that we don't use __jnigen__ to configure [the Ant build script for web natives](jni/build-web.xml), __jnigen__ doesn't support this platform.
 And thus it's all handwritten and needs to be kept in sync with jnigen configuration for other platforms in `build.gradle`.
 
-> The build was only tested with Emscripten SDK 2.0.9.
+> The build is configured and tested with Emscripten SDK 3.1.46.
 
 To be able to assemble natives for this platform you need to:
-- Install the [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html)
+- Install the [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html#installation-instructions-using-the-emsdk-recommended)
 - Make sure the Emscripten compiler executables (__emcc__ and __em++__) are available on the system `PATH`. Usually, they are located at `${EMSDK}/upstream/emscripten`.
