@@ -1,3 +1,5 @@
+### Next
+
 ### 0.2.0
 - Updated to libGDX 1.12.0
 - Updated to Basis Universal 1.16.4
