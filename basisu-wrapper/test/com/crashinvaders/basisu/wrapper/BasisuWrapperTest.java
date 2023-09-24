@@ -7,7 +7,6 @@ import org.junit.Test;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 import static org.junit.Assert.*;
@@ -24,6 +23,7 @@ public class BasisuWrapperTest {
 
         System.out.println("Loading " + IMAGE_FILE);
         try (InputStream is = BasisuWrapperTest.class.getClassLoader().getResourceAsStream(IMAGE_FILE)) {
+            assert is != null;
             byte[] bytes = TestUtils.readToByteArray(is);
             basisBuffer = TestUtils.asByteBuffer(bytes);
         }
