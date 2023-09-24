@@ -1,8 +1,8 @@
 compileJava.options.headerOutputDirectory.set(file('jni'))
 
 sourceSets.main.java.srcDirs += ['src']
-sourceSets.test.java.srcDirs += ['test']
-sourceSets.test.resources.srcDirs += ['test-resources']
+sourceSets.test.java.srcDirs += ['test/src']
+sourceSets.test.resources.srcDirs += ['test/resources']
 
 dependencies {
     testImplementation "junit:junit:$junitVersion"
@@ -13,6 +13,7 @@ dependencies {
 test {
     useJUnit()
     maxHeapSize = '1G'
+    workingDir = 'test'
 }
 
 //region jnigen configuration

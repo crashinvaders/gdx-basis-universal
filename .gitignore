@@ -8,7 +8,7 @@ robovm-build
 .DS_Store
 
 /basisu-wrapper/obj/**
-/basisu-wrapper/test-output/**
+/basisu-wrapper/test/output
 /basisu-wrapper/jni/jni-headers/**
 /basisu-wrapper/jni/target/**
 /basisu-wrapper/jni/build/**

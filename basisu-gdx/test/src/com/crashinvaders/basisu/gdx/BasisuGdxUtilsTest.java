@@ -3,6 +3,8 @@ package com.crashinvaders.basisu.gdx;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.headless.HeadlessApplication;
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Texture;
 import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
 import org.junit.*;
 
@@ -37,5 +39,19 @@ public class BasisuGdxUtilsTest {
         for (BasisuTranscoderTextureFormat value : BasisuTranscoderTextureFormat.values()) {
             BasisuGdxUtils.toGlTextureFormat(value);
         }
+    }
+
+    /**
+     * Texture data load test.
+     * For the sake of simplicity, we lock the transcoding to ETC2_RGBA.
+     */
+    @Test
+    public void testTextureDataPrepare() {
+        BasisuTextureData.defaultFormatSelector = (data, fileInfo, imageInfo) ->
+                BasisuTranscoderTextureFormat.ETC2_RGBA;
+
+        FileHandle textureFile = Gdx.files.classpath("kodim3.basis");
+        BasisuTextureData textureData = new BasisuTextureData(textureFile, 0);
+        textureData.prepare();
     }
 }

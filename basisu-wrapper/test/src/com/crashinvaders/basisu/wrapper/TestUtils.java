@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 public class TestUtils {
-    private static final String OUTPUT_ROOT = "test-output/";
+    private static final String OUTPUT_ROOT = "output/";
 
     public static void saveImagePng(BufferedImage image, String fileName) {
         File outFile = new File(OUTPUT_ROOT + fileName + ".png");
