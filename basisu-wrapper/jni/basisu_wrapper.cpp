@@ -2,7 +2,6 @@
 #include <cstring>
 
 #include "basisu_wrapper.h"
-#include "basisu_transcoder.h"
 #include "basisu_native_utils.h"
 
 using namespace basist;
@@ -10,8 +9,6 @@ using namespace basist;
 namespace basisuWrapper {
 
 #define LOG_TAG "basisu_wrapper.cpp"
-
-    static etc1_global_selector_codebook codebook;
 
     void initBasisu() {
         static bool basisuInitialized;
@@ -24,31 +21,29 @@ namespace basisuWrapper {
         basisuInitialized = true;
 
         basisu_transcoder_init();
-
-        codebook.init(g_global_selector_cb_size, g_global_selector_cb);
     }
 
     bool validateHeader(uint8_t *data, uint32_t dataSize) {
         initBasisu();
-        basisu_transcoder transcoder(&codebook);
+        basisu_transcoder transcoder = {};
         return transcoder.validate_header(data, dataSize);
     }
 
     bool validateChecksum(uint8_t *data, uint32_t dataSize, bool fullValidation) {
         initBasisu();
-        basisu_transcoder transcoder(&codebook);
+        basisu_transcoder transcoder = {};
         return transcoder.validate_file_checksums(data, dataSize, fullValidation);
     }
 
     int getTotalMipMapLevels(uint8_t *data, uint32_t dataSize) {
         initBasisu();
-        basisu_transcoder transcoder(&codebook);
+        basisu_transcoder transcoder = {};
         return transcoder.get_total_image_levels(data, dataSize, 0);
     }
 
     bool getFileInfo(basisu_file_info &fileInfo, uint8_t *data, uint32_t dataSize)  {
         initBasisu();
-        basisu_transcoder transcoder(&codebook);
+        basisu_transcoder transcoder = {};
         bool successful = transcoder.get_file_info(data, dataSize, fileInfo);
         if (!successful) {
             basisuUtils::logError(LOG_TAG, "Failed to obtain file info.");
@@ -58,7 +53,7 @@ namespace basisuWrapper {
 
     bool getImageInfo(basisu_image_info &imageInfo, uint8_t *data, uint32_t dataSize, uint32_t imageIndex) {
         initBasisu();
-        basisu_transcoder transcoder(&codebook);
+        basisu_transcoder transcoder = {};
         bool successful = transcoder.get_image_info(data, dataSize, imageInfo, imageIndex);
         if (!successful) {
             basisuUtils::logError(LOG_TAG, "Failed to obtain image info.");
@@ -67,10 +62,10 @@ namespace basisuWrapper {
     }
 
     // Based on https://github.com/BinomialLLC/basis_universal/blob/master/webgl/transcoder/basis_wrappers.cpp
-    bool transcode(std::vector<uint8_t> &out, uint8_t *data, uint32_t dataSize,
+    bool transcode(basisu::vector<uint8_t> &out, uint8_t *data, uint32_t dataSize,
                    uint32_t imageIndex, uint32_t levelIndex, transcoder_texture_format format) {
         initBasisu();
-        basisu_transcoder transcoder(&codebook);
+        basisu_transcoder transcoder = {};
 
         uint32_t origWidth, origHeight, totalBlocks;
         if (!transcoder.get_image_level_desc(data, dataSize, imageIndex, levelIndex, origWidth, origHeight, totalBlocks)) {
@@ -141,25 +136,24 @@ namespace basisuWrapper {
 // Emscripten Embind bindings.
 #ifdef __EMSCRIPTEN__
 
-#include <vector>
 #include <iostream>
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
 
 using namespace emscripten;
 
-//FIXME Array double copying (Java->JS->C++) is really ugly. Find a way to pass data arrays more easily. Look into GWT types that LibGDX uses.
+//FIXME Array double copying (Java->JS->C++) is really ugly. Find a way to pass data arrays more easily. Look into GWT types that libGDX uses.
 
 // From https://github.com/emscripten-core/emscripten/issues/5519#issuecomment-624775352
-std::vector<uint8_t> vecFromTypedArray(const val &jsValue) {
+basisu::vector<uint8_t> vecFromTypedArray(const val &jsValue) {
     const unsigned length = jsValue["length"].as<unsigned>();
-    std::vector<uint8_t> vec(length);
+    basisu::vector<uint8_t> vec(length);
     val memoryView{typed_memory_view(length, vec.data())};
     memoryView.call<void>("set", jsValue);
     return vec;
 }
 
-val vecToTypedArray(std::vector<uint8_t> &vec) {
+val vecToTypedArray(basisu::vector<uint8_t> &vec) {
     val jsValue = val::global("Uint8Array").new_(vec.size());
     val memoryView{typed_memory_view(vec.size(), vec.data())};
     jsValue.call<void>("set", memoryView);
@@ -167,27 +161,27 @@ val vecToTypedArray(std::vector<uint8_t> &vec) {
 }
 
 int main(int, char**) {
-    basisuUtils::logInfo(LOG_TAG, "LibGDX Basis Universal native library is ready.");
+    basisuUtils::logInfo(LOG_TAG, "libGDX Basis Universal native library is ready.");
     return 0;
 }
 
 bool validateHeader_wrap(const val &jsData) {
-    std::vector<uint8_t> data = vecFromTypedArray(jsData);
+    basisu::vector<uint8_t> data = vecFromTypedArray(jsData);
     return basisuWrapper::validateHeader(data.data(), data.size());
 }
 
 bool validateChecksum_wrap(const val &jsData, bool fullValidation) {
-    std::vector<uint8_t> data = vecFromTypedArray(jsData);
+    basisu::vector<uint8_t> data = vecFromTypedArray(jsData);
     return basisuWrapper::validateChecksum(data.data(), data.size(), fullValidation);
 }
 
 int getTotalMipMapLevels_wrap(const val &jsData) {
-    std::vector<uint8_t> data = vecFromTypedArray(jsData);
+    basisu::vector<uint8_t> data = vecFromTypedArray(jsData);
     return basisuWrapper::getTotalMipMapLevels(data.data(), data.size());
 }
 
 basist::basisu_file_info getFileInfo_wrap(const val &jsData) {
-    std::vector<uint8_t> data = vecFromTypedArray(jsData);
+    basisu::vector<uint8_t> data = vecFromTypedArray(jsData);
     basist::basisu_file_info fileInfo;
     if (!basisuWrapper::getFileInfo(fileInfo, data.data(), data.size())) {
         basisuUtils::throwException(nullptr, "Failed to obtain file info.");
@@ -196,7 +190,7 @@ basist::basisu_file_info getFileInfo_wrap(const val &jsData) {
 }
 
 basist::basisu_image_info getImageInfo_wrap(const val &jsData, uint32_t imageIndex) {
-    std::vector<uint8_t> data = vecFromTypedArray(jsData);
+    basisu::vector<uint8_t> data = vecFromTypedArray(jsData);
     basist::basisu_image_info imageInfo;
     if (!basisuWrapper::getImageInfo(imageInfo, data.data(), data.size(), imageIndex)) {
         basisuUtils::throwException(nullptr, "Failed to obtain image info.");
@@ -205,8 +199,8 @@ basist::basisu_image_info getImageInfo_wrap(const val &jsData, uint32_t imageInd
 }
 
 val transcode_wrap(const val &jsData, uint32_t imageIndex, uint32_t levelIndex, uint32_t textureFormatId) {
-    std::vector<uint8_t> data = vecFromTypedArray(jsData);
-    std::vector<uint8_t> rgba;
+    basisu::vector<uint8_t> data = vecFromTypedArray(jsData);
+    basisu::vector<uint8_t> rgba;
     basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
 
     if (!basisuWrapper::transcode(rgba, data.data(), data.size(), imageIndex, levelIndex, format)) {
@@ -233,8 +227,8 @@ uint8_t fileInfo_texFormat(basist::basisu_file_info &fileInfo) {
 }
 
 val fileInfo_imageMipmapLevels(basist::basisu_file_info &fileInfo) {
-    std::vector<uint32_t> vec32 = fileInfo.m_image_mipmap_levels;
-    std::vector<uint8_t> vec8(vec32.size());
+    basisu::vector<uint32_t> vec32 = fileInfo.m_image_mipmap_levels;
+    basisu::vector<uint8_t> vec8(vec32.size());
     for (int i = 0; i < vec32.size(); i++) {
         vec8[i] = (uint8_t)vec32[i];
     }

@@ -131,7 +131,7 @@ public class BasisuFileInfo implements Closeable {
     /** The number of mipmap levels for each image. */
     public int[] getImageMipmapLevels() { return jniGetImageMipmapLevels(addr); }
     private native int[] jniGetImageMipmapLevels(long addr); /*
-        std::vector<uint32_t> imageLevels = getWrapped(addr)->m_image_mipmap_levels;
+        basisu::vector<uint32_t> imageLevels = getWrapped(addr)->m_image_mipmap_levels;
 
         jintArray intArray = env->NewIntArray(imageLevels.size());
         env->SetIntArrayRegion(intArray, (jsize)0, (jsize)imageLevels.size(), (jint*)imageLevels.data());

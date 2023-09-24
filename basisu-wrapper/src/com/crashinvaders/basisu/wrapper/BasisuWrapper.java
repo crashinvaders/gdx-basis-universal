@@ -78,7 +78,7 @@ public class BasisuWrapper {
     private static native byte[] transcodeNative(Buffer dataRaw, int dataSize, int imageIndex, int levelIndex, int textureFormatId); /*MANUAL
         basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
         uint8_t* data = (uint8_t*)env->GetDirectBufferAddress(dataRaw);
-        std::vector<uint8_t> transcodedData;
+        basisu::vector<uint8_t> transcodedData;
 
         if (!basisuWrapper::transcode(transcodedData, data, dataSize, imageIndex, levelIndex, format)) {
             basisuUtils::throwException(env, "Error during image transcoding.");

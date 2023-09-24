@@ -18,15 +18,6 @@ test {
 //region jnigen configuration
 apply plugin: 'com.badlogicgames.gdx.gdx-jnigen'
 
-def nativeSrcFiles = [
-        'basisu_wrapper.cpp',
-        'basisu_native_utils.cpp',
-        'basis-universal/transcoder/basisu_transcoder.cpp',
-        'com_crashinvaders_basisu_wrapper_BasisuWrapper.cpp',
-        'com_crashinvaders_basisu_wrapper_BasisuFileInfo.cpp',
-        'com_crashinvaders_basisu_wrapper_BasisuImageInfo.cpp',
-]
-
 // The set of supported native GPU texture formats varies based on the platform.
 // "-DBASISD_SUPPORT_*" flag params disable specific transcoder texture tables to save up space.
 // Unity docs have a nice reference page - https://docs.unity3d.com/Manual/class-TextureImporterOverride.html
@@ -48,29 +39,50 @@ jnigen {
     }
 
     all {
-        headerDirs = ['include', 'basis-universal/transcoder']
-        cExcludes = cppExcludes = ['build/**',]
+        headerDirs = [
+                'include',
+                'basis-universal/transcoder',
+                'basis-universal/zstd',
+        ]
+        cIncludes = [
+                // Basis Universal files.
+                'basis-universal/zstd/zstddeclib.c',
+        ]
+        cppIncludes = [
+                // Basis Universal files.
+                'basis-universal/transcoder/basisu_transcoder.cpp',
 
-        cppIncludes = nativeSrcFiles
+                // Local JNI files.
+                'basisu_wrapper.cpp',
+                'basisu_native_utils.cpp',
 
-        cFlags +=      ' -std=c11   -fvisibility=hidden -Wall -O2 -g0 -fno-exceptions '
-        cppFlags +=    ' -std=c++11 -fvisibility=hidden -Wall -O2 -g0 -fno-exceptions '
-        linkerFlags += '            -fvisibility=hidden -Wall -O2 -g0 -fno-exceptions '
+                // Auto generated JNI classes.
+                'com_crashinvaders_basisu_wrapper_BasisuWrapper.cpp',
+                'com_crashinvaders_basisu_wrapper_BasisuFileInfo.cpp',
+                'com_crashinvaders_basisu_wrapper_BasisuImageInfo.cpp',
+        ]
+        cExcludes = cppExcludes = [
+                'build/**',
+        ]
+
+        def commonFlags = '-fvisibility=hidden -Wall -O2 -g0 -fno-exceptions'
+
+        cFlags += " -std=c11 $commonFlags "
+        cppFlags += " -std=c++11 $commonFlags "
+        linkerFlags += " $commonFlags "
 
         // Disable texture formats we don't support at all.
         // Macros reference - https://github.com/BinomialLLC/basis_universal/wiki/Transcoder-details-and-shrinking-the-compiled-size-of-the-transcoder#shrinking-the-transcoders-compiled-size
         cppFlags += ' -DBASISD_SUPPORT_FXT1=0 '
 
+        // Basis Universal general switches.
+        cppFlags += ' -DBASISU_SUPPORT_ENCODING=-0 '
+        cppFlags += ' -DBASISD_SUPPORT_KTX2=0 '
+        cppFlags += ' -DBASISD_SUPPORT_KTX2_ZSTD=0 '
+
         // Enable for Basis Universal debug messages.
         // cppFlags += ' -DBASISU_FORCE_DEVEL_MESSAGES=1 '
     }
-//    add(Windows, x32) {
-//        compilerPrefix = 'mingw32-'
-//        compilerSuffix = '.exe'
-//
-//        linkerFlags += ' -s '   // Strip debug symbols.
-//        cppFlags += desktopUnsupportedFormats
-//    }
     add(Windows, x64) {
         def os = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.currentOperatingSystem
         if (os.isWindows()) {
@@ -146,15 +158,6 @@ getTasksByName('jnigen', false).first().doLast {
                 byline: true) {
             fileset(dir: 'jni', includes: 'build-android32.xml')
         }
-    }
-
-    // Fix missing source files in Android.mk.
-    ant.replaceregexp(
-            match: 'LOCAL_SRC_FILES :=  ',
-            replace: "LOCAL_SRC_FILES := ${String.join(' ', nativeSrcFiles)}\n",
-            flags: 'g',
-            byline: true) {
-        fileset(dir: 'jni', includes: 'Android.mk')
     }
 }
 

@@ -1,9 +1,9 @@
 #pragma once
 
 #include <stdint.h>
-#include <vector>
 
 #include "basisu_transcoder.h"
+#include "basisu_containers.h"
 #include "basisu_file_headers.h"
 
 #define LOG_INFO "[BASISU_WRAPPER] INFO: "
@@ -23,7 +23,7 @@ namespace basisuWrapper {
 
     bool getImageInfo(basisu_image_info &imageInfo, uint8_t *data, uint32_t dataSize, uint32_t imageIndex);
 
-    bool transcode(std::vector<uint8_t> &out, uint8_t *data, uint32_t dataSize,
+    bool transcode(basisu::vector<uint8_t> &out, uint8_t *data, uint32_t dataSize,
                    uint32_t imageIndex, uint32_t levelIndex, transcoder_texture_format format);
 
     bool isTranscoderTexFormatSupported(transcoder_texture_format transcoderTexFormat, basis_tex_format basisTexFormat); 

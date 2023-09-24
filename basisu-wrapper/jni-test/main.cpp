@@ -9,7 +9,7 @@
 #define LOG_TAG "jni-test"
 
 int main(int, char**) {
-    std::vector<uint8_t> basisData = fileUtils::readFile("../test-resources/kodim3.basis");
+    basisu::vector<uint8_t> basisData = fileUtils::readFile("../test-resources/kodim3.basis");
     if (basisData.size() == 0) {
         basisuUtils::logError(LOG_TAG, "An error occurred during reading the file.");
         return 1;
@@ -22,7 +22,7 @@ int main(int, char**) {
         return 2;
     }
 
-    std::vector<uint8_t> rgba;
+    basisu::vector<uint8_t> rgba;
     if (!basisuWrapper::transcode(rgba, basisData.data(), basisData.size(), 0, 0, basist::transcoder_texture_format::cTFRGBA4444)) {
         basisuUtils::logError(LOG_TAG, "Error during image transcoding!");
         return 3;
