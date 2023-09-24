@@ -12,17 +12,17 @@ add_definitions(-DBASISU_FORCE_DEVEL_MESSAGES=1)
 
 include_directories(
     "."
-    "../jni"
-    "../jni/basis-universal/transcoder"
-    "../jni/basis-universal/zstd"
+    ".."
+    "../basis-universal/transcoder"
+    "../basis-universal/zstd"
 )
 
 file(GLOB SOURCES
     "./*.cpp"
-    "../jni/basis-universal/transcoder/basisu_transcoder.cpp"
-    "../jni/basis-universal/zstd/zstddeclib.c"
-    "../jni/basisu_native_utils.cpp"
-    "../jni/basisu_wrapper.cpp"
+    "../basis-universal/transcoder/basisu_transcoder.cpp"
+    "../basis-universal/zstd/zstddeclib.c"
+    "../basisu_native_utils.cpp"
+    "../basisu_wrapper.cpp"
 )
 
 add_executable(basisu-wrapper-test ${SOURCES})

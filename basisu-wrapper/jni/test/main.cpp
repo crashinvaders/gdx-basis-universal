@@ -9,7 +9,7 @@
 #define LOG_TAG "jni-test"
 
 int main(int, char**) {
-    basisu::vector<uint8_t> basisData = fileUtils::readFile("../test-resources/kodim3.basis");
+    basisu::vector<uint8_t> basisData = fileUtils::readFile("../../test-resources/kodim3.basis");
     if (basisData.size() == 0) {
         basisuUtils::logError(LOG_TAG, "An error occurred during reading the file.");
         return 1;
