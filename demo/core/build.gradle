@@ -19,3 +19,7 @@ dependencies {
         api project(':basisu-gdx')
     }
 }
+
+if (project.ext.useGdxBasisuMavenArtifacts == false) {
+    jar.dependsOn(':basisu-wrapper:jnigenJarNativesAll')
+}
