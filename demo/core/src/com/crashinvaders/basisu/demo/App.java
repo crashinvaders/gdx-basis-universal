@@ -8,12 +8,15 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.Cell;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -62,6 +65,7 @@ public class App implements ApplicationListener {
         assetManager.load("screen-stuff-etc1s.basis", Texture.class);   // ETC1S RGBA
         assetManager.load("screen-stuff-uastc.basis", Texture.class);   // UASTC RGBA
         assetManager.load("kodim3.basis", Texture.class);               // ETC1S RGB
+        assetManager.load("basisu-atlas.atlas", TextureAtlas.class);    // Basis-based texture atlas
         assetManager.finishLoading();
 
         BasisuTextureData basisuData0 = new BasisuTextureData(Gdx.files.internal("level_temple0.basis"));  // ETC1S RGBA
@@ -105,6 +109,12 @@ public class App implements ApplicationListener {
                     .growX();
 
             stage.addActor(rootTable);
+
+            // Put atlas region at the center.
+            Container<Image> containerAtlasRegion = new Container<Image>(new Image(assetManager.get("basisu-atlas.atlas", TextureAtlas.class).findRegion("ic_env_picnic")));
+            containerAtlasRegion.setFillParent(true);
+            containerAtlasRegion.center();
+            rootTable.addActor(containerAtlasRegion);
 
             rootTable.setTouchable(Touchable.enabled);
             rootTable.addListener(new ClickListener() {
