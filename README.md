@@ -101,7 +101,7 @@ As usual, GWT module requires a bit more dance around.
 You need to declare an extra dependency and the sources for all the used jars.
 ```gradle
 dependencies {
-    implementation "com.crashinvaders.basisu:basisu-gdx-gwt"
+    implementation "com.crashinvaders.basisu:basisu-gdx-gwt:$gdxBasisuVersion"
     implementation "com.crashinvaders.basisu:basisu-gdx-gwt:$gdxBasisuVersion:sources"
     implementation "com.crashinvaders.basisu:basisu-gdx:$gdxBasisuVersion:sources"
     implementation "com.crashinvaders.basisu:basisu-wrapper:$gdxBasisuVersion:sources"
