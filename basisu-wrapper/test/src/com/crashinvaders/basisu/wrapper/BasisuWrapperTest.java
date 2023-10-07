@@ -188,6 +188,18 @@ public class BasisuWrapperTest {
     }
 
     @Test
+    public void testKtx2GetTextureFormat() {
+        BasisuTextureFormat textureFormat = BasisuWrapper.ktx2GetTextureFormat(imageKtx2Buffer);
+        assertEquals(BasisuTextureFormat.UASTC4x4, textureFormat);
+    }
+
+    @Test
+    public void textKtx2HasAlphaNative() {
+        boolean hasAlpha = BasisuWrapper.ktx2HasAlpha(imageKtx2Buffer);
+        assertTrue(hasAlpha);
+    }
+
+    @Test
     public void testKtx2TranscodeEtc2Rgba() {
         Ktx2ImageLevelInfo imageInfo = BasisuWrapper.ktx2GetImageLevelInfo(imageKtx2Buffer, 0, 0);
 

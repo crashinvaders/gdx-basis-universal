@@ -1,17 +1,13 @@
 package com.crashinvaders.basisu.gdx;
 
-import com.badlogic.gdx.Application;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.IntMap;
 import com.crashinvaders.basisu.wrapper.BasisuFileInfo;
 import com.crashinvaders.basisu.wrapper.BasisuImageInfo;
 import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
 import com.crashinvaders.basisu.wrapper.BasisuWrapper;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 /**
@@ -33,7 +29,7 @@ public class BasisuData implements Disposable {
      * @param file the file to load the Basis texture data from
      */
     public BasisuData(FileHandle file) {
-        this(readFileIntoBuffer(file));
+        this(BasisuGdxUtils.readFileIntoBuffer(file));
     }
 
     /**
@@ -115,40 +111,5 @@ public class BasisuData implements Disposable {
      */
     public ByteBuffer transcode(int imageIndex, int mipmapLevel, BasisuTranscoderTextureFormat textureFormat) {
         return BasisuWrapper.basisTranscode(encodedData, imageIndex, mipmapLevel, textureFormat);
-    }
-
-    /**
-     * Reads the file content into the {@link ByteBuffer}.
-     * It uses unsafe (direct) byte buffer for all the platforms except for GWT,
-     * so don't forget to free it using {@link BufferUtils#disposeUnsafeByteBuffer(ByteBuffer)}.
-     */
-    public static ByteBuffer readFileIntoBuffer(FileHandle file) {
-        byte[] buffer = new byte[1024 * 10];
-        DataInputStream in = null;
-        try {
-            in = new DataInputStream(new BufferedInputStream(file.read()));
-            int fileSize = (int)file.length();
-
-            // We use unsafe (direct) byte buffer everywhere but not on GWT as it doesn't support it.
-            final ByteBuffer byteBuffer;
-            if (Gdx.app.getType() == Application.ApplicationType.WebGL) {
-                byteBuffer = BufferUtils.newByteBuffer(fileSize);
-            } else {
-                //TODO Replace with BufferUtils.newUnsafeByteBuffer(fileSize) once it's compatible with GWT compiler.
-                byteBuffer = BasisuBufferUtils.newUnsafeByteBuffer(fileSize);
-            }
-
-            int readBytes = 0;
-            while ((readBytes = in.read(buffer)) != -1) {
-                byteBuffer.put(buffer, 0, readBytes);
-            }
-            ((Buffer)byteBuffer).position(0);
-            ((Buffer)byteBuffer).limit(byteBuffer.capacity());
-            return byteBuffer;
-        } catch (Exception e) {
-            throw new BasisuGdxException("Couldn't load file '" + file + "'", e);
-        } finally {
-            StreamUtils.closeQuietly(in);
-        }
     }
 }

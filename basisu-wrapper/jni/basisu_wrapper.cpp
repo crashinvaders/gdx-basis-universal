@@ -208,6 +208,32 @@ namespace basisuWrapper {
             return height;
         }
 
+        basist::basis_tex_format getTextureFormat(uint8_t *data, uint32_t dataSize) {
+            initBasisu();
+
+            ktx2_transcoder transcoder = {};
+            if (!transcoder.init(data, dataSize)) {
+                basisuUtils::logError(LOG_TAG, "Failed to read KTX2 data.");
+                return basist::basis_tex_format(-1);
+            }
+            basist::basis_tex_format textureFormat = transcoder.get_format();
+            transcoder.clear();
+            return textureFormat;
+        }
+
+        bool hasAlpha(uint8_t *data, uint32_t dataSize) {
+            initBasisu();
+
+            ktx2_transcoder transcoder = {};
+            if (!transcoder.init(data, dataSize)) {
+                basisuUtils::logError(LOG_TAG, "Failed to read KTX2 data.");
+                return false;
+            }
+            bool hasAlpha = transcoder.get_has_alpha();
+            transcoder.clear();
+            return hasAlpha;
+        }
+
         bool transcode(basisu::vector<uint8_t> &out, uint8_t *data, uint32_t dataSize,
                        uint32_t layerIndex, uint32_t levelIndex, transcoder_texture_format format) {
 

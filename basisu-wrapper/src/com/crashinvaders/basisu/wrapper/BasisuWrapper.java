@@ -4,6 +4,8 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import static com.crashinvaders.basisu.wrapper.UniqueIdUtils.findOrThrow;
+
 /**
  * The wrapper over the native Basis Universal transcoder functionality.
  */
@@ -180,6 +182,21 @@ public class BasisuWrapper {
         return basisuWrapper::ktx2::getImageHeight((uint8_t*)data, dataSize);
     */
 
+    public static BasisuTextureFormat ktx2GetTextureFormat(Buffer data) {
+        int textureFormatId = ktx2GetTextureFormatNative(data, data.capacity());
+        return findOrThrow(BasisuTextureFormat.values(), textureFormatId);
+    }
+    private static native int ktx2GetTextureFormatNative(Buffer data, int dataSize); /*
+        return (int)basisuWrapper::ktx2::getTextureFormat((uint8_t*)data, dataSize);
+    */
+
+    public static boolean ktx2HasAlpha(Buffer data) {
+        return ktx2HasAlphaNative(data, data.capacity());
+    }
+    private static native boolean ktx2HasAlphaNative(Buffer data, int dataSize); /*
+        return basisuWrapper::ktx2::hasAlpha(data, dataSize);
+    */
+
     public static ByteBuffer ktx2Transcode(Buffer data, int imageIndex, int levelIndex, BasisuTranscoderTextureFormat textureFormat) {
         int format = textureFormat.getId();
         byte[] transcodedData = ktx2TranscodeNative(data, data.capacity(), imageIndex, levelIndex, format);
@@ -194,12 +211,12 @@ public class BasisuWrapper {
         ((Buffer)buffer).limit(buffer.capacity());
         return buffer;
     }
-    private static native byte[] ktx2TranscodeNative(Buffer dataRaw, int dataSize, int imageIndex, int levelIndex, int textureFormatId); /*MANUAL
+    private static native byte[] ktx2TranscodeNative(Buffer dataRaw, int dataSize, int layerIndex, int levelIndex, int textureFormatId); /*MANUAL
         basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
         uint8_t* data = (uint8_t*)env->GetDirectBufferAddress(dataRaw);
         basisu::vector<uint8_t> transcodedData;
 
-        if (!basisuWrapper::ktx2::transcode(transcodedData, data, dataSize, imageIndex, levelIndex, format)) {
+        if (!basisuWrapper::ktx2::transcode(transcodedData, data, dataSize, layerIndex, levelIndex, format)) {
             basisuUtils::throwException(env, "Error during KTX2 image transcoding.");
             return 0;
         };

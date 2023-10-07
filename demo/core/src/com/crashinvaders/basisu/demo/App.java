@@ -61,9 +61,11 @@ public class App implements ApplicationListener {
 
         assetManager = new AssetManager();
         assetManager.setLoader(Texture.class, ".basis", new BasisuTextureLoader(assetManager.getFileHandleResolver()));
-        assetManager.load("screen-stuff-etc1s.basis", Texture.class);   // ETC1S RGBA
-        assetManager.load("screen-stuff-uastc.basis", Texture.class);   // UASTC RGBA
-        assetManager.load("kodim3.basis", Texture.class);               // ETC1S RGB
+        assetManager.setLoader(Texture.class, ".ktx2", new Ktx2TextureLoader(assetManager.getFileHandleResolver()));
+        assetManager.load("screen-stuff-etc1s.basis", Texture.class);   // BASIS/ETC1S RGBA
+        assetManager.load("screen-stuff-uastc.basis", Texture.class);   // BASIS/UASTC RGBA
+        assetManager.load("kodim3.basis", Texture.class);               // BASIS/ETC1S RGB
+        assetManager.load("screen_stuff.uastc.ktx2", Texture.class);    // KTX2/UASTC RGBA
         assetManager.load("basisu-atlas.atlas", TextureAtlas.class);    // Basis-based texture atlas
         assetManager.finishLoading();
 
@@ -75,46 +77,40 @@ public class App implements ApplicationListener {
             Table rootTable = new Table();
             rootTable.setFillParent(true);
             rootTable.center();
+            rootTable.defaults().grow().center().pad(16f).uniform();
 
-            rootTable.add(new Image(new TextureRegionDrawable(texture0), Scaling.fit, Align.center))
-                    .center()
-                    .height(240f)
-                    .growX();
+            rootTable.add(new Image(new TextureRegionDrawable(texture0), Scaling.fit, Align.center));
 
             rootTable.add(new Image(
-                    new TextureRegionDrawable(assetManager.get("kodim3.basis", Texture.class)),
-                    Scaling.fit,
-                    Align.center))
-                    .center()
-                    .height(240f)
-                    .growX();
+                            new TextureRegionDrawable(assetManager.get("kodim3.basis", Texture.class)),
+                            Scaling.fit,
+                            Align.center));
+
+            rootTable.add(new Image(
+                            new TextureRegionDrawable(assetManager.get("screen-stuff-etc1s.basis", Texture.class)),
+                            Scaling.fit,
+                            Align.center));
 
             rootTable.row();
 
             rootTable.add(new Image(
-                    new TextureRegionDrawable(assetManager.get("screen-stuff-etc1s.basis", Texture.class)),
-                    Scaling.fit,
-                    Align.center))
-                    .center()
-                    .height(240f)
-                    .growX();
+                            new TextureRegionDrawable(assetManager.get("screen-stuff-uastc.basis", Texture.class)),
+                            Scaling.fit,
+                            Align.center));
 
             rootTable.add(new Image(
-                    new TextureRegionDrawable(assetManager.get("screen-stuff-uastc.basis", Texture.class)),
-                    Scaling.fit,
-                    Align.center))
-                    .center()
-                    .height(240f)
-                    .growX();
+                            new TextureRegionDrawable(assetManager.get("basisu-atlas.atlas", TextureAtlas.class).findRegion("ic_env_picnic")),
+                            Scaling.fit,
+                            Align.center));
+
+            rootTable.add(new Image(
+                            new TextureRegionDrawable(assetManager.get("screen_stuff.uastc.ktx2", Texture.class)),
+                            Scaling.fit,
+                            Align.center));
 
             stage.addActor(rootTable);
 
-            // Put atlas region at the center.
-            Container<Image> containerAtlasRegion = new Container<Image>(new Image(assetManager.get("basisu-atlas.atlas", TextureAtlas.class).findRegion("ic_env_picnic")));
-            containerAtlasRegion.setFillParent(true);
-            containerAtlasRegion.center();
-            rootTable.addActor(containerAtlasRegion);
-
+            // Animate composition on click.
             rootTable.setTouchable(Touchable.enabled);
             rootTable.addListener(new ClickListener() {
                 @Override
@@ -182,7 +178,7 @@ public class App implements ApplicationListener {
             BasisuNativeLibLoader.loadIfNeeded();
             FileHandle file = Gdx.files.internal("kodim3.basis");
             Gdx.app.log(TAG, "Reading Basis file: " + file.name());
-            ByteBuffer basisuData = BasisuData.readFileIntoBuffer(file);
+            ByteBuffer basisuData = BasisuGdxUtils.readFileIntoBuffer(file);
             boolean valid = BasisuWrapper.basisValidateHeader(basisuData);
             Gdx.app.log(TAG, "Data is " + (valid ? "valid" : "invalid"));
 

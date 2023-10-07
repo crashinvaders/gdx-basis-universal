@@ -14,25 +14,24 @@ import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
 import java.nio.Buffer;
 
 /**
- * Provides support for Basis texture data format for {@link com.badlogic.gdx.graphics.Texture}.
+ * Provides support for KTX2 texture data format for {@link com.badlogic.gdx.graphics.Texture}.
  * The implementation is based of {@link com.badlogic.gdx.graphics.glutils.ETC1TextureData}.
  * <p/>
  * The implementation uses {@link BasisuTextureFormatSelector} to determine
  * which texture format is preferable for the current platform.
- * The {@link com.crashinvaders.basisu.gdx.BasisuTextureFormatSelector.Default} selector is used for all the instances
+ * The {@link BasisuTextureFormatSelector.Default} selector is used for all the instances
  * unless another one is specified through {@link #setTextureFormatSelector(BasisuTextureFormatSelector)}.
  * You can also override the default selector by updating the value of {@link BasisuTextureFormatSelector#defaultSelector}.
  */
-public class BasisuTextureData implements TextureData {
-    private static final String TAG = BasisuTextureData.class.getSimpleName();
+public class Ktx2TextureData implements TextureData {
+    private static final String TAG = Ktx2TextureData.class.getSimpleName();
 
     private BasisuTextureFormatSelector formatSelector = BasisuTextureFormatSelector.defaultSelector;
 
     private final FileHandle file;  // May be null.
-    private final int imageIndex;
     private final int mipmapLevel;
 
-    private BasisuData basisuData;
+    private Ktx2Data ktx2Data;
 
     private Buffer transcodedData = null;
     private BasisuTranscoderTextureFormat transcodeFormat = null;
@@ -42,61 +41,41 @@ public class BasisuTextureData implements TextureData {
     private boolean isPrepared = false;
 
     /**
-     * @param file the file to load the Basis texture data from
+     * @param file the file to load the KTX2 texture data from
      */
-    public BasisuTextureData(FileHandle file) {
-        this(file, 0, 0);
+    public Ktx2TextureData(FileHandle file) {
+        this(file, 0);
     }
 
     /**
-     * @param file the file to load the Basis texture data from
-     * @param imageIndex the image index in the Basis file
-     */
-    public BasisuTextureData(FileHandle file, int imageIndex) {
-        this(file, imageIndex, 0);
-    }
-
-    /**
-     * @param file the file to load the Basis texture data from
-     * @param imageIndex the image index in the Basis file
+     * @param file the file to load the KTX2 texture data from
      * @param mipmapLevel the mipmap level of the image
-     *                    (mipmaps should be enabled by the Basis encoder when you generate the Basis file).
+     *                    (mipmaps should be enabled by the Basis encoder when you generate a KTX2 file).
      */
-    public BasisuTextureData(FileHandle file, int imageIndex, int mipmapLevel) {
+    public Ktx2TextureData(FileHandle file, int mipmapLevel) {
         this.file = file;
-        this.imageIndex = imageIndex;
         this.mipmapLevel = mipmapLevel;
 
-        this.basisuData = null;
+        this.ktx2Data = null;
     }
 
     /**
-     * @param basisuData the Basis texture data to transcode the texture from
+     * @param ktx2Data the KTX2 texture data to transcode the texture from
      */
-    public BasisuTextureData(BasisuData basisuData) {
-        this(basisuData, 0);
+    public Ktx2TextureData(Ktx2Data ktx2Data) {
+        this(ktx2Data, 0);
     }
 
     /**
-     * @param basisuData the Basis texture data to transcode the texture from
-     * @param imageIndex the image index in the Basis file
-     */
-    public BasisuTextureData(BasisuData basisuData, int imageIndex) {
-        this(basisuData, imageIndex, 0);
-    }
-
-    /**
-     * @param basisuData the Basis texture data to transcode the texture from
-     * @param imageIndex the image index in the Basis file
+     * @param ktx2Data the KTX2 texture data to transcode the texture from
      * @param mipmapLevel the mipmap level of the image
-     *                    (mipmaps should be enabled by the Basis encoder when you generate the Basis file).
+     *                    (mipmaps should be enabled by the Basis encoder when you generate ae KTX2 file).
      */
-    public BasisuTextureData(BasisuData basisuData, int imageIndex, int mipmapLevel) {
+    public Ktx2TextureData(Ktx2Data ktx2Data, int mipmapLevel) {
         this.file = null;
-        this.imageIndex = imageIndex;
         this.mipmapLevel = mipmapLevel;
 
-        this.basisuData = basisuData;
+        this.ktx2Data = ktx2Data;
     }
 
     /**
@@ -135,44 +114,37 @@ public class BasisuTextureData implements TextureData {
     @Override
     public void prepare() {
         if (isPrepared) throw new GdxRuntimeException("Already prepared");
-        if (file == null && basisuData == null) throw new GdxRuntimeException("Can only load once from BasisuData");
+        if (file == null && ktx2Data == null) throw new GdxRuntimeException("Can only load once from ktx2Data");
         if (file != null) {
-            basisuData = new BasisuData(file);
+            ktx2Data = new Ktx2Data(file);
         }
 
-        BasisuFileInfo fileInfo = basisuData.getFileInfo();
-
-        int totalImages = fileInfo.getTotalImages();
-        if (imageIndex < 0 || imageIndex >= totalImages) {
-            throw new BasisuGdxException("imageIndex " + imageIndex + " exceeds " +
-                    "the total number of images (" + totalImages + ") in the basis file.");
-        }
-
-        int mipmapLevels = fileInfo.getImageMipmapLevels()[imageIndex];
+        int mipmapLevels = ktx2Data.getTotalMipmapLevels();
         if (mipmapLevel < 0 || mipmapLevel >= mipmapLevels) {
             throw new BasisuGdxException("mipmapLevel " + mipmapLevel + " exceeds " +
                     "the total number of mipmap levels (" + mipmapLevels + ") in the basis file.");
         }
 
-        BasisuTextureType textureType = fileInfo.getTextureType();
-        if (textureType != BasisuTextureType.REGULAR_2D) {
-            throw new BasisuGdxException("textureType " + textureType + " is not supported at the moment. " +
-                    "Only BasisuTextureType.REGULAR_2D texture type is allowed.");
-        }
+        //TODO Find a way to get texture type from KTX2 files and add sanity check.
+//        BasisuTextureType textureType = fileInfo.getTextureType();
+//        if (textureType != BasisuTextureType.REGULAR_2D) {
+//            throw new BasisuGdxException("textureType " + textureType + " is not supported at the moment. " +
+//                    "Only BasisuTextureType.REGULAR_2D texture type is allowed.");
+//        }
 
-        BasisuImageInfo imageInfo = basisuData.getImageInfo(imageIndex);
-        width = imageInfo.getWidth();
-        height = imageInfo.getHeight();
+        width = ktx2Data.getImageWidth();
+        height = ktx2Data.getImageHeight();
 
-        transcodeFormat = formatSelector.resolveTextureFormat(basisuData, imageIndex);
+        transcodeFormat = formatSelector.resolveTextureFormat(ktx2Data);
         Gdx.app.debug(TAG, (file != null ? "["+file.path()+"] " : "") + "Transcoding to the " + transcodeFormat + " format");
 
-        this.transcodedData = basisuData.transcode(imageIndex, mipmapLevel, transcodeFormat);
+        int layerIndex = 0; // We do not yet support multi-layer KTX2 formats.
+        this.transcodedData = ktx2Data.transcode(layerIndex, mipmapLevel, transcodeFormat);
 
         Gdx.app.debug(TAG, (file != null ? "["+file.path()+"] " : "") + "Transcoded texture size: " + MathUtils.round(this.transcodedData.capacity() / 1024.0f) + "kB");
 
-        basisuData.dispose();
-        basisuData = null;
+        ktx2Data.dispose();
+        ktx2Data = null;
         isPrepared = true;
     }
 

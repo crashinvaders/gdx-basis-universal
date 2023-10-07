@@ -44,6 +44,10 @@ namespace basisuWrapper {
 
         uint32_t getImageHeight(uint8_t *data, uint32_t dataSize);
 
+        basist::basis_tex_format getTextureFormat(uint8_t *data, uint32_t dataSize);
+
+        bool hasAlpha(uint8_t *data, uint32_t dataSize);
+
         bool transcode(basisu::vector<uint8_t> &out, uint8_t *data, uint32_t dataSize,
                        uint32_t layerIndex, uint32_t levelIndex, transcoder_texture_format format);
 

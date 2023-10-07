@@ -1,34 +1,30 @@
 package com.crashinvaders.basisu.gdx;
 
 import com.badlogic.gdx.assets.AssetDescriptor;
-import com.badlogic.gdx.assets.AssetLoaderParameters;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.AsynchronousAssetLoader;
 import com.badlogic.gdx.assets.loaders.FileHandleResolver;
 import com.badlogic.gdx.assets.loaders.TextureLoader;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
-import com.badlogic.gdx.graphics.Texture.TextureWrap;
 import com.badlogic.gdx.utils.Array;
-import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
 
 /**
- * {@link AssetManager} compliant loader for Basis Universal textures.
+ * {@link AssetManager} compliant loader for KTX2 textures.
  * <p/>
  * Here's an example of how to setup the loader, so the {@link AssetManager} can support loading of ".basis" texture files: *
  * <br/>
  * <code>
- *     assetManager.setLoader(Texture.class, ".basis", new BasisuTextureLoader(assetManager.getFileHandleResolver()));
+ *     assetManager.setLoader(Texture.class, ".ktx2", new Ktx2TextureLoader(assetManager.getFileHandleResolver()));
  * </code>
  * <br/>
- * And after that call to <code>assetManager.load("MyImage.basis", Texture.class);</code> will post the texture for loading.
+ * And after that call to <code>assetManager.load("MyImage.ktx2", Texture.class);</code> will post the texture for loading.
  */
-public class BasisuTextureLoader extends AsynchronousAssetLoader<Texture, TextureLoader.TextureParameter> {
+public class Ktx2TextureLoader extends AsynchronousAssetLoader<Texture, TextureLoader.TextureParameter> {
 
-    BasisuTextureData textureData;
+    Ktx2TextureData textureData;
 
-    public BasisuTextureLoader(FileHandleResolver resolver) {
+    public Ktx2TextureLoader(FileHandleResolver resolver) {
         super(resolver);
         // We need to make sure this one is first time called
         // on the main thread and not during async texture loading.
@@ -36,15 +32,15 @@ public class BasisuTextureLoader extends AsynchronousAssetLoader<Texture, Textur
     }
 
     public void loadAsync(AssetManager manager, String fileName, FileHandle fileHandle, TextureLoader.TextureParameter parameter) {
-        BasisuTextureData data;
-        if (parameter instanceof BasisuTextureParameter) {
-            BasisuTextureParameter basisParameter = (BasisuTextureParameter) parameter;
-            data = new BasisuTextureData(fileHandle, basisParameter.imageIndex, basisParameter.mipmapLevel);
+        Ktx2TextureData data;
+        if (parameter instanceof Ktx2TextureParameter) {
+            Ktx2TextureParameter basisParameter = (Ktx2TextureParameter) parameter;
+            data = new Ktx2TextureData(fileHandle, basisParameter.mipmapLevel);
             if (basisParameter.formatSelector != null) {
                 data.setTextureFormatSelector(basisParameter.formatSelector);
             }
         } else {
-            data = new BasisuTextureData(fileHandle);
+            data = new Ktx2TextureData(fileHandle);
         }
         data.prepare();
         textureData = data;
@@ -67,14 +63,14 @@ public class BasisuTextureLoader extends AsynchronousAssetLoader<Texture, Textur
     }
 
     /**
-     * Parameter class is an optional extension for the standard {@link com.badlogic.gdx.assets.loaders.TextureLoader.TextureParameter}.
+     * Parameter class is an optional extension for the standard {@link TextureLoader.TextureParameter}.
      */
-    public static class BasisuTextureParameter extends TextureLoader.TextureParameter {
-        public int imageIndex = 0;
+    public static class Ktx2TextureParameter extends TextureLoader.TextureParameter {
+        // public int layerIndex = 0; // Not yet supported.
         public int mipmapLevel = 0;
         public BasisuTextureFormatSelector formatSelector = null;
 
-        public BasisuTextureParameter() {
+        public Ktx2TextureParameter() {
         }
     }
 }
