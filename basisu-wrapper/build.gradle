@@ -61,6 +61,7 @@ jnigen {
                 'com_crashinvaders_basisu_wrapper_BasisuWrapper.cpp',
                 'com_crashinvaders_basisu_wrapper_BasisuFileInfo.cpp',
                 'com_crashinvaders_basisu_wrapper_BasisuImageInfo.cpp',
+                'com_crashinvaders_basisu_wrapper_Ktx2ImageLevelInfo.cpp',
         ]
         cExcludes = cppExcludes = [
                 'build/**',
@@ -68,18 +69,18 @@ jnigen {
 
         def commonFlags = '-fvisibility=hidden -Wall -O2 -g0 -fno-exceptions'
 
-        cFlags += " -std=c11 $commonFlags "
-        cppFlags += " -std=c++11 $commonFlags "
-        linkerFlags += " $commonFlags "
+        def transcoderDefines =
+                // Basis Universal general switches.
+                '-DBASISU_SUPPORT_ENCODING=0 ' +
+                '-DBASISD_SUPPORT_KTX2=1 ' +
+                '-DBASISD_SUPPORT_KTX2_ZSTD=1 ' +
+                // Disable texture formats we don't support at all.
+                // Macros reference - https://github.com/BinomialLLC/basis_universal/wiki/Transcoder-details-and-shrinking-the-compiled-size-of-the-transcoder#shrinking-the-transcoders-compiled-size
+                '-DBASISD_SUPPORT_FXT1=0 '
 
-        // Disable texture formats we don't support at all.
-        // Macros reference - https://github.com/BinomialLLC/basis_universal/wiki/Transcoder-details-and-shrinking-the-compiled-size-of-the-transcoder#shrinking-the-transcoders-compiled-size
-        cppFlags += ' -DBASISD_SUPPORT_FXT1=0 '
-
-        // Basis Universal general switches.
-        cppFlags += ' -DBASISU_SUPPORT_ENCODING=-0 '
-        cppFlags += ' -DBASISD_SUPPORT_KTX2=0 '
-        cppFlags += ' -DBASISD_SUPPORT_KTX2_ZSTD=0 '
+        cFlags +=       " -std=c11 $commonFlags $transcoderDefines"
+        cppFlags +=     " -std=c++11 $commonFlags $transcoderDefines"
+        linkerFlags +=  " $commonFlags "
 
         // Enable for Basis Universal debug messages.
         // cppFlags += ' -DBASISU_FORCE_DEVEL_MESSAGES=1 '

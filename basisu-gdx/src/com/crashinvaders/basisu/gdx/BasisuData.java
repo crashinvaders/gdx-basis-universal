@@ -44,11 +44,11 @@ public class BasisuData implements Disposable {
 
         this.encodedData = encodedData;
 
-        if (!BasisuWrapper.validateHeader(encodedData)) {
+        if (!BasisuWrapper.basisValidateHeader(encodedData)) {
             throw new BasisuGdxException("Cannot validate header of the basis universal data.");
         }
 
-        this.fileInfo = BasisuWrapper.getFileInfo(encodedData);
+        this.fileInfo = BasisuWrapper.basisGetFileInfo(encodedData);
     }
 
     @Override
@@ -98,7 +98,7 @@ public class BasisuData implements Disposable {
         }
         BasisuImageInfo imageInfo = imageInfoIndex.get(imageIndex);
         if (imageInfo == null) {
-            imageInfo = BasisuWrapper.getImageInfo(encodedData, imageIndex);
+            imageInfo = BasisuWrapper.basisGetImageInfo(encodedData, imageIndex);
             imageInfoIndex.put(imageIndex, imageInfo);
         }
         return imageInfo;
@@ -114,7 +114,7 @@ public class BasisuData implements Disposable {
      * Can be used for further processing or supplied directly to the OpenGL as compressed texture.
      */
     public ByteBuffer transcode(int imageIndex, int mipmapLevel, BasisuTranscoderTextureFormat textureFormat) {
-        return BasisuWrapper.transcode(encodedData, imageIndex, mipmapLevel, textureFormat);
+        return BasisuWrapper.basisTranscode(encodedData, imageIndex, mipmapLevel, textureFormat);
     }
 
     /**

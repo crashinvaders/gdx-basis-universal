@@ -15,7 +15,6 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -184,14 +183,14 @@ public class App implements ApplicationListener {
             FileHandle file = Gdx.files.internal("kodim3.basis");
             Gdx.app.log(TAG, "Reading Basis file: " + file.name());
             ByteBuffer basisuData = BasisuData.readFileIntoBuffer(file);
-            boolean valid = BasisuWrapper.validateHeader(basisuData);
+            boolean valid = BasisuWrapper.basisValidateHeader(basisuData);
             Gdx.app.log(TAG, "Data is " + (valid ? "valid" : "invalid"));
 
-            ByteBuffer rgba = BasisuWrapper.transcode(basisuData, 0, 0, BasisuTranscoderTextureFormat.RGBA32);
+            ByteBuffer rgba = BasisuWrapper.basisTranscode(basisuData, 0, 0, BasisuTranscoderTextureFormat.RGBA32);
             Gdx.app.log(TAG, "Transcoded size: " + rgba.capacity());
             Gdx.app.log(TAG, "Transcoded checksum: " + modRtuCrc(rgba));
 
-            BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisuData, 0);
+            BasisuImageInfo imageInfo = BasisuWrapper.basisGetImageInfo(basisuData, 0);
             Gdx.app.log(TAG, "===== IMAGE INFO =====");
             Gdx.app.log(TAG, "getImageIndex() " + imageInfo.getImageIndex());
             Gdx.app.log(TAG, "getTotalLevels() " + imageInfo.getTotalLevels());
@@ -207,7 +206,7 @@ public class App implements ApplicationListener {
             Gdx.app.log(TAG, "hasIframeFlag() " + imageInfo.hasIframeFlag());
             imageInfo.close();
 
-            BasisuFileInfo fileInfo = BasisuWrapper.getFileInfo(basisuData);
+            BasisuFileInfo fileInfo = BasisuWrapper.basisGetFileInfo(basisuData);
             Gdx.app.log(TAG, "===== FILE INFO =====");
             Gdx.app.log(TAG, "getVersion() " + fileInfo.getVersion());
             Gdx.app.log(TAG, "getTotalHeaderSize() " + fileInfo.getTotalHeaderSize());
