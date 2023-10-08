@@ -3,10 +3,7 @@ package com.crashinvaders.basisu.gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.IntMap;
-import com.crashinvaders.basisu.wrapper.BasisuTextureFormat;
-import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
-import com.crashinvaders.basisu.wrapper.BasisuWrapper;
-import com.crashinvaders.basisu.wrapper.Ktx2ImageLevelInfo;
+import com.crashinvaders.basisu.wrapper.*;
 
 import java.nio.ByteBuffer;
 
@@ -17,6 +14,7 @@ import java.nio.ByteBuffer;
 public class Ktx2Data implements Disposable {
 
     private final ByteBuffer encodedData;
+    private final Ktx2FileInfo fileInfo;
 
     /**
      * Keeps track of all the image info instances created by this object
@@ -41,10 +39,8 @@ public class Ktx2Data implements Disposable {
         this.encodedData = encodedData;
 
         // KTX2 codec doesn't provide a simple validation method.
-        // We assume we're good if we can parse the header and read "anything" out of it.
-        if (BasisuWrapper.ktx2GetTotalLayers(encodedData) < 0) {
-            throw new BasisuGdxException("Cannot validate header of KTX2 data.");
-        }
+        // We assume we're good if we can read a file info.
+        fileInfo = BasisuWrapper.ktx2GetFileInfo(encodedData);
     }
 
     @Override
@@ -56,6 +52,8 @@ public class Ktx2Data implements Disposable {
         }
         imageInfoIndex.clear();
 
+        fileInfo.close();
+
         //TODO Replace with BufferUtils.newUnsafeByteBuffer(fileSize) once it's compatible with GWT compiler.
         if (BasisuBufferUtils.isUnsafeByteBuffer(encodedData)) {
             BasisuBufferUtils.disposeUnsafeByteBuffer(encodedData);
@@ -63,27 +61,27 @@ public class Ktx2Data implements Disposable {
     }
 
     public int getTotalLayers() {
-        return BasisuWrapper.ktx2GetTotalLayers(encodedData);
+        return fileInfo.getTotalLayers();
     }
 
     public int getTotalMipmapLevels() {
-        return BasisuWrapper.ktx2GetTotalMipmapLevels(encodedData);
+        return fileInfo.getTotalMipmapLevels();
     }
 
     public int getImageWidth() {
-        return BasisuWrapper.ktx2GetImageWidth(encodedData);
+        return fileInfo.getImageWidth();
     }
 
     public int getImageHeight() {
-        return BasisuWrapper.ktx2GetImageHeight(encodedData);
+        return fileInfo.getImageHeight();
     }
 
     public boolean hasAlpha() {
-        return BasisuWrapper.ktx2HasAlpha(encodedData);
+        return fileInfo.hasAlpha();
     }
 
     public BasisuTextureFormat getTextureFormat() {
-        return BasisuWrapper.ktx2GetTextureFormat(encodedData);
+        return fileInfo.getTextureFormat();
     }
 
     /**

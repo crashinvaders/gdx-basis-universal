@@ -65,16 +65,6 @@ public class BasisuWrapper {
     */
 
     /**
-     * @return the number of mipmap levels in an image
-     */
-    public static int basisGetTotalMipMapLevels(Buffer data) {
-        return basisGetTotalMipMapLevelsNative(data, data.capacity());
-    }
-    private static native int basisGetTotalMipMapLevelsNative(Buffer data, int dataSize); /*
-        return basisuWrapper::basis::getTotalMipMapLevels((uint8_t*)data, dataSize);
-    */
-
-    /**
      * Decodes a single mipmap level from the .basis file to any of the supported output texture formats.
      * If the .basis file doesn't have alpha slices, the output alpha blocks will be set to fully opaque (all 255's).
      * Currently, to decode to PVRTC1 the basis texture's dimensions in pixels must be a power of 2, due to PVRTC1 format requirements.
@@ -120,7 +110,7 @@ public class BasisuWrapper {
     private static native void basisGetFileInfoNative(Buffer data, int dataSize, long fileInfoAddr); /*
         basist::basisu_file_info* fileInfo = (basist::basisu_file_info*)fileInfoAddr;
         if (!basisuWrapper::basis::getFileInfo(*fileInfo, (uint8_t*)data, dataSize)) {
-            basisuUtils::throwException(env, "Failed to obtain file info.");
+            basisuUtils::throwException(env, "Failed to obtain Basis file info.");
         }
     */
 
@@ -135,13 +125,24 @@ public class BasisuWrapper {
     private static native void basisGetImageInfoNative(Buffer data, int dataSize, int imageIndex, long imageInfoAddr); /*
         basist::basisu_image_info* imageInfo = (basist::basisu_image_info*)imageInfoAddr;
         if (!basisuWrapper::basis::getImageInfo(*imageInfo, (uint8_t*)data, dataSize, imageIndex)) {
-            basisuUtils::throwException(env, "Failed to obtain image info.");
+            basisuUtils::throwException(env, "Failed to obtain Basis image info.");
         }
     */
 
-    /**
-     * @return information about the specified image level.
-     */
+    /** @return information about the KTX2 file. */
+    public static Ktx2FileInfo ktx2GetFileInfo(Buffer data) {
+        Ktx2FileInfo fileInfo = new Ktx2FileInfo();
+        ktx2GetFileInfoNative(data, data.capacity(), fileInfo.addr);
+        return fileInfo;
+    }
+    private static native void ktx2GetFileInfoNative(Buffer data, int dataSize, long fileInfoAddr); /*
+        basisuWrapper::ktx2_file_info* fileInfo = (basisuWrapper::ktx2_file_info*)fileInfoAddr;
+        if (!basisuWrapper::ktx2::getFileInfo(*fileInfo, (uint8_t*)data, dataSize)) {
+            basisuUtils::throwException(env, "Failed to obtain KTX2 file info.");
+        }
+    */
+
+    /** @return information about the specified image level. */
     public static Ktx2ImageLevelInfo ktx2GetImageLevelInfo(Buffer data, int imageIndex, int imageLevel) {
         Ktx2ImageLevelInfo imageInfo = new Ktx2ImageLevelInfo();
         ktx2GetImageLevelInfoNative(data, data.capacity(), imageIndex, imageLevel, imageInfo.addr);
@@ -150,51 +151,8 @@ public class BasisuWrapper {
     private static native void ktx2GetImageLevelInfoNative(Buffer data, int dataSize, int imageIndex, int imageLevel, long imageInfoAddr); /*
         basist::ktx2_image_level_info* imageInfo = (basist::ktx2_image_level_info*)imageInfoAddr;
         if (!basisuWrapper::ktx2::getImageLevelInfo(*imageInfo, (uint8_t*)data, dataSize, imageIndex, imageLevel)) {
-            basisuUtils::throwException(env, "Failed to obtain image level info.");
+            basisuUtils::throwException(env, "Failed to obtain KTX2 image level info.");
         }
-    */
-
-    public static int ktx2GetTotalLayers(Buffer data) {
-        return ktx2GetTotalLayersNative(data, data.capacity());
-    }
-    private static native int ktx2GetTotalLayersNative(Buffer data, int dataSize); /*
-        return basisuWrapper::ktx2::getTotalLayers((uint8_t*)data, dataSize);
-    */
-
-    public static int ktx2GetTotalMipmapLevels(Buffer data) {
-        return ktx2GetTotalMipmapLevelsNative(data, data.capacity());
-    }
-    private static native int ktx2GetTotalMipmapLevelsNative(Buffer data, int dataSize); /*
-        return basisuWrapper::ktx2::getTotalMipmapLevels((uint8_t*)data, dataSize);
-    */
-
-    public static int ktx2GetImageWidth(Buffer data) {
-        return ktx2GetImageWidthNative(data, data.capacity());
-    }
-    private static native int ktx2GetImageWidthNative(Buffer data, int dataSize); /*
-        return basisuWrapper::ktx2::getImageWidth((uint8_t*)data, dataSize);
-    */
-
-    public static int ktx2GetImageHeight(Buffer data) {
-        return ktx2GetImageHeightNative(data, data.capacity());
-    }
-    private static native int ktx2GetImageHeightNative(Buffer data, int dataSize); /*
-        return basisuWrapper::ktx2::getImageHeight((uint8_t*)data, dataSize);
-    */
-
-    public static BasisuTextureFormat ktx2GetTextureFormat(Buffer data) {
-        int textureFormatId = ktx2GetTextureFormatNative(data, data.capacity());
-        return findOrThrow(BasisuTextureFormat.values(), textureFormatId);
-    }
-    private static native int ktx2GetTextureFormatNative(Buffer data, int dataSize); /*
-        return (int)basisuWrapper::ktx2::getTextureFormat((uint8_t*)data, dataSize);
-    */
-
-    public static boolean ktx2HasAlpha(Buffer data) {
-        return ktx2HasAlphaNative(data, data.capacity());
-    }
-    private static native boolean ktx2HasAlphaNative(Buffer data, int dataSize); /*
-        return basisuWrapper::ktx2::hasAlpha(data, dataSize);
     */
 
     public static ByteBuffer ktx2Transcode(Buffer data, int imageIndex, int levelIndex, BasisuTranscoderTextureFormat textureFormat) {

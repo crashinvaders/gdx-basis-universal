@@ -41,12 +41,6 @@ namespace basisuWrapper {
             return transcoder.validate_file_checksums(data, dataSize, fullValidation);
         }
 
-        uint32_t getTotalMipMapLevels(uint8_t *data, uint32_t dataSize) {
-            initBasisu();
-            basisu_transcoder transcoder = {};
-            return transcoder.get_total_image_levels(data, dataSize, 0);
-        }
-
         bool getFileInfo(basisu_file_info &fileInfo, uint8_t *data, uint32_t dataSize)  {
             initBasisu();
             basisu_transcoder transcoder = {};
@@ -139,6 +133,27 @@ namespace basisuWrapper {
 
     namespace ktx2 {
 
+        bool getFileInfo(basisuWrapper::ktx2_file_info& fileInfo, uint8_t *data, uint32_t dataSize) {
+            initBasisu();
+
+            ktx2_transcoder transcoder = {};
+            if (!transcoder.init(data, dataSize)) {
+                basisuUtils::logError(LOG_TAG, "Failed to read KTX2 data.");
+                return false;
+            }
+
+            fileInfo.layers = transcoder.get_layers();
+            fileInfo.mipmapLevels = transcoder.get_levels();
+            fileInfo.width = transcoder.get_width();
+            fileInfo.height = transcoder.get_height();
+            fileInfo.hasAlpha = transcoder.get_has_alpha();
+            fileInfo.textureFormat = transcoder.get_format();
+
+            transcoder.clear();
+
+            return true;
+        }
+
         bool getImageLevelInfo(ktx2_image_level_info& imageInfo, uint8_t *data, uint32_t dataSize, uint32_t levelIndex, uint32_t layerIndex) {
             initBasisu();
 
@@ -154,84 +169,6 @@ namespace basisuWrapper {
             transcoder.get_image_level_info(imageInfo, levelIndex, layerIndex, faceIndex);
             transcoder.clear();
             return true;
-        }
-
-        uint32_t getTotalLayers(uint8_t *data, uint32_t dataSize) {
-            initBasisu();
-
-            ktx2_transcoder transcoder = {};
-            if (!transcoder.init(data, dataSize)) {
-                basisuUtils::logError(LOG_TAG, "Failed to read KTX2 data.");
-                return -1;
-            }
-            uint32_t layers = transcoder.get_layers();
-            transcoder.clear();
-            return layers;
-        }
-
-        uint32_t getTotalMipmapLevels(uint8_t *data, uint32_t dataSize) {
-            initBasisu();
-
-            ktx2_transcoder transcoder = {};
-            if (!transcoder.init(data, dataSize)) {
-                basisuUtils::logError(LOG_TAG, "Failed to read KTX2 data.");
-                return -1;
-            }
-            uint32_t levels = transcoder.get_levels();
-            transcoder.clear();
-            return levels;
-        }
-
-        uint32_t getImageWidth(uint8_t *data, uint32_t dataSize) {
-            initBasisu();
-
-            ktx2_transcoder transcoder = {};
-            if (!transcoder.init(data, dataSize)) {
-                basisuUtils::logError(LOG_TAG, "Failed to read KTX2 data.");
-                return -1;
-            }
-            uint32_t width = transcoder.get_width();
-            transcoder.clear();
-            return width;
-        }
-
-        uint32_t getImageHeight(uint8_t *data, uint32_t dataSize) {
-            initBasisu();
-
-            ktx2_transcoder transcoder = {};
-            if (!transcoder.init(data, dataSize)) {
-                basisuUtils::logError(LOG_TAG, "Failed to read KTX2 data.");
-                return -1;
-            }
-            uint32_t height = transcoder.get_height();
-            transcoder.clear();
-            return height;
-        }
-
-        basist::basis_tex_format getTextureFormat(uint8_t *data, uint32_t dataSize) {
-            initBasisu();
-
-            ktx2_transcoder transcoder = {};
-            if (!transcoder.init(data, dataSize)) {
-                basisuUtils::logError(LOG_TAG, "Failed to read KTX2 data.");
-                return basist::basis_tex_format(-1);
-            }
-            basist::basis_tex_format textureFormat = transcoder.get_format();
-            transcoder.clear();
-            return textureFormat;
-        }
-
-        bool hasAlpha(uint8_t *data, uint32_t dataSize) {
-            initBasisu();
-
-            ktx2_transcoder transcoder = {};
-            if (!transcoder.init(data, dataSize)) {
-                basisuUtils::logError(LOG_TAG, "Failed to read KTX2 data.");
-                return false;
-            }
-            bool hasAlpha = transcoder.get_has_alpha();
-            transcoder.clear();
-            return hasAlpha;
         }
 
         bool transcode(basisu::vector<uint8_t> &out, uint8_t *data, uint32_t dataSize,

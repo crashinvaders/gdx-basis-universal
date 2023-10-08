@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class BasisuWrapperTest {
 
@@ -55,71 +56,80 @@ public class BasisuWrapperTest {
     }
 
     @Test
-    public void testBasisGetFileInfo() {
-        BasisuFileInfo fileInfo = BasisuWrapper.basisGetFileInfo(imageBasisBuffer);
+    public void testBasisValidateChecksum() {
+        assertTrue(BasisuWrapper.basisValidateChecksum(imageBasisBuffer, true));
+    }
 
-        assertEquals(BasisuTextureType.REGULAR_2D, fileInfo.getTextureType());
-        assertEquals(BasisuTextureFormat.ETC1S, fileInfo.getTextureFormat());
-        assertEquals(19, fileInfo.getVersion());
-        assertEquals(100, fileInfo.getTotalHeaderSize());
-        assertEquals(14720, fileInfo.getTotalSelectors());
-        assertEquals(27491, fileInfo.getSelectorCodebookSize());
-        assertEquals(2584, fileInfo.getTotalEndpoints());
-        assertEquals(4272, fileInfo.getEndpointCodebookSize());
-        assertEquals(2051, fileInfo.getTablesSize());
-        assertEquals(51390, fileInfo.getSlicesSize());
-        assertEquals(0, fileInfo.getUsPerFrame());
-        assertEquals(1, fileInfo.getTotalImages());
-        assertEquals(1, fileInfo.getImageMipmapLevels().length);
-        assertEquals(1, fileInfo.getImageMipmapLevels()[0]);
-        assertEquals(0, fileInfo.getUserdata0());
-        assertEquals(0, fileInfo.getUserdata1());
-        assertFalse(fileInfo.isFlippedY());
-        assertTrue(fileInfo.isEtc1s());
-        assertFalse(fileInfo.hasAlphaSlices());
+    @Test
+    public void testBasisGetFileInfo() {
+        try (BasisuFileInfo fileInfo = BasisuWrapper.basisGetFileInfo(imageBasisBuffer)) {
+
+            assertEquals(BasisuTextureType.REGULAR_2D, fileInfo.getTextureType());
+            assertEquals(BasisuTextureFormat.ETC1S, fileInfo.getTextureFormat());
+            assertEquals(19, fileInfo.getVersion());
+            assertEquals(100, fileInfo.getTotalHeaderSize());
+            assertEquals(14720, fileInfo.getTotalSelectors());
+            assertEquals(27491, fileInfo.getSelectorCodebookSize());
+            assertEquals(2584, fileInfo.getTotalEndpoints());
+            assertEquals(4272, fileInfo.getEndpointCodebookSize());
+            assertEquals(2051, fileInfo.getTablesSize());
+            assertEquals(51390, fileInfo.getSlicesSize());
+            assertEquals(0, fileInfo.getUsPerFrame());
+            assertEquals(1, fileInfo.getTotalImages());
+            assertEquals(1, fileInfo.getImageMipmapLevels().length);
+            assertEquals(1, fileInfo.getImageMipmapLevels()[0]);
+            assertEquals(0, fileInfo.getUserdata0());
+            assertEquals(0, fileInfo.getUserdata1());
+            assertFalse(fileInfo.isFlippedY());
+            assertTrue(fileInfo.isEtc1s());
+            assertFalse(fileInfo.hasAlphaSlices());
+        }
     }
 
     @Test
     public void testBasisGetImageInfo() {
-        BasisuImageInfo imageInfo = BasisuWrapper.basisGetImageInfo(imageBasisBuffer, 0);
+        try (BasisuImageInfo imageInfo = BasisuWrapper.basisGetImageInfo(imageBasisBuffer, 0)) {
 
-        assertEquals(0, imageInfo.getImageIndex());
-        assertEquals(1, imageInfo.getTotalLevels());
-        assertEquals(768, imageInfo.getOrigWidth());
-        assertEquals(512, imageInfo.getOrigHeight());
-        assertEquals(768, imageInfo.getWidth());
-        assertEquals(512, imageInfo.getHeight());
-        assertEquals(192, imageInfo.getNumBlocksX());
-        assertEquals(128, imageInfo.getNumBlocksY());
-        assertEquals(24576, imageInfo.getTotalBlocks());
-        assertEquals(0, imageInfo.getFirstSliceIndex());
-        assertFalse(imageInfo.hasAlphaFlag());
-        assertFalse(imageInfo.hasIframeFlag());
+            assertEquals(0, imageInfo.getImageIndex());
+            assertEquals(1, imageInfo.getTotalLevels());
+            assertEquals(768, imageInfo.getOrigWidth());
+            assertEquals(512, imageInfo.getOrigHeight());
+            assertEquals(768, imageInfo.getWidth());
+            assertEquals(512, imageInfo.getHeight());
+            assertEquals(192, imageInfo.getNumBlocksX());
+            assertEquals(128, imageInfo.getNumBlocksY());
+            assertEquals(24576, imageInfo.getTotalBlocks());
+            assertEquals(0, imageInfo.getFirstSliceIndex());
+            assertFalse(imageInfo.hasAlphaFlag());
+            assertFalse(imageInfo.hasIframeFlag());
+        }
     }
 
     @Test
     public void testBasisTranscodeRgba32() {
-        BasisuImageInfo imageInfo = BasisuWrapper.basisGetImageInfo(imageBasisBuffer, 0);
+        try (BasisuImageInfo imageInfo = BasisuWrapper.basisGetImageInfo(imageBasisBuffer, 0)) {
 
-        ByteBuffer rgba8888 = BasisuWrapper.basisTranscode(imageBasisBuffer, 0, 0, BasisuTranscoderTextureFormat.RGBA32);
+            ByteBuffer rgba8888 = BasisuWrapper.basisTranscode(imageBasisBuffer, 0, 0, BasisuTranscoderTextureFormat.RGBA32);
 
-        // Check if encoding is correct.
-        assertEquals(imageInfo.getWidth() * imageInfo.getHeight() * 4, rgba8888.capacity());
+            // Check if encoding is correct.
+            assertEquals(imageInfo.getWidth() * imageInfo.getHeight() * 4, rgba8888.capacity());
 
-        BufferedImage bufferedImage = TestUtils.fromRgba8888(rgba8888, imageInfo.getWidth(), imageInfo.getHeight());
-        TestUtils.saveImagePng(bufferedImage, IMAGE_BASIS_NAME + ".rgba32");
+            BufferedImage bufferedImage = TestUtils.fromRgba8888(rgba8888, imageInfo.getWidth(), imageInfo.getHeight());
+            TestUtils.saveImagePng(bufferedImage, IMAGE_BASIS_NAME + ".rgba32");
+        }
     }
 
     @Test
     public void testBasisTranscodeEtc2Rgba() {
-        BasisuImageInfo imageInfo = BasisuWrapper.basisGetImageInfo(imageBasisBuffer, 0);
+        try (BasisuImageInfo imageInfo = BasisuWrapper.basisGetImageInfo(imageBasisBuffer, 0)) {
 
-        ByteBuffer etc2Rgba = BasisuWrapper.basisTranscode(imageBasisBuffer, 0, 0, BasisuTranscoderTextureFormat.ETC2_RGBA);
+            ByteBuffer etc2Rgba = BasisuWrapper.basisTranscode(imageBasisBuffer, 0, 0, BasisuTranscoderTextureFormat.ETC2_RGBA);
 
-        // Check if encoding is correct.
-        assertEquals(imageInfo.getTotalBlocks() * 16, etc2Rgba.capacity());
+            // Check if encoding is correct.
+            assertEquals(imageInfo.getTotalBlocks() * 16, etc2Rgba.capacity());
 
-        TestUtils.saveFile(etc2Rgba, IMAGE_BASIS_NAME + ".etc2rgba");
+            TestUtils.saveFile(etc2Rgba, IMAGE_BASIS_NAME + ".etc2rgba");
+        }
     }
 
     /**
@@ -129,86 +139,66 @@ public class BasisuWrapperTest {
      */
     @Test
     public void testBasisTranscodeAll() {
-        BasisuImageInfo imageInfo = BasisuWrapper.basisGetImageInfo(imageBasisBuffer, 0);
+        try (BasisuImageInfo imageInfo = BasisuWrapper.basisGetImageInfo(imageBasisBuffer, 0)) {
 
-        List<BasisuTranscoderTextureFormat> supportedFormats = new ArrayList<>(
-                BasisuTranscoderTextureFormatSupportIndex.getSupportedTextureFormats(BasisuTextureFormat.ETC1S));
+            List<BasisuTranscoderTextureFormat> supportedFormats = new ArrayList<>(
+                    BasisuTranscoderTextureFormatSupportIndex.getSupportedTextureFormats(BasisuTextureFormat.ETC1S));
 
-        for (BasisuTranscoderTextureFormat format : supportedFormats) {
-            if ((format == BasisuTranscoderTextureFormat.PVRTC1_4_RGB || format == BasisuTranscoderTextureFormat.PVRTC1_4_RGBA)
-                    && !TestUtils.isSquareAndPowerOfTwo(imageInfo.getWidth(), imageInfo.getHeight())) {
-                System.out.println("Format " + format + " requires the image to be square and has POW dimensions. Skipped...");
-                continue;
+            for (BasisuTranscoderTextureFormat format : supportedFormats) {
+                if ((format == BasisuTranscoderTextureFormat.PVRTC1_4_RGB || format == BasisuTranscoderTextureFormat.PVRTC1_4_RGBA)
+                        && !TestUtils.isSquareAndPowerOfTwo(imageInfo.getWidth(), imageInfo.getHeight())) {
+                    System.out.println("Format " + format + " requires the image to be square and has POW dimensions. Skipped...");
+                    continue;
+                }
+                System.out.println("Transcoding to " + format);
+                BasisuWrapper.basisTranscode(imageBasisBuffer, 0, 0, format);
             }
-            System.out.println("Transcoding to " + format);
-            BasisuWrapper.basisTranscode(imageBasisBuffer, 0, 0, format);
+        }
+    }
+
+    @Test
+    public void testKtx2GetFileInfo() {
+        try (Ktx2FileInfo fileInfo = BasisuWrapper.ktx2GetFileInfo(imageKtx2Buffer)) {
+
+            assertEquals(2048, fileInfo.getImageWidth());
+            assertEquals(2048, fileInfo.getImageHeight());
+            assertEquals(0, fileInfo.getTotalLayers());
+            assertEquals(1, fileInfo.getTotalMipmapLevels());
+            assertEquals(BasisuTextureFormat.UASTC4x4, fileInfo.getTextureFormat());
+            assertTrue(fileInfo.hasAlpha());
         }
     }
 
     @Test
     public void testKtx2GetImageLevelInfo() {
-        Ktx2ImageLevelInfo imageInfo = BasisuWrapper.ktx2GetImageLevelInfo(imageKtx2Buffer, 0, 0);
+        try (Ktx2ImageLevelInfo imageInfo = BasisuWrapper.ktx2GetImageLevelInfo(imageKtx2Buffer, 0, 0)) {
 
-        assertEquals(0, imageInfo.getLevelIndex());
-        assertEquals(0, imageInfo.getLayerIndex());
-        assertEquals(0, imageInfo.getFaceIndex());
-        assertEquals(2048, imageInfo.getOrigWidth());
-        assertEquals(2048, imageInfo.getOrigHeight());
-        assertEquals(2048, imageInfo.getWidth());
-        assertEquals(2048, imageInfo.getHeight());
-        assertEquals(512, imageInfo.getNumBlocksX());
-        assertEquals(512, imageInfo.getNumBlocksY());
-        assertEquals(262144, imageInfo.getTotalBlocks());
-        assertTrue(imageInfo.getAlphaFlag());
-        assertFalse(imageInfo.getIframeFlag());
-    }
-
-    @Test
-    public void testKtx2GetTotalLayers() {
-        int totalLayers = BasisuWrapper.ktx2GetTotalLayers(imageKtx2Buffer);
-        assertEquals(0, totalLayers);
-    }
-
-    @Test
-    public void testKtx2GetTotalMipmapLevels() {
-        int mipmapLayers = BasisuWrapper.ktx2GetTotalMipmapLevels(imageKtx2Buffer);
-        assertEquals(1, mipmapLayers);
-    }
-
-    @Test
-    public void testKtx2GetImageWidth() {
-        int width = BasisuWrapper.ktx2GetImageWidth(imageKtx2Buffer);
-        assertEquals(2048, width);
-    }
-
-    @Test
-    public void testKtx2GetImageHeight() {
-        int height = BasisuWrapper.ktx2GetImageHeight(imageKtx2Buffer);
-        assertEquals(2048, height);
-    }
-
-    @Test
-    public void testKtx2GetTextureFormat() {
-        BasisuTextureFormat textureFormat = BasisuWrapper.ktx2GetTextureFormat(imageKtx2Buffer);
-        assertEquals(BasisuTextureFormat.UASTC4x4, textureFormat);
-    }
-
-    @Test
-    public void textKtx2HasAlphaNative() {
-        boolean hasAlpha = BasisuWrapper.ktx2HasAlpha(imageKtx2Buffer);
-        assertTrue(hasAlpha);
+            assertEquals(0, imageInfo.getLevelIndex());
+            assertEquals(0, imageInfo.getLayerIndex());
+            assertEquals(0, imageInfo.getFaceIndex());
+            assertEquals(2048, imageInfo.getOrigWidth());
+            assertEquals(2048, imageInfo.getOrigHeight());
+            assertEquals(2048, imageInfo.getWidth());
+            assertEquals(2048, imageInfo.getHeight());
+            assertEquals(512, imageInfo.getNumBlocksX());
+            assertEquals(512, imageInfo.getNumBlocksY());
+            assertEquals(262144, imageInfo.getTotalBlocks());
+            assertTrue(imageInfo.getAlphaFlag());
+            assertFalse(imageInfo.getIframeFlag());
+        }
     }
 
     @Test
     public void testKtx2TranscodeEtc2Rgba() {
-        Ktx2ImageLevelInfo imageInfo = BasisuWrapper.ktx2GetImageLevelInfo(imageKtx2Buffer, 0, 0);
+        try (Ktx2ImageLevelInfo imageInfo = BasisuWrapper.ktx2GetImageLevelInfo(imageKtx2Buffer, 0, 0)) {
 
-        ByteBuffer etc2Rgba = BasisuWrapper.ktx2Transcode(imageKtx2Buffer, 0, 0, BasisuTranscoderTextureFormat.ETC2_RGBA);
+            ByteBuffer etc2Rgba = BasisuWrapper.ktx2Transcode(imageKtx2Buffer, 0, 0, BasisuTranscoderTextureFormat.ETC2_RGBA);
 
-        // Check if encoding is correct.
-        assertEquals(imageInfo.getTotalBlocks() * 16, etc2Rgba.capacity());
+            // Check if encoding is correct.
+            assertEquals(imageInfo.getTotalBlocks() * 16, etc2Rgba.capacity());
 
-        TestUtils.saveFile(etc2Rgba, IMAGE_KTX2_NAME + ".etc2rgba");
+            TestUtils.saveFile(etc2Rgba, IMAGE_KTX2_NAME + ".etc2rgba");
+        }
     }
 
     /**
@@ -218,22 +208,24 @@ public class BasisuWrapperTest {
      */
     @Test
     public void testKtx2TranscodeAll() {
-        Ktx2ImageLevelInfo imageInfo = BasisuWrapper.ktx2GetImageLevelInfo(imageKtx2Buffer, 0, 0);
-        int width = imageInfo.getWidth();
-        int height = imageInfo.getHeight();
+        try (Ktx2ImageLevelInfo imageInfo = BasisuWrapper.ktx2GetImageLevelInfo(imageKtx2Buffer, 0, 0)) {
 
-        List<BasisuTranscoderTextureFormat> supportedFormats = new ArrayList<>(
-                BasisuTranscoderTextureFormatSupportIndex.getSupportedTextureFormats(BasisuTextureFormat.UASTC4x4));
+            int width = imageInfo.getWidth();
+            int height = imageInfo.getHeight();
 
-        for (BasisuTranscoderTextureFormat format : supportedFormats) {
+            List<BasisuTranscoderTextureFormat> supportedFormats = new ArrayList<>(
+                    BasisuTranscoderTextureFormatSupportIndex.getSupportedTextureFormats(BasisuTextureFormat.UASTC4x4));
 
-            if ((format == BasisuTranscoderTextureFormat.PVRTC1_4_RGB || format == BasisuTranscoderTextureFormat.PVRTC1_4_RGBA)
-                    && !TestUtils.isSquareAndPowerOfTwo(width, height)) {
-                System.out.println("Format " + format + " requires the image to be square and has POW dimensions. Skipped...");
-                continue;
+            for (BasisuTranscoderTextureFormat format : supportedFormats) {
+
+                if ((format == BasisuTranscoderTextureFormat.PVRTC1_4_RGB || format == BasisuTranscoderTextureFormat.PVRTC1_4_RGBA)
+                        && !TestUtils.isSquareAndPowerOfTwo(width, height)) {
+                    System.out.println("Format " + format + " requires the image to be square and has POW dimensions. Skipped...");
+                    continue;
+                }
+                System.out.println("Transcoding to " + format);
+                BasisuWrapper.ktx2Transcode(imageKtx2Buffer, 0, 0, format);
             }
-            System.out.println("Transcoding to " + format);
-            BasisuWrapper.ktx2Transcode(imageKtx2Buffer, 0, 0, format);
         }
     }
 }
