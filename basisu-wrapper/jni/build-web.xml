@@ -61,6 +61,7 @@
 		<exclude name="build/**"/>
 		<include name="basisu_native_utils.cpp"/>
 		<include name="basisu_wrapper.cpp"/>
+		<include name="basisu_wrapper_emscripten.cpp"/>
 		<include name="basis-universal/transcoder/basisu_transcoder.cpp"/>
 	</fileset>
 
