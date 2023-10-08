@@ -11,6 +11,7 @@
             android:theme="@style/GdxTheme">
         <activity android:name="com.crashinvaders.basisu.demo.android.AndroidLauncher"
                   android:screenOrientation="sensorLandscape"
+                  android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout"
                   android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
