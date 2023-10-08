@@ -10,7 +10,7 @@ import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
 
-public class HtmlLauncher extends GwtApplication implements PlatformLauncher {
+public class WebLauncher extends GwtApplication implements PlatformLauncher {
 
     private static final int PADDING = 0;
     private GwtApplicationConfiguration cfg;

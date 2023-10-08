@@ -16,7 +16,7 @@ public class IOSLauncher extends IOSApplication.Delegate implements PlatformLaun
         return new IOSApplication(new App(this), config) {
             @Override
             protected IOSAudio createAudio(IOSApplicationConfiguration config) {
-                // This helps to run the demo a simulator inside
+                // This helps to run the demo on a simulator inside
                 // a virtualized macOS instance (with no audio support).
                 return new MockIosAudio();
             }
