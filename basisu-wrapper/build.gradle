@@ -67,7 +67,7 @@ jnigen {
                 'build/**',
         ]
 
-        def commonFlags = '-fvisibility=hidden -Wall -O2 -g0 -fno-exceptions'
+        def commonFlags = '-fvisibility=hidden -Wall -O2 -g0 -fno-exceptions -fno-strict-aliasing'
 
         def transcoderDefines =
                 // Basis Universal general switches.

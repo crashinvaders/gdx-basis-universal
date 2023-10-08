@@ -23,7 +23,7 @@ import static com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat.*;
 public interface BasisuTextureFormatSelector {
 
     /** Default texture format selector to be used by all the BasisuTextureData/KTX2TextureData instances. */
-    public static BasisuTextureFormatSelector defaultSelector = new Default();
+    BasisuTextureFormatSelector defaultSelector = new Default();
 
     /** Resolves the texture format that intermediate Basis Universal texture (ETC1S/UASTC) will be transcoded to. */
     BasisuTranscoderTextureFormat resolveTextureFormat(BasisuData data, int imageIndex);
@@ -92,12 +92,12 @@ public interface BasisuTextureFormatSelector {
                         isMultipleOfFour(width, height)) {
                     return BC3_RGBA;
                 }
+                if (isBasisuFormatSupported(ASTC_4x4_RGBA, textureFormat)) {
+                    return ASTC_4x4_RGBA;
+                }
                 // Quality is very similar to BC1/BC3.
                 if (isBasisuFormatSupported(ATC_RGBA, textureFormat)) {
                     return ATC_RGBA;
-                }
-                if (isBasisuFormatSupported(ASTC_4x4_RGBA, textureFormat)) {
-                    return ASTC_4x4_RGBA;
                 }
                 // PVRTC1 transcoder requires that the ETC1S texture's dimensions both be equal and a power of two.
                 if (isBasisuFormatSupported(PVRTC1_4_RGBA, textureFormat) &&
@@ -152,23 +152,19 @@ public interface BasisuTextureFormatSelector {
                 if (isBasisuFormatSupported(ASTC_4x4_RGBA, textureFormat)) {
                     return ASTC_4x4_RGBA;
                 }
-                // Transcoding to BC7 mode 5 is very fast.
                 if (isBasisuFormatSupported(BC7_RGBA, textureFormat)) {
                     return BC7_RGBA;
                 }
-                // Conversion is nearly lossless and very fast.
                 if (isBasisuFormatSupported(BC3_RGBA, textureFormat) &&
                         isMultipleOfFour(width, height)) {
                     return BC3_RGBA;
                 }
+                if (isBasisuFormatSupported(ETC2_RGBA, textureFormat)) {
+                    return ETC2_RGBA;
+                }
                 // Quality is very similar to BC1/BC3.
                 if (isBasisuFormatSupported(ATC_RGBA, textureFormat)) {
                     return ATC_RGBA;
-                }
-                // The color block will be ETC1S, and the alpha block is EAC.
-                // Conversion from ETC1S->EAC is very fast and nearly lossless.
-                if (isBasisuFormatSupported(ETC2_RGBA, textureFormat)) {
-                    return ETC2_RGBA;
                 }
                 // PVRTC1 transcoder requires that the ETC1S texture's dimensions both be equal and a power of two.
                 if (isBasisuFormatSupported(PVRTC1_4_RGBA, textureFormat) &&
@@ -184,24 +180,19 @@ public interface BasisuTextureFormatSelector {
                 return RGBA32;
 
             } else {
-                // Conversion is nearly lossless and very fast.
-                if (isBasisuFormatSupported(ATC_RGB, textureFormat)) {
-                    return ATC_RGB;
-                }
-                // Conversion to BC1 is very fast.
-                // Conversion loses approx. .3-.5 dB Y PSNR relative to the source ETC1S data.
                 if (isBasisuFormatSupported(BC1_RGB, textureFormat) &&
                         isMultipleOfFour(width, height)) {
                     return BC1_RGB;
                 }
-                // Fast and almost as high quality as BC1.
-                if (isBasisuFormatSupported(PVRTC2_4_RGB, textureFormat)) {
-                    return PVRTC2_4_RGB;
-                }
                 if (isBasisuFormatSupported(ETC1_RGB, textureFormat)) {
                     return ETC1_RGB;
                 }
-//                // Fast and almost as high quality as BC1.
+                if (isBasisuFormatSupported(ATC_RGB, textureFormat)) {
+                    return ATC_RGB;
+                }
+                if (isBasisuFormatSupported(PVRTC2_4_RGB, textureFormat)) {
+                    return PVRTC2_4_RGB;
+                }
 //                if (isBasisuFormatSupported(FXT1_RGB))basisTexFormat {
 //                    return FXT1_RGB;
 //                }
