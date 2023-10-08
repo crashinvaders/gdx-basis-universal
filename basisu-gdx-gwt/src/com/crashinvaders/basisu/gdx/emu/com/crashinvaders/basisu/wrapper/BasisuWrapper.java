@@ -8,55 +8,72 @@ import java.nio.*;
 
 public class BasisuWrapper {
 
-    public static boolean validateHeader(Buffer data) {
-        return validateHeaderNative(toTypedArray(data));
-    }
-    private static native boolean validateHeaderNative(ArrayBufferView data)/*-{
-        return $wnd.basisuModule.validateHeader(data);
-    }-*/;
-
-    public static boolean validateChecksum(Buffer data, boolean fullValidation) {
-        return validateChecksumNative(toTypedArray(data), fullValidation);
-    }
-    private static native boolean validateChecksumNative(ArrayBufferView data, boolean fullValidation)/*-{
-        return $wnd.basisuModule.validateChecksum(data, fullValidation);
-    }-*/;
-
-    public static int getTotalMipMapLevels(Buffer data) {
-        return getTotalMipMapLevelsNative(toTypedArray(data));
-    }
-    private static native int getTotalMipMapLevelsNative(ArrayBufferView data)/*-{
-        return $wnd.basisuModule.getTotalMipMapLevels(data);
-    }-*/;
-
-    public static ByteBuffer transcode(Buffer data, int imageIndex, int levelIndex, BasisuTranscoderTextureFormat textureFormat) {
-        Uint8Array array = transcodeNative(toTypedArray(data), imageIndex, levelIndex, textureFormat.getId(), data);
-        return fromTypedArray(array);
-    }
-    static native Uint8Array transcodeNative(ArrayBufferView data, int imageIndex, int levelIndex, int textureFormat, Object dataRaw)/*-{
-        return $wnd.basisuModule.transcode(data, imageIndex, levelIndex, textureFormat);
-    }-*/;
-
-    public static BasisuFileInfo getFileInfo(Buffer data) {
-        JavaScriptObject fileInfoJs = getFileInfoNative(toTypedArray(data));
-        return new BasisuFileInfo(fileInfoJs);
-    }
-    static native JavaScriptObject getFileInfoNative(ArrayBufferView data)/*-{
-        return $wnd.basisuModule.getFileInfo(data);
-    }-*/;
-
-    public static BasisuImageInfo getImageInfo(Buffer data, int imageIndex) {
-        JavaScriptObject imageInfoJs = getImageInfoNative(toTypedArray(data), imageIndex);
-        return new BasisuImageInfo(imageInfoJs);
-    }
-    static native JavaScriptObject getImageInfoNative(ArrayBufferView data, int imageIndex)/*-{
-        return $wnd.basisuModule.getImageInfo(data, imageIndex);
-    }-*/;
-
     public static native boolean isTranscoderTexFormatSupported(BasisuTranscoderTextureFormat transcoderTexFormat, BasisuTextureFormat basisTexFormat)/*-{
         var transcoderTexFormatId = transcoderTexFormat.@com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat::getId()();
         var basisTexFormatId = basisTexFormat.@com.crashinvaders.basisu.wrapper.BasisuTextureFormat::getId()();
         return $wnd.basisuModule.isTranscoderTexFormatSupported(transcoderTexFormatId, basisTexFormatId);
+    }-*/;
+
+    public static boolean basisValidateHeader(Buffer data) {
+        return basisValidateHeaderNative(toTypedArray(data));
+    }
+    private static native boolean basisValidateHeaderNative(ArrayBufferView data)/*-{
+        return $wnd.basisuModule.basisValidateHeader(data);
+    }-*/;
+
+    public static boolean basisValidateChecksum(Buffer data, boolean fullValidation) {
+        return basisValidateChecksumNative(toTypedArray(data), fullValidation);
+    }
+    private static native boolean basisValidateChecksumNative(ArrayBufferView data, boolean fullValidation)/*-{
+        return $wnd.basisuModule.basisValidateChecksum(data, fullValidation);
+    }-*/;
+
+    public static ByteBuffer basisTranscode(Buffer data, int imageIndex, int levelIndex, BasisuTranscoderTextureFormat textureFormat) {
+        Uint8Array array = basisTranscodeNative(toTypedArray(data), imageIndex, levelIndex, textureFormat.getId(), data);
+        return fromTypedArray(array);
+    }
+    static native Uint8Array basisTranscodeNative(ArrayBufferView data, int imageIndex, int levelIndex, int textureFormat, Object dataRaw)/*-{
+        return $wnd.basisuModule.basisTranscode(data, imageIndex, levelIndex, textureFormat);
+    }-*/;
+
+    public static BasisuFileInfo basisGetFileInfo(Buffer data) {
+        JavaScriptObject fileInfoJs = basisGetFileInfoNative(toTypedArray(data));
+        return new BasisuFileInfo(fileInfoJs);
+    }
+    static native JavaScriptObject basisGetFileInfoNative(ArrayBufferView data)/*-{
+        return $wnd.basisuModule.basisGetFileInfo(data);
+    }-*/;
+
+    public static BasisuImageInfo basisGetImageInfo(Buffer data, int imageIndex) {
+        JavaScriptObject imageInfoJs = basisGetImageInfoNative(toTypedArray(data), imageIndex);
+        return new BasisuImageInfo(imageInfoJs);
+    }
+    static native JavaScriptObject basisGetImageInfoNative(ArrayBufferView data, int imageIndex)/*-{
+        return $wnd.basisuModule.basisGetImageInfo(data, imageIndex);
+    }-*/;
+
+    public static Ktx2FileInfo ktx2GetFileInfo(Buffer data) {
+        JavaScriptObject fileInfoJs = ktx2GetFileInfoNative(toTypedArray(data));
+        return new Ktx2FileInfo(fileInfoJs);
+    }
+    static native JavaScriptObject ktx2GetFileInfoNative(ArrayBufferView data) /*-{
+        return $wnd.basisuModule.ktx2GetFileInfo(data);
+    }-*/;
+
+    public static Ktx2ImageLevelInfo ktx2GetImageLevelInfo(Buffer data, int layerIndex, int imageLevel) {
+        JavaScriptObject imageLayerInfoJs = ktx2GetImageLevelInfoNative(toTypedArray(data), layerIndex, imageLevel);
+        return new Ktx2ImageLevelInfo(imageLayerInfoJs);
+    }
+    static native JavaScriptObject ktx2GetImageLevelInfoNative(ArrayBufferView data, int layerIndex, int imageLevel) /*-{
+        return $wnd.basisuModule.ktx2GetImageLevelInfo(data, layerIndex, imageLevel);
+    }-*/;
+
+    public static ByteBuffer ktx2Transcode(Buffer data, int layerIndex, int levelIndex, BasisuTranscoderTextureFormat textureFormat) {
+        Uint8Array array = ktx2TranscodeNative(toTypedArray(data), layerIndex, levelIndex, textureFormat.getId(), data);
+        return fromTypedArray(array);
+    }
+    static native Uint8Array ktx2TranscodeNative(ArrayBufferView data, int layerIndex, int levelIndex, int textureFormat, Object dataRaw) /*-{
+        return $wnd.basisuModule.ktx2Transcode(data, layerIndex, levelIndex, textureFormat);
     }-*/;
 
 

@@ -43,7 +43,7 @@ namespace basisuWrapper {
 
         bool getFileInfo(basisuWrapper::ktx2_file_info& fileInfo, uint8_t *data, uint32_t dataSize);
 
-        bool getImageLevelInfo(ktx2_image_level_info& imageInfo, uint8_t *data, uint32_t dataSize, uint32_t levelIndex, uint32_t layerIndex);
+        bool getImageLevelInfo(ktx2_image_level_info& imageInfo, uint8_t *data, uint32_t dataSize, uint32_t layerIndex, uint32_t levelIndex);
 
         bool transcode(basisu::vector<uint8_t> &out, uint8_t *data, uint32_t dataSize,
                        uint32_t layerIndex, uint32_t levelIndex, transcoder_texture_format format);

@@ -36,7 +36,7 @@ public class BasisuFileInfo implements Closeable {
     }
     native int getTextureTypeNative() /*-{
         var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
-        return data.getTexType();
+        return data.textureType.value;
     }-*/;
 
     public BasisuTextureFormat getTextureFormat() {
@@ -45,7 +45,7 @@ public class BasisuFileInfo implements Closeable {
     }
     native int getTextureFormatNative() /*-{
         var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
-        return data.getTexFormat();
+        return data.textureFormat.value;
     }-*/;
 
     /** The number of mipmap levels for each image. */

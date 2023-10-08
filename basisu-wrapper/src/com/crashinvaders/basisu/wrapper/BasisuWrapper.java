@@ -155,9 +155,9 @@ public class BasisuWrapper {
         }
     */
 
-    public static ByteBuffer ktx2Transcode(Buffer data, int imageIndex, int levelIndex, BasisuTranscoderTextureFormat textureFormat) {
+    public static ByteBuffer ktx2Transcode(Buffer data, int layerIndex, int levelIndex, BasisuTranscoderTextureFormat textureFormat) {
         int format = textureFormat.getId();
-        byte[] transcodedData = ktx2TranscodeNative(data, data.capacity(), imageIndex, levelIndex, format);
+        byte[] transcodedData = ktx2TranscodeNative(data, data.capacity(), layerIndex, levelIndex, format);
 
         // Seems like allocating and filling a DirectByteBuffer
         // is faster on Java side rather than on the native one
