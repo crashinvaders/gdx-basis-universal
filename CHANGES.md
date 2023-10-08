@@ -1,4 +1,6 @@
-### Next
+### 1.0.0
+- Added: support for KTX2 textures.
+- Improved: better default ETC1S/UASTC transcoder selector.
 
 ### 0.2.0
 - Updated to libGDX 1.12.0
