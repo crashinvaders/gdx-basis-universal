@@ -8,7 +8,7 @@ import java.nio.Buffer;
 import java.nio.IntBuffer;
 
 /**
- * OpenGL functions that are not supported on all the LibGDX backends and thus may be (re)implemented.
+ * OpenGL functions that are not supported on all the libGDX backends and thus may be (re)implemented.
  */
 public class BasisuGdxGl {
 
@@ -33,7 +33,7 @@ public class BasisuGdxGl {
 
     /**
      * Uploads compressed texture data to the OpenGL.
-     * This method exists here only because LibGDX doesn't support it for GWT backend
+     * This method exists here only because libGDX doesn't support it for GWT backend
      * and basisu-gdx-gwt provides its own implementation.
      */
     public static void glCompressedTexImage2D(int target, int level, int internalformat,

@@ -227,11 +227,12 @@ public class App implements ApplicationListener {
     }
 
     private void printBasisSupportedTextureFormats(BasisuTextureFormat basisTexFormat) {
-        Gdx.app.log(TAG, "===== SUPPORTED TRANSCODER FORMATS | " + basisTexFormat.name() + " =====");
         StringBuilder sb = new StringBuilder();
+        sb.append("===== SUPPORTED TRANSCODER FORMATS | ").append(basisTexFormat.name()).append(" =====");
         Set<BasisuTranscoderTextureFormat> formats = BasisuTranscoderTextureFormatSupportIndex.getSupportedTextureFormats(basisTexFormat);
         for (BasisuTranscoderTextureFormat format : formats) {
-            sb.append(format).append(" ");
+            boolean glSupported = BasisuGdxUtils.isBasisuFormatSupported(format, basisTexFormat);
+            sb.append("\n").append(format).append(glSupported ? " (+)" : "");
         }
         Gdx.app.log(TAG, sb.toString());
     }

@@ -67,15 +67,17 @@ public interface BasisuTextureFormatSelector {
         private BasisuTranscoderTextureFormat resolveTextureFormat(BasisuTextureFormat textureFormat, int width, int height, boolean hasAlpha) {
             switch (textureFormat) {
                 case ETC1S:
-                    return resolveForEtc1s(textureFormat, width, height, hasAlpha);
+                    return resolveForEtc1s(width, height, hasAlpha);
                 case UASTC4x4:
-                    return resolveForUastc(textureFormat, width, height, hasAlpha);
+                    return resolveForUastc(width, height, hasAlpha);
                 default:
                     throw new BasisuGdxException("Unexpected texture format: " + textureFormat);
             }
         }
 
-        private static BasisuTranscoderTextureFormat resolveForEtc1s(BasisuTextureFormat textureFormat, int width, int height, boolean hasAlpha) {
+        private static BasisuTranscoderTextureFormat resolveForEtc1s(int width, int height, boolean hasAlpha) {
+            BasisuTextureFormat textureFormat = BasisuTextureFormat.ETC1S;
+
             //TODO Implement selectors for R and RG formats.
             if (hasAlpha) {
                 // The color block will be ETC1S, and the alpha block is EAC.
@@ -146,7 +148,9 @@ public interface BasisuTextureFormatSelector {
             }
         }
 
-        private BasisuTranscoderTextureFormat resolveForUastc(BasisuTextureFormat textureFormat, int width, int height, boolean hasAlpha) {
+        private BasisuTranscoderTextureFormat resolveForUastc(int width, int height, boolean hasAlpha) {
+            BasisuTextureFormat textureFormat = BasisuTextureFormat.UASTC4x4;
+
             //TODO Implement selectors for R and RG formats.
             if (hasAlpha) {
                 if (isBasisuFormatSupported(ASTC_4x4_RGBA, textureFormat)) {

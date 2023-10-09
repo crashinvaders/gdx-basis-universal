@@ -16,7 +16,7 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 /**
- * Various utility methods required for Basis Universal LibGDX library.
+ * Various utility methods required for Basis Universal libGDX library.
  * <p/>
  * <b>References for OpenGL extension names and texture format codes</b>
  * <ul>
@@ -157,11 +157,22 @@ public class BasisuGdxUtils {
     }
 
     /**
-     * Checks if the texture format can be transcoded to and if there's a native graphics API support for it as well.
+     * Checks if the texture format can be transcoded to
+     * and if there's a native graphics API support for it as well.
      */
-    public static boolean isBasisuFormatSupported(BasisuTranscoderTextureFormat textureFormat, BasisuTextureFormat basisTexFormat) {
+    public static boolean isBasisuFormatSupported(BasisuTranscoderTextureFormat textureFormat,
+                                                  BasisuTextureFormat basisTexFormat) {
+        // The uncompressed formats are supported unconditionally.
+        switch (textureFormat) {
+            case RGBA32:
+            case RGB565:
+            case RGBA4444:
+                return true;
+        }
+
         int glTextureFormat = toGlTextureFormat(textureFormat);
-        return isGlTextureFormatSupported(glTextureFormat) && isTranscoderTextureFormatSupported(textureFormat, basisTexFormat);
+        return isGlTextureFormatSupported(glTextureFormat) &&
+                isTranscoderTextureFormatSupported(textureFormat, basisTexFormat);
     }
 
     /**
