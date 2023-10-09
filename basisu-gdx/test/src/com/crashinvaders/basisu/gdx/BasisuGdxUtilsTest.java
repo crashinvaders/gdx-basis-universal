@@ -47,11 +47,9 @@ public class BasisuGdxUtilsTest {
      */
     @Test
     public void testTextureDataPrepare() {
-        BasisuTextureData.defaultFormatSelector = (data, fileInfo, imageInfo) ->
-                BasisuTranscoderTextureFormat.ETC2_RGBA;
-
         FileHandle textureFile = Gdx.files.classpath("kodim3.basis");
         BasisuTextureData textureData = new BasisuTextureData(textureFile, 0);
+        textureData.setTextureFormatSelector(BasisuTranscoderTextureFormat.ETC2_RGBA);
         textureData.prepare();
     }
 }
