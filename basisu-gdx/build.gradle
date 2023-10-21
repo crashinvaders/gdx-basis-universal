@@ -16,3 +16,5 @@ test {
     useJUnit()
     maxHeapSize = '1G'
 }
+
+test.dependsOn ':basisu-wrapper:jnigenJarNativesDesktop'
