@@ -27,7 +27,7 @@ import com.crashinvaders.basisu.gdx.*;
 import com.crashinvaders.basisu.wrapper.*;
 
 import java.nio.ByteBuffer;
-import java.util.Set;
+import java.util.*;
 
 public class App implements ApplicationListener {
     private static final String TAG = App.class.getSimpleName();
@@ -228,11 +228,13 @@ public class App implements ApplicationListener {
 
     private void printBasisSupportedTextureFormats(BasisuTextureFormat basisTexFormat) {
         StringBuilder sb = new StringBuilder();
-        sb.append("===== SUPPORTED TRANSCODER FORMATS | ").append(basisTexFormat.name()).append(" =====");
-        Set<BasisuTranscoderTextureFormat> formats = BasisuTranscoderTextureFormatSupportIndex.getSupportedTextureFormats(basisTexFormat);
+        sb.append("===== AVAILABLE TRANSCODER FORMATS | ").append(basisTexFormat.name()).append(" | (\"+\" if supported by the platform)").append(" =====");
+        ArrayList<BasisuTranscoderTextureFormat> formats = new ArrayList<>(
+                BasisuTranscoderTextureFormatSupportIndex.getSupportedTextureFormats(basisTexFormat));
+        Collections.sort(formats, (v0, v1) -> v0.ordinal() - v1.ordinal());
         for (BasisuTranscoderTextureFormat format : formats) {
             boolean glSupported = BasisuGdxUtils.isBasisuFormatSupported(format, basisTexFormat);
-            sb.append("\n").append(format).append(glSupported ? " (+)" : "");
+            sb.append("\n").append(glSupported ? "+ " : "  ").append(format);
         }
         Gdx.app.log(TAG, sb.toString());
     }

@@ -108,6 +108,7 @@ public class BasisuData implements Disposable {
      * @param textureFormat the target format to transcode to
      * @return the transcoded texture bytes.
      * Can be used for further processing or supplied directly to the OpenGL as compressed texture.
+     * Do not forget to use {@link BasisuWrapper#disposeNativeBuffer(ByteBuffer)} when the buffer is no longer required.
      */
     public ByteBuffer transcode(int imageIndex, int mipmapLevel, BasisuTranscoderTextureFormat textureFormat) {
         return BasisuWrapper.basisTranscode(encodedData, imageIndex, mipmapLevel, textureFormat);

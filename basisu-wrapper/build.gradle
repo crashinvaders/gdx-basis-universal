@@ -68,7 +68,7 @@ jnigen {
                 'build/**',
         ]
 
-        def commonFlags = '-fvisibility=hidden -Wall -O2 -g0 -fno-exceptions -fno-strict-aliasing'
+        def commonFlags = '-O2 -g0 -fvisibility=hidden -fno-exceptions -fPIC -fno-strict-aliasing -pthread -Wall'
 
         def transcoderDefines =
                 // Basis Universal general switches.
@@ -89,7 +89,11 @@ jnigen {
     add(Windows, x64) {
         def os = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.currentOperatingSystem
         if (os.isWindows()) {
+            // Windows
             compilerSuffix = '.exe'
+        } else {
+            // Unix (Linux/macOS)
+            compilerSuffix = '-posix'
         }
 
         linkerFlags += ' -s '   // Strip debug symbols.

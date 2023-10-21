@@ -242,7 +242,6 @@ namespace basisuWrapper {
                 static_cast<basist::transcoder_texture_format>(format),
                 decodeFlags);
 
-            //TODO Do we need to call this?
             transcoder.clear();
 
             return status;

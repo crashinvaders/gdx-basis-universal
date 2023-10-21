@@ -76,6 +76,9 @@ public class BasisuWrapper {
         return $wnd.basisuModule.ktx2Transcode(data, layerIndex, levelIndex, textureFormat);
     }-*/;
 
+    public static void disposeNativeBuffer(ByteBuffer dataBuffer) {
+        // JS array buffers are managed. We don't need to free them manually.
+    }
 
     //region Emscripten exception handler.
     static {

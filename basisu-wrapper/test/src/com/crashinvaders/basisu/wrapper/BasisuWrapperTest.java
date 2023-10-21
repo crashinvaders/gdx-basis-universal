@@ -116,6 +116,8 @@ public class BasisuWrapperTest {
 
             BufferedImage bufferedImage = TestUtils.fromRgba8888(rgba8888, imageInfo.getWidth(), imageInfo.getHeight());
             TestUtils.saveImagePng(bufferedImage, IMAGE_BASIS_NAME + ".rgba32");
+
+            BasisuWrapper.disposeNativeBuffer(rgba8888);
         }
     }
 
@@ -129,6 +131,8 @@ public class BasisuWrapperTest {
             assertEquals(imageInfo.getTotalBlocks() * 16, etc2Rgba.capacity());
 
             TestUtils.saveFile(etc2Rgba, IMAGE_BASIS_NAME + ".etc2rgba");
+
+            BasisuWrapper.disposeNativeBuffer(etc2Rgba);
         }
     }
 
@@ -151,7 +155,8 @@ public class BasisuWrapperTest {
                     continue;
                 }
                 System.out.println("Transcoding to " + format);
-                BasisuWrapper.basisTranscode(imageBasisBuffer, 0, 0, format);
+                ByteBuffer transcodedBuffer = BasisuWrapper.basisTranscode(imageBasisBuffer, 0, 0, format);
+                BasisuWrapper.disposeNativeBuffer(transcodedBuffer);
             }
         }
     }
@@ -198,6 +203,8 @@ public class BasisuWrapperTest {
             assertEquals(imageInfo.getTotalBlocks() * 16, etc2Rgba.capacity());
 
             TestUtils.saveFile(etc2Rgba, IMAGE_KTX2_NAME + ".etc2rgba");
+
+            BasisuWrapper.disposeNativeBuffer(etc2Rgba);
         }
     }
 
@@ -224,7 +231,8 @@ public class BasisuWrapperTest {
                     continue;
                 }
                 System.out.println("Transcoding to " + format);
-                BasisuWrapper.ktx2Transcode(imageKtx2Buffer, 0, 0, format);
+                ByteBuffer transcodedBuffer = BasisuWrapper.ktx2Transcode(imageKtx2Buffer, 0, 0, format);
+                BasisuWrapper.disposeNativeBuffer(transcodedBuffer);
             }
         }
     }

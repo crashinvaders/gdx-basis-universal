@@ -6,12 +6,10 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.TextureData;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.GdxRuntimeException;
-import com.crashinvaders.basisu.wrapper.BasisuFileInfo;
-import com.crashinvaders.basisu.wrapper.BasisuImageInfo;
-import com.crashinvaders.basisu.wrapper.BasisuTextureType;
 import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
+import com.crashinvaders.basisu.wrapper.BasisuWrapper;
 
-import java.nio.Buffer;
+import java.nio.ByteBuffer;
 
 /**
  * Provides support for KTX2 texture data format for {@link com.badlogic.gdx.graphics.Texture}.
@@ -33,7 +31,7 @@ public class Ktx2TextureData implements TextureData {
 
     private Ktx2Data ktx2Data;
 
-    private Buffer transcodedData = null;
+    private ByteBuffer transcodedData = null;
     private BasisuTranscoderTextureFormat transcodeFormat = null;
 
     private int width = 0;
@@ -166,6 +164,7 @@ public class Ktx2TextureData implements TextureData {
         }
 
         // Cleanup.
+        BasisuWrapper.disposeNativeBuffer(transcodedData);
         transcodedData = null;
         transcodeFormat = null;
 

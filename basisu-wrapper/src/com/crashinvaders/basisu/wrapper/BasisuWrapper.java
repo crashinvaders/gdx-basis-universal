@@ -22,6 +22,13 @@ public class BasisuWrapper {
     #define LOG_TAG "BasisuWrapper.java"
     #define BASE_PACKAGE com/crashinvaders/basisu/wrapper
 
+    jobject wrapIntoBuffer(JNIEnv* env, basisu::vector<uint8_t> imageData) {
+        uint32_t imageDataSize = imageData.size_in_bytes();
+        uint8_t* nativeBuffer = (uint8_t*)malloc(imageDataSize);
+        memcpy(nativeBuffer, imageData.data(), imageDataSize);
+        return env->NewDirectByteBuffer(nativeBuffer, imageDataSize);
+    }
+
     */
 
     /**
@@ -47,21 +54,19 @@ public class BasisuWrapper {
     /**
      * Quick header validation - no crc16 checks.
      */
-    public static boolean basisValidateHeader(Buffer data) {
-        return basisValidateHeaderNative(data, data.capacity());
-    }
-    private static native boolean basisValidateHeaderNative(Buffer data, int dataSize); /*
+    public static native boolean basisValidateHeader(Buffer dataBuffer); /*MANUAL
+        uint8_t* data = (uint8_t*)env->GetDirectBufferAddress(dataBuffer);
+        uint32_t dataSize = (uint32_t)env->GetDirectBufferCapacity(dataBuffer);
         return basisuWrapper::basis::validateHeader((uint8_t*)data, dataSize);
     */
 
     /**
      * Validates the .basis file. This computes a crc16 over the entire file, so it's slow.
      */
-    public static boolean basisValidateChecksum(Buffer data, boolean fullValidation) {
-        return basisValidateChecksumNative(data, data.capacity(), fullValidation);
-    }
-    private static native boolean basisValidateChecksumNative(Buffer data, int dataSize, boolean fullValidation); /*
-        return basisuWrapper::basis::validateChecksum((uint8_t*)data, dataSize, fullValidation);
+    public static native boolean basisValidateChecksum(Buffer dataBuffer, boolean fullValidation); /*MANUAL
+        uint8_t* data = (uint8_t*)env->GetDirectBufferAddress(dataBuffer);
+        uint32_t dataSize = (uint32_t)env->GetDirectBufferCapacity(dataBuffer);
+        return basisuWrapper::basis::validateChecksum(data, dataSize, fullValidation);
     */
 
     /**
@@ -70,23 +75,13 @@ public class BasisuWrapper {
      * Currently, to decode to PVRTC1 the basis texture's dimensions in pixels must be a power of 2, due to PVRTC1 format requirements.
      * @return the transcoded texture bytes
      */
-    public static ByteBuffer basisTranscode(Buffer data, int imageIndex, int levelIndex, BasisuTranscoderTextureFormat textureFormat) {
+    public static ByteBuffer basisTranscode(Buffer dataBuffer, int imageIndex, int levelIndex, BasisuTranscoderTextureFormat textureFormat) {
         int format = textureFormat.getId();
-        byte[] transcodedData = basisTranscodeNative(data, data.capacity(), imageIndex, levelIndex, format);
-
-        // Seems like allocating and filling a DirectByteBuffer
-        // is faster on Java side rather than on the native one
-        // (Even with receiving extra Java primitive array from the native code).
-        ByteBuffer buffer = ByteBuffer.allocateDirect(transcodedData.length);
-        buffer.order(ByteOrder.nativeOrder());
-        buffer.put(transcodedData);
-        ((Buffer)buffer).position(0);
-        ((Buffer)buffer).limit(buffer.capacity());
-        return buffer;
+        return basisTranscodeNative(dataBuffer, dataBuffer.capacity(), imageIndex, levelIndex, format);
     }
-    private static native byte[] basisTranscodeNative(Buffer dataRaw, int dataSize, int imageIndex, int levelIndex, int textureFormatId); /*MANUAL
+    private static native ByteBuffer basisTranscodeNative(Buffer dataBuffer, int dataSize, int imageIndex, int levelIndex, int textureFormatId); /*MANUAL
         basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
-        uint8_t* data = (uint8_t*)env->GetDirectBufferAddress(dataRaw);
+        uint8_t* data = (uint8_t*)env->GetDirectBufferAddress(dataBuffer);
         basisu::vector<uint8_t> transcodedData;
 
         if (!basisuWrapper::basis::transcode(transcodedData, data, dataSize, imageIndex, levelIndex, format)) {
@@ -94,22 +89,20 @@ public class BasisuWrapper {
             return 0;
         };
 
-        jbyteArray byteArray = env->NewByteArray(transcodedData.size());
-        env->SetByteArrayRegion(byteArray, (jsize)0, (jsize)transcodedData.size(), (jbyte*)transcodedData.data());
-        return byteArray;
+        return wrapIntoBuffer(env, transcodedData);
     */
 
     /**
      * @return a description of the basis file and low-level information about each slice.
      */
-    public static BasisuFileInfo basisGetFileInfo(Buffer data) {
+    public static BasisuFileInfo basisGetFileInfo(Buffer dataBuffer) {
         BasisuFileInfo fileInfo = new BasisuFileInfo();
-        basisGetFileInfoNative(data, data.capacity(), fileInfo.addr);
+        basisGetFileInfoNative(dataBuffer, dataBuffer.capacity(), fileInfo.addr);
         return fileInfo;
     }
-    private static native void basisGetFileInfoNative(Buffer data, int dataSize, long fileInfoAddr); /*
+    private static native void basisGetFileInfoNative(Buffer dataBuffer, int dataSize, long fileInfoAddr); /*
         basist::basisu_file_info* fileInfo = (basist::basisu_file_info*)fileInfoAddr;
-        if (!basisuWrapper::basis::getFileInfo(*fileInfo, (uint8_t*)data, dataSize)) {
+        if (!basisuWrapper::basis::getFileInfo(*fileInfo, (uint8_t*)dataBuffer, dataSize)) {
             basisuUtils::throwException(env, "Failed to obtain Basis file info.");
         }
     */
@@ -117,61 +110,51 @@ public class BasisuWrapper {
     /**
      * @return information about the specified image.
      */
-    public static BasisuImageInfo basisGetImageInfo(Buffer data, int imageIndex) {
+    public static BasisuImageInfo basisGetImageInfo(Buffer dataBuffer, int imageIndex) {
         BasisuImageInfo imageInfo = new BasisuImageInfo();
-        basisGetImageInfoNative(data, data.capacity(), imageIndex, imageInfo.addr);
+        basisGetImageInfoNative(dataBuffer, dataBuffer.capacity(), imageIndex, imageInfo.addr);
         return imageInfo;
     }
-    private static native void basisGetImageInfoNative(Buffer data, int dataSize, int imageIndex, long imageInfoAddr); /*
+    private static native void basisGetImageInfoNative(Buffer dataBuffer, int dataSize, int imageIndex, long imageInfoAddr); /*
         basist::basisu_image_info* imageInfo = (basist::basisu_image_info*)imageInfoAddr;
-        if (!basisuWrapper::basis::getImageInfo(*imageInfo, (uint8_t*)data, dataSize, imageIndex)) {
+        if (!basisuWrapper::basis::getImageInfo(*imageInfo, (uint8_t*)dataBuffer, dataSize, imageIndex)) {
             basisuUtils::throwException(env, "Failed to obtain Basis image info.");
         }
     */
 
     /** @return information about the KTX2 file. */
-    public static Ktx2FileInfo ktx2GetFileInfo(Buffer data) {
+    public static Ktx2FileInfo ktx2GetFileInfo(Buffer dataBuffer) {
         Ktx2FileInfo fileInfo = new Ktx2FileInfo();
-        ktx2GetFileInfoNative(data, data.capacity(), fileInfo.addr);
+        ktx2GetFileInfoNative(dataBuffer, dataBuffer.capacity(), fileInfo.addr);
         return fileInfo;
     }
-    private static native void ktx2GetFileInfoNative(Buffer data, int dataSize, long fileInfoAddr); /*
+    private static native void ktx2GetFileInfoNative(Buffer dataBuffer, int dataSize, long fileInfoAddr); /*
         basisuWrapper::ktx2_file_info* fileInfo = (basisuWrapper::ktx2_file_info*)fileInfoAddr;
-        if (!basisuWrapper::ktx2::getFileInfo(*fileInfo, (uint8_t*)data, dataSize)) {
+        if (!basisuWrapper::ktx2::getFileInfo(*fileInfo, (uint8_t*)dataBuffer, dataSize)) {
             basisuUtils::throwException(env, "Failed to obtain KTX2 file info.");
         }
     */
 
     /** @return information about the specified image level. */
-    public static Ktx2ImageLevelInfo ktx2GetImageLevelInfo(Buffer data, int imageIndex, int imageLevel) {
+    public static Ktx2ImageLevelInfo ktx2GetImageLevelInfo(Buffer dataBuffer, int imageIndex, int imageLevel) {
         Ktx2ImageLevelInfo imageInfo = new Ktx2ImageLevelInfo();
-        ktx2GetImageLevelInfoNative(data, data.capacity(), imageIndex, imageLevel, imageInfo.addr);
+        ktx2GetImageLevelInfoNative(dataBuffer, dataBuffer.capacity(), imageIndex, imageLevel, imageInfo.addr);
         return imageInfo;
     }
-    private static native void ktx2GetImageLevelInfoNative(Buffer data, int dataSize, int imageIndex, int imageLevel, long imageInfoAddr); /*
+    private static native void ktx2GetImageLevelInfoNative(Buffer dataBuffer, int dataSize, int imageIndex, int imageLevel, long imageInfoAddr); /*
         basist::ktx2_image_level_info* imageInfo = (basist::ktx2_image_level_info*)imageInfoAddr;
-        if (!basisuWrapper::ktx2::getImageLevelInfo(*imageInfo, (uint8_t*)data, dataSize, imageIndex, imageLevel)) {
+        if (!basisuWrapper::ktx2::getImageLevelInfo(*imageInfo, (uint8_t*)dataBuffer, dataSize, imageIndex, imageLevel)) {
             basisuUtils::throwException(env, "Failed to obtain KTX2 image level info.");
         }
     */
 
-    public static ByteBuffer ktx2Transcode(Buffer data, int layerIndex, int levelIndex, BasisuTranscoderTextureFormat textureFormat) {
+    public static ByteBuffer ktx2Transcode(Buffer dataBuffer, int layerIndex, int levelIndex, BasisuTranscoderTextureFormat textureFormat) {
         int format = textureFormat.getId();
-        byte[] transcodedData = ktx2TranscodeNative(data, data.capacity(), layerIndex, levelIndex, format);
-
-        // Seems like allocating and filling a DirectByteBuffer
-        // is faster on Java side rather than on the native one
-        // (Even with receiving extra Java primitive array from the native code).
-        ByteBuffer buffer = ByteBuffer.allocateDirect(transcodedData.length);
-        buffer.order(ByteOrder.nativeOrder());
-        buffer.put(transcodedData);
-        ((Buffer)buffer).position(0);
-        ((Buffer)buffer).limit(buffer.capacity());
-        return buffer;
+        return ktx2TranscodeNative(dataBuffer, dataBuffer.capacity(), layerIndex, levelIndex, format);
     }
-    private static native byte[] ktx2TranscodeNative(Buffer dataRaw, int dataSize, int layerIndex, int levelIndex, int textureFormatId); /*MANUAL
+    private static native ByteBuffer ktx2TranscodeNative(Buffer dataBuffer, int dataSize, int layerIndex, int levelIndex, int textureFormatId); /*MANUAL
         basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
-        uint8_t* data = (uint8_t*)env->GetDirectBufferAddress(dataRaw);
+        uint8_t* data = (uint8_t*)env->GetDirectBufferAddress(dataBuffer);
         basisu::vector<uint8_t> transcodedData;
 
         if (!basisuWrapper::ktx2::transcode(transcodedData, data, dataSize, layerIndex, levelIndex, format)) {
@@ -179,8 +162,14 @@ public class BasisuWrapper {
             return 0;
         };
 
-        jbyteArray byteArray = env->NewByteArray(transcodedData.size());
-        env->SetByteArrayRegion(byteArray, (jsize)0, (jsize)transcodedData.size(), (jbyte*)transcodedData.data());
-        return byteArray;
+        return wrapIntoBuffer(env, transcodedData);
+    */
+
+    /**
+     * A {@link ByteBuffer} returned from any of {@link BasisuWrapper}
+     * methods must be disposed using this method only.
+     */
+    public static native void disposeNativeBuffer(ByteBuffer dataBuffer); /*
+        free(dataBuffer);
     */
 }
