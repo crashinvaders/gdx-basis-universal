@@ -15,7 +15,6 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -27,7 +26,6 @@ import com.crashinvaders.basisu.gdx.*;
 import com.crashinvaders.basisu.wrapper.*;
 
 import java.nio.ByteBuffer;
-import java.util.*;
 
 public class App implements ApplicationListener {
     private static final String TAG = App.class.getSimpleName();
@@ -56,8 +54,9 @@ public class App implements ApplicationListener {
         Gdx.input.setInputProcessor(stage);
 
         testBasisuClasses();
-        printBasisSupportedTextureFormats(BasisuTextureFormat.ETC1S);
-        printBasisSupportedTextureFormats(BasisuTextureFormat.UASTC4x4);
+
+        Gdx.app.log(TAG, BasisuGdxUtils.reportAvailableTranscoderFormats(BasisuTextureFormat.ETC1S));
+        Gdx.app.log(TAG, BasisuGdxUtils.reportAvailableTranscoderFormats(BasisuTextureFormat.UASTC4x4));
 
         assetManager = new AssetManager();
         assetManager.setLoader(Texture.class, ".basis", new BasisuTextureLoader(assetManager.getFileHandleResolver()));
@@ -224,19 +223,6 @@ public class App implements ApplicationListener {
             Gdx.app.log(TAG, "getTextureFormat() " + fileInfo.getTextureFormat());
             fileInfo.close();
         }
-    }
-
-    private void printBasisSupportedTextureFormats(BasisuTextureFormat basisTexFormat) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("===== AVAILABLE TRANSCODER FORMATS | ").append(basisTexFormat.name()).append(" | (\"+\" if supported by the platform)").append(" =====");
-        ArrayList<BasisuTranscoderTextureFormat> formats = new ArrayList<>(
-                BasisuTranscoderTextureFormatSupportIndex.getSupportedTextureFormats(basisTexFormat));
-        Collections.sort(formats, (v0, v1) -> v0.ordinal() - v1.ordinal());
-        for (BasisuTranscoderTextureFormat format : formats) {
-            boolean glSupported = BasisuGdxUtils.isBasisuFormatSupported(format, basisTexFormat);
-            sb.append("\n").append(glSupported ? "+ " : "  ").append(format);
-        }
-        Gdx.app.log(TAG, sb.toString());
     }
 
     // Compute the MODBUS RTU CRC

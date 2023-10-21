@@ -41,7 +41,7 @@
 	<property name="webLibSetupFile" value="web-lib-setup.js"/>
 
 	<!-- common options used for the both C & C++ compilers and the linker -->
-	<property name="commonOpts" value="-Wall -O2 -g0 -flto -fno-exceptions -fno-strict-aliasing -s MODULARIZE=1 -s EXPORT_NAME=createBasisuGdxModule -s ENVIRONMENT=web -s WASM=1 -s FILESYSTEM=0 --closure 1 --bind -mnontrapping-fptoint -DBASISD_SUPPORT_PVRTC2=0 -DBASISD_SUPPORT_ATC=0 -DBASISD_SUPPORT_BC7=0 -DBASISD_SUPPORT_BC7_MODE5=0 -DBASISD_SUPPORT_ASTC_HIGHER_OPAQUE_QUALITY=0 -DBASISD_SUPPORT_FXT1=0 -DBASISU_SUPPORT_ENCODING=-0 -DBASISD_SUPPORT_KTX2=1 -DBASISD_SUPPORT_KTX2_ZSTD=1" />
+	<property name="commonOpts" value="-O2 -g0 -flto -fno-exceptions -fno-strict-aliasing -Wall -s MODULARIZE=1 -s EXPORT_NAME=createBasisuGdxModule -s ENVIRONMENT=web -s WASM=1 -s FILESYSTEM=0 --closure 1 --bind -mnontrapping-fptoint -DBASISD_SUPPORT_PVRTC2=0 -DBASISD_SUPPORT_ATC=0 -DBASISD_SUPPORT_BC7=0 -DBASISD_SUPPORT_BC7_MODE5=0 -DBASISD_SUPPORT_ASTC_HIGHER_OPAQUE_QUALITY=0 -DBASISD_SUPPORT_FXT1=0 -DBASISU_SUPPORT_ENCODING=-0 -DBASISD_SUPPORT_KTX2=1 -DBASISD_SUPPORT_KTX2_ZSTD=1" />
 
 	<!-- define gcc compiler, options and files to compile -->
 	<property name="gcc" value="${compilerPrefix}${cCompiler}${compilerSuffix}"/>

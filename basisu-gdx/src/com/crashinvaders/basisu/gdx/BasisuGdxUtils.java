@@ -14,6 +14,8 @@ import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Various utility methods required for Basis Universal libGDX library.
@@ -250,5 +252,18 @@ public class BasisuGdxUtils {
         } finally {
             StreamUtils.closeQuietly(in);
         }
+    }
+
+    public static String reportAvailableTranscoderFormats(BasisuTextureFormat basisTexFormat) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("===== AVAILABLE TRANSCODER FORMATS | ").append(basisTexFormat.name()).append(" | (\"+\" if supported by the platform)").append(" =====");
+        ArrayList<BasisuTranscoderTextureFormat> formats = new ArrayList<>(
+                BasisuTranscoderTextureFormatSupportIndex.getSupportedTextureFormats(basisTexFormat));
+        Collections.sort(formats, (v0, v1) -> v0.ordinal() - v1.ordinal());
+        for (BasisuTranscoderTextureFormat format : formats) {
+            boolean glSupported = BasisuGdxUtils.isBasisuFormatSupported(format, basisTexFormat);
+            sb.append("\n").append(glSupported ? "+ " : "  ").append(format);
+        }
+        return sb.toString();
     }
 }
