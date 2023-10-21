@@ -20,7 +20,7 @@ public class BasisuGdxGl {
     }
 
     private static native int[] getSupportedTextureFormatsNative(WebGLRenderingContext gl) /*-{
-            // We need to active the extensions first.
+            // We need to activate the extensions first.
             gl.getExtension("WEBGL_compressed_texture_astc");
             gl.getExtension("WEBGL_compressed_texture_atc");
             gl.getExtension("WEBGL_compressed_texture_etc");
@@ -39,9 +39,9 @@ public class BasisuGdxGl {
 
     /**
      * This is a simplified version of JS typed array preparation of GwtGL20#glTexImage2D().
-     * It was tested for the GDX Basis Universal code and may not work for any other use cases.
+     * It was tested for the GDX Basis Universal code and may not work outside of it.
      */
-    public static void glCompressedTexImage2D(int target, int level, int internalformat,
+    public static void glCompressedTexImage2D(int target, int level, int internalFormat,
                                               int width, int height, int border,
                                               int imageSize, Buffer pixels) {
 
@@ -50,14 +50,14 @@ public class BasisuGdxGl {
         int remainingBytes = pixels.remaining();
         ArrayBufferView buffer = Uint8ArrayNative.create(webGLArray.buffer(), 0, remainingBytes);
 
-        glCompressedTexImage2DNative(getGlContext(), target, level, internalformat, width, height, border, imageSize, buffer);
+        glCompressedTexImage2DNative(getGlContext(), target, level, internalFormat, width, height, border, imageSize, buffer);
     }
 
     private static native void glCompressedTexImage2DNative(WebGLRenderingContext gl,
-                                                            int target, int level, int internalformat,
+                                                            int target, int level, int internalFormat,
                                                             int width, int height, int border,
                                                             int imageSize, ArrayBufferView pixels) /*-{
-        gl.compressedTexImage2D(target, level, internalformat, width, height, border, pixels);
+        gl.compressedTexImage2D(target, level, internalFormat, width, height, border, pixels);
     }-*/;
 
     private static WebGLRenderingContext getGlContext() {

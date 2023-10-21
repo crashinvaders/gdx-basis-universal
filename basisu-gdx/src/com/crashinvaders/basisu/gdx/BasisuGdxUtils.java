@@ -2,13 +2,23 @@ package com.crashinvaders.basisu.gdx;
 
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.IntSet;
+import com.badlogic.gdx.utils.StreamUtils;
 import com.crashinvaders.basisu.wrapper.*;
 
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collections;
+
 /**
- * Various utility methods required for Basis Universal LibGDX library.
+ * Various utility methods required for Basis Universal libGDX library.
  * <p/>
  * <b>References for OpenGL extension names and texture format codes</b>
  * <ul>
@@ -63,6 +73,9 @@ public class BasisuGdxUtils {
     public static final int GL_TEX_PVRTC1_4BPP_RGB = 0x8c00;
     public static final int GL_TEX_PVRTC1_4BPP_RGBA = 0x8c02;
     public static final int GL_TEX_PVRTC2_4BPP_RGBA = 0x9138;
+
+    /** Default texture format selector to be used by all the BasisuTextureData/KTX2TextureData instances. */
+    public static BasisuTextureFormatSelector defaultFormatSelector = new BasisuTextureFormatSelector.Default();
 
     private static final IntSet supportedGlTextureFormats = new IntSet();
     private static boolean supportedGlTextureFormatsInitialized = false;
@@ -149,11 +162,22 @@ public class BasisuGdxUtils {
     }
 
     /**
-     * Checks if the texture format can be transcoded to and if there's a native graphics API support for it as well.
+     * Checks if the texture format can be transcoded to
+     * and if there's a native graphics API support for it as well.
      */
-    public static boolean isBasisuFormatSupported(BasisuTranscoderTextureFormat textureFormat, BasisuTextureFormat basisTexFormat) {
+    public static boolean isBasisuFormatSupported(BasisuTranscoderTextureFormat textureFormat,
+                                                  BasisuTextureFormat basisTexFormat) {
+        // The uncompressed formats are supported unconditionally.
+        switch (textureFormat) {
+            case RGBA32:
+            case RGB565:
+            case RGBA4444:
+                return true;
+        }
+
         int glTextureFormat = toGlTextureFormat(textureFormat);
-        return isGlTextureFormatSupported(glTextureFormat) && isTranscoderTextureFormatSupported(textureFormat, basisTexFormat);
+        return isGlTextureFormatSupported(glTextureFormat) &&
+                isTranscoderTextureFormatSupported(textureFormat, basisTexFormat);
     }
 
     /**
@@ -196,5 +220,53 @@ public class BasisuGdxUtils {
      */
     public static boolean isMultipleOfFour(int width, int height) {
         return width % 4 == 0 && height % 4 == 0;
+    }
+
+    /**
+     * Reads the file content into the {@link ByteBuffer}.
+     * It uses unsafe (direct) byte buffer for all the platforms except for GWT,
+     * so don't forget to free it using {@link BufferUtils#disposeUnsafeByteBuffer(ByteBuffer)}.
+     */
+    public static ByteBuffer readFileIntoBuffer(FileHandle file) {
+        byte[] buffer = new byte[1024 * 10];
+        DataInputStream in = null;
+        try {
+            in = new DataInputStream(new BufferedInputStream(file.read()));
+            int fileSize = (int)file.length();
+
+            // We use unsafe (direct) byte buffer everywhere but not on GWT as it doesn't support it.
+            final ByteBuffer byteBuffer;
+            if (Gdx.app.getType() == Application.ApplicationType.WebGL) {
+                byteBuffer = BufferUtils.newByteBuffer(fileSize);
+            } else {
+                //TODO Replace with BufferUtils.newUnsafeByteBuffer(fileSize) once it's compatible with GWT compiler.
+                byteBuffer = BasisuBufferUtils.newUnsafeByteBuffer(fileSize);
+            }
+
+            int readBytes = 0;
+            while ((readBytes = in.read(buffer)) != -1) {
+                byteBuffer.put(buffer, 0, readBytes);
+            }
+            ((Buffer)byteBuffer).position(0);
+            ((Buffer)byteBuffer).limit(byteBuffer.capacity());
+            return byteBuffer;
+        } catch (Exception e) {
+            throw new BasisuGdxException("Couldn't load file '" + file + "'", e);
+        } finally {
+            StreamUtils.closeQuietly(in);
+        }
+    }
+
+    public static String reportAvailableTranscoderFormats(BasisuTextureFormat basisTexFormat) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("===== AVAILABLE TRANSCODER FORMATS | ").append(basisTexFormat.name()).append(" | (\"+\" if supported by the platform)").append(" =====");
+        ArrayList<BasisuTranscoderTextureFormat> formats = new ArrayList<>(
+                BasisuTranscoderTextureFormatSupportIndex.getSupportedTextureFormats(basisTexFormat));
+        Collections.sort(formats, (v0, v1) -> v0.ordinal() - v1.ordinal());
+        for (BasisuTranscoderTextureFormat format : formats) {
+            boolean glSupported = BasisuGdxUtils.isBasisuFormatSupported(format, basisTexFormat);
+            sb.append("\n").append(glSupported ? "+ " : "  ").append(format);
+        }
+        return sb.toString();
     }
 }

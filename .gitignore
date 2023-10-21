@@ -24,3 +24,8 @@ robovm-build
 
 /demo/android/libs
 /demo/web/war
+
+# Eclipse
+.project
+.classpath
+.settings

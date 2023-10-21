@@ -15,8 +15,6 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.ui.Cell;
-import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -28,7 +26,6 @@ import com.crashinvaders.basisu.gdx.*;
 import com.crashinvaders.basisu.wrapper.*;
 
 import java.nio.ByteBuffer;
-import java.util.Set;
 
 public class App implements ApplicationListener {
     private static final String TAG = App.class.getSimpleName();
@@ -57,14 +54,17 @@ public class App implements ApplicationListener {
         Gdx.input.setInputProcessor(stage);
 
         testBasisuClasses();
-        printBasisSupportedTextureFormats(BasisuTextureFormat.ETC1S);
-        printBasisSupportedTextureFormats(BasisuTextureFormat.UASTC4x4);
+
+        Gdx.app.log(TAG, BasisuGdxUtils.reportAvailableTranscoderFormats(BasisuTextureFormat.ETC1S));
+        Gdx.app.log(TAG, BasisuGdxUtils.reportAvailableTranscoderFormats(BasisuTextureFormat.UASTC4x4));
 
         assetManager = new AssetManager();
         assetManager.setLoader(Texture.class, ".basis", new BasisuTextureLoader(assetManager.getFileHandleResolver()));
-        assetManager.load("screen-stuff-etc1s.basis", Texture.class);   // ETC1S RGBA
-        assetManager.load("screen-stuff-uastc.basis", Texture.class);   // UASTC RGBA
-        assetManager.load("kodim3.basis", Texture.class);               // ETC1S RGB
+        assetManager.setLoader(Texture.class, ".ktx2", new Ktx2TextureLoader(assetManager.getFileHandleResolver()));
+        assetManager.load("screen-stuff-etc1s.basis", Texture.class);   // BASIS/ETC1S RGBA
+        assetManager.load("screen-stuff-uastc.basis", Texture.class);   // BASIS/UASTC RGBA
+        assetManager.load("kodim3.basis", Texture.class);               // BASIS/ETC1S RGB
+        assetManager.load("screen_stuff.uastc.ktx2", Texture.class);    // KTX2/UASTC RGBA
         assetManager.load("basisu-atlas.atlas", TextureAtlas.class);    // Basis-based texture atlas
         assetManager.finishLoading();
 
@@ -76,46 +76,40 @@ public class App implements ApplicationListener {
             Table rootTable = new Table();
             rootTable.setFillParent(true);
             rootTable.center();
+            rootTable.defaults().grow().center().pad(16f).uniform();
 
-            rootTable.add(new Image(new TextureRegionDrawable(texture0), Scaling.fit, Align.center))
-                    .center()
-                    .height(240f)
-                    .growX();
+            rootTable.add(new Image(new TextureRegionDrawable(texture0), Scaling.fit, Align.center));
 
             rootTable.add(new Image(
-                    new TextureRegionDrawable(assetManager.get("kodim3.basis", Texture.class)),
-                    Scaling.fit,
-                    Align.center))
-                    .center()
-                    .height(240f)
-                    .growX();
+                            new TextureRegionDrawable(assetManager.get("kodim3.basis", Texture.class)),
+                            Scaling.fit,
+                            Align.center));
+
+            rootTable.add(new Image(
+                            new TextureRegionDrawable(assetManager.get("screen-stuff-etc1s.basis", Texture.class)),
+                            Scaling.fit,
+                            Align.center));
 
             rootTable.row();
 
             rootTable.add(new Image(
-                    new TextureRegionDrawable(assetManager.get("screen-stuff-etc1s.basis", Texture.class)),
-                    Scaling.fit,
-                    Align.center))
-                    .center()
-                    .height(240f)
-                    .growX();
+                            new TextureRegionDrawable(assetManager.get("screen-stuff-uastc.basis", Texture.class)),
+                            Scaling.fit,
+                            Align.center));
 
             rootTable.add(new Image(
-                    new TextureRegionDrawable(assetManager.get("screen-stuff-uastc.basis", Texture.class)),
-                    Scaling.fit,
-                    Align.center))
-                    .center()
-                    .height(240f)
-                    .growX();
+                            new TextureRegionDrawable(assetManager.get("basisu-atlas.atlas", TextureAtlas.class).findRegion("ic_env_picnic")),
+                            Scaling.fit,
+                            Align.center));
+
+            rootTable.add(new Image(
+                            new TextureRegionDrawable(assetManager.get("screen_stuff.uastc.ktx2", Texture.class)),
+                            Scaling.fit,
+                            Align.center));
 
             stage.addActor(rootTable);
 
-            // Put atlas region at the center.
-            Container<Image> containerAtlasRegion = new Container<Image>(new Image(assetManager.get("basisu-atlas.atlas", TextureAtlas.class).findRegion("ic_env_picnic")));
-            containerAtlasRegion.setFillParent(true);
-            containerAtlasRegion.center();
-            rootTable.addActor(containerAtlasRegion);
-
+            // Animate composition on click.
             rootTable.setTouchable(Touchable.enabled);
             rootTable.addListener(new ClickListener() {
                 @Override
@@ -183,15 +177,15 @@ public class App implements ApplicationListener {
             BasisuNativeLibLoader.loadIfNeeded();
             FileHandle file = Gdx.files.internal("kodim3.basis");
             Gdx.app.log(TAG, "Reading Basis file: " + file.name());
-            ByteBuffer basisuData = BasisuData.readFileIntoBuffer(file);
-            boolean valid = BasisuWrapper.validateHeader(basisuData);
+            ByteBuffer basisuData = BasisuGdxUtils.readFileIntoBuffer(file);
+            boolean valid = BasisuWrapper.basisValidateHeader(basisuData);
             Gdx.app.log(TAG, "Data is " + (valid ? "valid" : "invalid"));
 
-            ByteBuffer rgba = BasisuWrapper.transcode(basisuData, 0, 0, BasisuTranscoderTextureFormat.RGBA32);
+            ByteBuffer rgba = BasisuWrapper.basisTranscode(basisuData, 0, 0, BasisuTranscoderTextureFormat.RGBA32);
             Gdx.app.log(TAG, "Transcoded size: " + rgba.capacity());
             Gdx.app.log(TAG, "Transcoded checksum: " + modRtuCrc(rgba));
 
-            BasisuImageInfo imageInfo = BasisuWrapper.getImageInfo(basisuData, 0);
+            BasisuImageInfo imageInfo = BasisuWrapper.basisGetImageInfo(basisuData, 0);
             Gdx.app.log(TAG, "===== IMAGE INFO =====");
             Gdx.app.log(TAG, "getImageIndex() " + imageInfo.getImageIndex());
             Gdx.app.log(TAG, "getTotalLevels() " + imageInfo.getTotalLevels());
@@ -207,7 +201,7 @@ public class App implements ApplicationListener {
             Gdx.app.log(TAG, "hasIframeFlag() " + imageInfo.hasIframeFlag());
             imageInfo.close();
 
-            BasisuFileInfo fileInfo = BasisuWrapper.getFileInfo(basisuData);
+            BasisuFileInfo fileInfo = BasisuWrapper.basisGetFileInfo(basisuData);
             Gdx.app.log(TAG, "===== FILE INFO =====");
             Gdx.app.log(TAG, "getVersion() " + fileInfo.getVersion());
             Gdx.app.log(TAG, "getTotalHeaderSize() " + fileInfo.getTotalHeaderSize());
@@ -229,16 +223,6 @@ public class App implements ApplicationListener {
             Gdx.app.log(TAG, "getTextureFormat() " + fileInfo.getTextureFormat());
             fileInfo.close();
         }
-    }
-
-    private void printBasisSupportedTextureFormats(BasisuTextureFormat basisTexFormat) {
-        Gdx.app.log(TAG, "===== SUPPORTED TRANSCODER FORMATS | " + basisTexFormat.name() + " =====");
-        StringBuilder sb = new StringBuilder();
-        Set<BasisuTranscoderTextureFormat> formats = BasisuTranscoderTextureFormatSupportIndex.getSupportedTextureFormats(basisTexFormat);
-        for (BasisuTranscoderTextureFormat format : formats) {
-            sb.append(format).append(" ");
-        }
-        Gdx.app.log(TAG, sb.toString());
     }
 
     // Compute the MODBUS RTU CRC
