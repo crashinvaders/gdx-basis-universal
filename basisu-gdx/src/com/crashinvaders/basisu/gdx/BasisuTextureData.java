@@ -18,12 +18,12 @@ import java.nio.ByteBuffer;
  * which texture format is preferable for the current platform.
  * The {@link com.crashinvaders.basisu.gdx.BasisuTextureFormatSelector.Default} selector is used for all the instances
  * unless another one is specified through {@link #setTextureFormatSelector(BasisuTextureFormatSelector)}.
- * You can also override the default selector by updating the value of {@link BasisuTextureFormatSelector#defaultSelector}.
+ * You can also override the default selector by updating the value of {@link BasisuGdxUtils#defaultFormatSelector}.
  */
 public class BasisuTextureData implements TextureData {
     private static final String TAG = BasisuTextureData.class.getSimpleName();
 
-    private BasisuTextureFormatSelector formatSelector = BasisuTextureFormatSelector.defaultSelector;
+    private BasisuTextureFormatSelector formatSelector = BasisuGdxUtils.defaultFormatSelector;
 
     private final FileHandle file;  // May be null.
     private final int imageIndex;

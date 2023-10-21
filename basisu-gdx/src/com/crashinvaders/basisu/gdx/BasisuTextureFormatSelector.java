@@ -22,9 +22,6 @@ import static com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat.*;
  */
 public interface BasisuTextureFormatSelector {
 
-    /** Default texture format selector to be used by all the BasisuTextureData/KTX2TextureData instances. */
-    BasisuTextureFormatSelector defaultSelector = new Default();
-
     /** Resolves the texture format that intermediate Basis Universal texture (ETC1S/UASTC) will be transcoded to. */
     BasisuTranscoderTextureFormat resolveTextureFormat(BasisuData data, int imageIndex);
 

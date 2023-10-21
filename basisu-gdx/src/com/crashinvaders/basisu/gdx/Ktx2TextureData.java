@@ -19,12 +19,12 @@ import java.nio.ByteBuffer;
  * which texture format is preferable for the current platform.
  * The {@link BasisuTextureFormatSelector.Default} selector is used for all the instances
  * unless another one is specified through {@link #setTextureFormatSelector(BasisuTextureFormatSelector)}.
- * You can also override the default selector by updating the value of {@link BasisuTextureFormatSelector#defaultSelector}.
+ * You can also override the default selector by updating the value of {@link BasisuGdxUtils#defaultFormatSelector}.
  */
 public class Ktx2TextureData implements TextureData {
     private static final String TAG = Ktx2TextureData.class.getSimpleName();
 
-    private BasisuTextureFormatSelector formatSelector = BasisuTextureFormatSelector.defaultSelector;
+    private BasisuTextureFormatSelector formatSelector = BasisuGdxUtils.defaultFormatSelector;
 
     private final FileHandle file;  // May be null.
     private final int mipmapLevel;

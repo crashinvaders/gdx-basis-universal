@@ -74,6 +74,9 @@ public class BasisuGdxUtils {
     public static final int GL_TEX_PVRTC1_4BPP_RGBA = 0x8c02;
     public static final int GL_TEX_PVRTC2_4BPP_RGBA = 0x9138;
 
+    /** Default texture format selector to be used by all the BasisuTextureData/KTX2TextureData instances. */
+    public static BasisuTextureFormatSelector defaultFormatSelector = new BasisuTextureFormatSelector.Default();
+
     private static final IntSet supportedGlTextureFormats = new IntSet();
     private static boolean supportedGlTextureFormatsInitialized = false;
 
