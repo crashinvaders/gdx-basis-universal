@@ -26,6 +26,7 @@ import com.crashinvaders.basisu.gdx.*;
 import com.crashinvaders.basisu.wrapper.*;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class App implements ApplicationListener {
     private static final String TAG = App.class.getSimpleName();
@@ -54,6 +55,8 @@ public class App implements ApplicationListener {
         Gdx.input.setInputProcessor(stage);
 
         testBasisuClasses();
+
+        printGlSupportedTextureFormats();
 
         Gdx.app.log(TAG, BasisuGdxUtils.reportAvailableTranscoderFormats(BasisuTextureFormat.ETC1S));
         Gdx.app.log(TAG, BasisuGdxUtils.reportAvailableTranscoderFormats(BasisuTextureFormat.UASTC4x4));
@@ -223,6 +226,15 @@ public class App implements ApplicationListener {
             Gdx.app.log(TAG, "getTextureFormat() " + fileInfo.getTextureFormat());
             fileInfo.close();
         }
+    }
+
+    private static void printGlSupportedTextureFormats() {
+        int[] supportedTextureFormats = BasisuGdxGl.getSupportedTextureFormats();
+        String[] supportedTextureFormatsStr = new String[supportedTextureFormats.length];
+        for (int i = 0; i < supportedTextureFormats.length; i++) {
+            supportedTextureFormatsStr[i] = Integer.toHexString(supportedTextureFormats[i]);
+        }
+        Gdx.app.log(TAG, "Supported OpenGL compress texture formats:\n" + Arrays.toString(supportedTextureFormatsStr));
     }
 
     // Compute the MODBUS RTU CRC

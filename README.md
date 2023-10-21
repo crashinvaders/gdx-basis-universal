@@ -89,10 +89,17 @@ dependencies {
 }
 ```
 
-#### iOS module ([RoboVM](https://github.com/libGDX/libGDX/tree/master/backends/gdx-backend-robovm) backend)
+#### iOS module ([RoboVM](https://github.com/libGDX/libGDX/tree/master/backends/gdx-backend-robovm-metalangle) backend)
+
+> It's highly recommended to use `robovm-metalangle` libGDX backend in favor of classic `robovm`,
+> as this is the only way to unlock access to more compressed texture formats on Apple devices.
+
 ```gradle
 dependencies {
     runtimeOnly "com.crashinvaders.basisu:basisu-wrapper:$gdxBasisuVersion:natives-ios"
+    
+    // This is highly recomended, otherwise you're stuck with only PVRTC1 textures.
+    implementation "com.badlogicgames.gdx:gdx-backend-robovm-metalangle:$gdxVersion"
 }
 ```
 
@@ -154,6 +161,7 @@ Here's the list of the limitations you should be aware of when using this librar
 
 - __[Android]__ Due to NDK specs, __Android 5.0 (API 21) is the minimum supported version__.
 - __[GWT]__ WebAssembly is available pretty much on every modern browser ([compatibility chart](https://caniuse.com/wasm)). Just for reference, the support is enabled by default as of __Firefox 52__, __Chrome 57__, __Opera 44__, and __Edge 16__.
+- __[iOS]__ Due to OpenGL deprecation, working with compressed textures is troublesome. Please read [this section](#ios-module-robovm-backend). 
 
 ## Basis Universal feature support notes
 
