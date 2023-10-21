@@ -1,6 +1,8 @@
 ### 1.0.0
 - Added: support for KTX2 textures.
+- Added: support for decoding ZSTD compressed UASTC textures.
 - Improved: better default ETC1S/UASTC transcoder selector.
+- Fixed: Basis transcoded texture buffers weren't disposed properly (memleak).
 
 ### 0.2.0
 - Updated to libGDX 1.12.0
