@@ -4,7 +4,7 @@
 
 Cross-platform support for Binomial's [Basis Universal](https://github.com/BinomialLLC/basis_universal) supercompressed GPU textures.
 
-Use the same intermediate [compressed texture](https://en.wikipedia.org/wiki/Texture_compression) assets (`.basis`) for all the [libGDX](https://github.com/libGDX/libGDX) backends and save on RAM leveraging the platforms' natively supported GPU compression.
+Use the same intermediate [compressed texture](https://en.wikipedia.org/wiki/Texture_compression) assets (`.ktx2`/`.basis`) for all the [libGDX](https://github.com/libGDX/libGDX) backends and save on video memory leveraging the platforms' natively supported GPU compression.
 
 <details>
     <summary>
@@ -18,7 +18,7 @@ When using traditional image formats (like PNG, JPG, TIFF, etc), they all get de
 To address this issue many GPU manufacturers implement hardware support for specific texture compression formats.
 Some may help you to chop down the memory footprint with the compression ratio of impressive 8 times, if you're agreed on a small trade-off in image quality (most of the texture compression formats are lossy).
     
-The only downside is there is no one universal texture compression format that guarantees to work on every single platform/hardware. And if you're up for the game of supplying GPU compressed textures for your game, you have to pack your distributions with a whole lot of specific types of compressed textures per device hardware support for them (to mention, what in a way [Unity practices](https://docs.unity3d.com/Manual/class-TextureImporterOverride.html) for quite a while).
+The only downside is there is no one universal texture compression format that guarantees to work on every single platform/hardware. And if you're up for the game of supplying GPU compressed textures for your game, you have to pack your distributions with a lot of specific types of compressed textures per device hardware support for them (to mention, what in a way [Unity practices](https://docs.unity3d.com/Manual/class-TextureImporterOverride.html) for quite a while).
     
 #### The compromise
 To address this issue, [Binomial LLC](http://www.binomial.info/) founded their Basis Universal project.
@@ -32,11 +32,11 @@ Basis Universal is backed by Google, open-source, and now available to everyone!
 </details>
     
 ### Cool, how do I turn my images into Basis textures?
-[GDX Texture Packer GUI](https://github.com/crashinvaders/gdx-texture-packer-gui) has full support for encoding the atlases as Basis Universal files.
+[GDX Texture Packer GUI](https://github.com/crashinvaders/gdx-texture-packer-gui) has full support for encoding atlases as Basis Universal textures. Also, it provides CLI interface to turn any PNG/JPG image into a KTX2/Basis texture.
 
 You can also use the official [command-line tool](https://github.com/BinomialLLC/basis_universal/releases) or build the encoder from the [sources](https://github.com/BinomialLLC/basis_universal) yourself.
 
-There could be some other options (even potentially encoding in the browser), but I'm not aware ATM and it's worth googling.
+There could be some other options (even potentially encoding in the browser), but I'm not aware ATM, and it's worth googling.
 
 > Please read the ["Texture format notes"](#texture-format-notes) and ["Feature support notes"](#basis-universal-feature-support-notes) sections before encoding your textures.
 
@@ -61,7 +61,7 @@ buildscript {
 And then just add these records to the dependency section of your `build.gradle` files. 
 
 > Don't forget to set `gdxBasisuVersion` property with the correct library version 
-(e.g. declaring `gdxBasisuVersion=0.2.0` in the project's root `settings.gradle` file).
+(e.g. declaring `gdxBasisuVersion=1.0.0` in the project's root `settings.gradle` file).
 
 #### Core module
 ```gradle
@@ -118,30 +118,30 @@ Don't forget to add a GWT module entry to your `GdxDefinition.gwt.xml` file.
 
 ### Example code
 
-The library provides transparent support for `Basis` format textures using `BasisuTextureData` class, which acts very similar to libGDX's implementation of `ETC1TextureData`. The only difference is libGDX doesn't know how to load `.basis` texture files out of the box, so you have to explicitly use the proper texture data class when creating a texture.
+The library provides transparent support for `KTX2`/`Basis` format textures using `Ktx2TextureData`/`BasisuTextureData` classes respectively. Each acts very similar to libGDX's implementation of `ETC1TextureData`. The only difference is libGDX doesn't know how to load `.ktx2`/`.basis` texture files out of the box, so you have to explicitly use the proper texture data class when creating a texture.
 
 ```java
-Texture myTexture = new Texture(new BasisuTextureData(Gdx.files.internal("MyTexture.basis")));
+Texture myTexture = new Texture(new Ktx2TextureData(Gdx.files.internal("MyTexture.ktx2")));
 ```
 
-From now on, it's safe to use the texture instance as usual and it already should hold the data transcoded to the best suited native GPU compressed texture format for your platform.
+From now on, it's safe to use the texture instance as usual, and it already should hold the data transcoded to the best suited native GPU compressed texture format for your platform.
 
 #### Asset manager integration
 
 If you're using `AssetManager` to load game asset, you can easily integrate with it as well using `BasisuTextureLoader` class.
 
 ```java
-// Register the texture loader for the ".basis" file extension.
-assetManager.setLoader(Texture.class, ".basis", new BasisuTextureLoader(assetManager.getFileHandleResolver()));
+// Register the texture loader for the ".ktx2" file extension.
+assetManager.setLoader(Texture.class, ".ktx2", new Ktx2TextureLoader(assetManager.getFileHandleResolver()));
 
 // Post your texture assets for loading as usual.
-assetManager.load("MyTexture.basis", Texture.class);
-// You can also use basis-texture-based atlases.
+assetManager.load("MyTexture.ktx2", Texture.class);
+// You can also use ktx2-based atlases.
 // The Basis textures will be automatically resolved and loaded.
 assetManager.load("MyAtlas.atlas", TextureAtlas.class);
 
 // When the asset manager has finished loading, retrieve the assets as usual.
-Texture myTexture = assetManager.get("MyTexture.basis", Texture.class);
+Texture myTexture = assetManager.get("MyTexture.ktx2", Texture.class);
 TextureAtlas myAtlas = assetManager.get("MyAtlas.atlas", TextureAtlas.class);
 ```
 
@@ -156,9 +156,12 @@ Here's the list of the limitations you should be aware of when using this librar
 
 ## Basis Universal feature support notes
 
-Most of the essential Basis transcoder features are exposed and implemented for Java (including file validation, transcoding to all the necessary formats, and Basis file/image information lookup methods).
+Most of the essential Basis transcoder features are exposed and implemented for Java (including file validation, transcoding to all the necessary formats, and KTX2/Basis file/image information lookup methods).
 
 Transcoding from both intermediate formats (__ETC1S__ low-medium quality and __UASTC__ high quality) works as intended.
+
+Mipmaps are supported, but not implemented on libGDX integration side.
+The feature will be enabled in the future releases.
 
 ### Texture channel layout types
 
@@ -174,7 +177,7 @@ For these, there are the most variety of transcoder texture formats supported.
 
 The rest two are considered as niche types, and the transcoder has fewer options.
 
-Please be aware, that at the moment the [default texture format selector](#texture-format-resolution-strategy) doesn't recognize __RG__ and __R__ texture types and they will be treated as __RGBA__ and __RGB__ respectively. If you need support for them, provide a custom selector implementation.
+Please be aware, that at the moment the [default texture format selector](#texture-format-resolution-strategy) doesn't recognize __RG__ and __R__ texture types, and they will be treated as __RGBA__ and __RGB__ respectively. If you need support for them, provide a custom selector implementation.
 
 ### Basis texture types
 
@@ -191,6 +194,26 @@ Out of which support only for __Regular 2D__ is implemented through __BasisuText
 > I'm not very familiar with 3D related formats like __Cubemap array__ and skipped them for now.
 The Basis data for those is fully available from `basisu-wrapper`, only the libGDX support is missing.
 If you're in demand for those or may assist with the implementation, please come forward and open an issue with the details.
+
+### KTX2 vs Basis files
+
+Simply put, when in doubt, go with `.ktx2` files in favor of `.basis`.
+
+The long story. Those are simply two different texture file containers. Both capable of containing same Basis textures, but a little differently in terms of inner layout (like `mp4` and `mpv` in the world of video files). Historically `.basis` was the only container, made specifically for needs of the Basis Universal library.
+Later on, Basis Universal was standardized by [The Khronos Group](https://www.khronos.org/assets/uploads/developers/presentations/3D_Formats_Wayfair_KTX2_SIGGRAPH_Aug21.pdf) and the new `.ktx2` container came along.
+
+### Debugging/diagnostics
+
+If you're writing your own transcoder format selector or just wish to know which of the textures are supported on the specific platform, 
+here's a little snippet that logs out Basis Universal support report:
+```
+BasisuNativeLibLoader.loadIfNeeded(); // Make sure the Basis Universal natives are loaded.
+Gdx.app.log(TAG, BasisuGdxUtils.reportAvailableTranscoderFormats(BasisuTextureFormat.ETC1S));
+Gdx.app.log(TAG, BasisuGdxUtils.reportAvailableTranscoderFormats(BasisuTextureFormat.UASTC4x4));
+```
+
+Besides that, the library prints a bunch of useful information (like texture transcoding operations) to debug log.
+Check it on your device.
 
 ## Texture format notes
 
@@ -215,22 +238,14 @@ Here are all the criteria we should respect in making such a decision (the most 
 - Whether the intermediate image meets the target format's requirements (see [Texture format notes](#texture-format-notes) section).
 - The target format quality loss and/or transcoding speed.
 
-The [default texture format selector](basisu-gdx/src/com/crashinvaders/basisu/gdx/BasisuTextureFormatSelector.java#L40) logic is implemented based on these. That way it should always pick the best available option. In case there are none of the texture formats are passing the check, the selector fallbacks to the uncompressed texture formats (RGBA8888/RGB888). Which are pretty much regular libGDX texture formats and have guaranteed support on all the platforms.
+The [default texture format selector](basisu-gdx/src/com/crashinvaders/basisu/gdx/BasisuTextureFormatSelector.java#L42) logic is implemented based on these. That way it should always pick the best available option. In case there are none of the texture formats are passing the check, the selector fallbacks to the uncompressed texture formats (RGBA8888/RGB888). Which are regular libGDX texture formats and have guaranteed support on all the platforms.
 
-If your case requires a different selection strategy, you can always create a custom implementation for `BasisuTextureFormatSelector` and use it selectively with `BasisuTextureData#setTextureFormatSelector()` methods or set it to be used as the default selector by updating the `BasisuTextureDatastatic#defaultFormatSelector` static field.
+If you require a different selection strategy, you can always create a custom implementation for `BasisuTextureFormatSelector` and use it selectively with `BasisuTextureData#setTextureFormatSelector()`/`Ktx2TextureData#setTextureFormatSelector()` methods or set it to be used as the default selector by updating the `BasisuGdxUtils#defaultFormatSelector` static field.
 
 > Please be aware, that at the moment the default texture format selector doesn't recognize __RG__ and __R__ texture types and they will be treated as __RGBA__ and __RGB__ respectively. If you need support for them, provide a custom selector implementation.
 
 ## Native dependencies
 
-The project is using [Basis Universal C/C++ code](https://github.com/BinomialLLC/basis_universal) and [JNI](https://en.wikipedia.org/wiki/Java_Native_Interface) wrappers to connect to libGDX cross-platform code. [basisu-wrapper](basisu-wrapper) module provides a pure Java (no dependencies) abstraction layer over the native libs.
+The project uses [Basis Universal C/C++ code](https://github.com/BinomialLLC/basis_universal) and [JNI](https://en.wikipedia.org/wiki/Java_Native_Interface) wrappers to connect to libGDX cross-platform code. [basisu-wrapper](basisu-wrapper) module provides a pure Java (no dependencies) abstraction layer over the native libs.
 
 Read more about the module and the native library building notes on [the module's page](basisu-wrapper).
-
-
-## Development notes
-1. `basisu-gdx-gwt` module seems to be broken if compiled with JDK 9+.
-   It's recommended to build the entire project with JDK 8. 
-   There are number of _"cannot find symbol"_ errors pointing to GWT emulated classes like 
-   `HasArrayBufferView`, `DirectReadWriteByteBuffer` and even locally emulated `BasisuGwtBufferUtil`. 
-   The problem may be related to the Java 9+ Jigsaw project - https://stackoverflow.com/questions/60204182 
