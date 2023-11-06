@@ -1,3 +1,7 @@
+### 1.0.1
+- Updated to libGDX 1.12.1
+- Possibly fixed: failed to load natives on old Android devices (5.1.1 and down). See #2
+
 ### 1.0.0
 - Added: support for KTX2 textures.
 - Added: support for decoding ZSTD compressed UASTC textures.
