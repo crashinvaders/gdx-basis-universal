@@ -115,12 +115,17 @@ jnigen {
         cppFlags += desktopUnsupportedFormats
     }
     add(Android) {
-        linkerFlags += ' -llog '  // We use "log.h" lib and should explicitly declare it.
-
         // NDK doesn't include a standard lib, we should explicitly ask for it.
         androidApplicationMk += 'APP_STL := c++_static'
         // This min SDK comes from the NDK 26 itself.
         androidApplicationMk += 'APP_PLATFORM := android-26'
+
+        // We use "log.h" lib and should explicitly declare it.
+        linkerFlags += ' -llog '
+        // Without this, the natives failed to load on Android <= 5.1.1
+        // https://stackoverflow.com/a/59649817/3802890
+        cppFlags += ' -Wl,--hash-style=both '
+        cFlags += ' -Wl,--hash-style=both '
 
 //        cppFlags += ' -fexceptions '
 //        cppFlags += ' -frtti '
