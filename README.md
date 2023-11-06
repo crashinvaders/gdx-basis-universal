@@ -1,6 +1,6 @@
 # GDX Basis Universal
 ![Maven Central](https://img.shields.io/maven-central/v/com.crashinvaders.basisu/basisu-gdx?label=Maven%20Central)
-[![libGDX](https://img.shields.io/badge/libGDX-1.12.0-blue.svg)](https://libgdx.com/)
+[![libGDX](https://img.shields.io/badge/libGDX-1.12.1-blue.svg)](https://libgdx.com/)
 [![Basis Universal](https://img.shields.io/badge/Basis%20Universal-1.16.4-blue.svg)](https://github.com/BinomialLLC/basis_universal)
 
 Cross-platform support for Binomial's [Basis Universal](https://github.com/BinomialLLC/basis_universal) supercompressed GPU textures.
