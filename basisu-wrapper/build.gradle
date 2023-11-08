@@ -182,7 +182,7 @@ task jnigenBuildWeb() {
         if (!com.badlogic.gdx.jnigen.BuildExecutor.executeAnt(
                 "${projectDir}/jni/build-web.xml",
                 "-Drelease=" + jnigen.release, "clean", "postcompile", "-v")) {
-            throw new RuntimeException("Ant execution for web failed.");F
+            throw new RuntimeException("Ant execution for web failed.");
         }
     }
 }
