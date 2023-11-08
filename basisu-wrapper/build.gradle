@@ -115,17 +115,17 @@ jnigen {
         cppFlags += desktopUnsupportedFormats
     }
     add(Android) {
+        // Should be in sync with the official supported ABI list.
+        // https://developer.android.com/ndk/guides/abis#sa
+        androidABIs = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
+
         // NDK doesn't include a standard lib, we should explicitly ask for it.
         androidApplicationMk += 'APP_STL := c++_static'
-        // This min SDK comes from the NDK 26 itself.
-        androidApplicationMk += 'APP_PLATFORM := android-26'
+        // This min SDK comes from the NDK 21 itself.
+        androidApplicationMk += 'APP_PLATFORM := android-21'
 
         // We use "log.h" lib and should explicitly declare it.
         linkerFlags += ' -llog '
-        // Without this, the natives failed to load on Android <= 5.1.1
-        // https://stackoverflow.com/a/59649817/3802890
-        cppFlags += ' -Wl,--hash-style=both '
-        cFlags += ' -Wl,--hash-style=both '
 
 //        cppFlags += ' -fexceptions '
 //        cppFlags += ' -frtti '
@@ -135,9 +135,9 @@ jnigen {
         cppFlags += ' -DBASISD_SUPPORT_BC7=0 '
         cppFlags += ' -DBASISD_SUPPORT_BC7_MODE5=0 '
 
-        // Should be in sync with the official supported ABI list.
-        // https://developer.android.com/ndk/guides/abis#sa
-        androidABIs = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
+        // Without this, the natives failed to load on Android API 22 and older.
+        // https://stackoverflow.com/a/59649817/3802890
+        linkerFlags += ' -Wl,--hash-style=both '
     }
     add(IOS) {
         cppFlags += ' -stdlib=libc++ '  // iOS compiler toolchain is pretty whiny about this...
@@ -182,7 +182,7 @@ task jnigenBuildWeb() {
         if (!com.badlogic.gdx.jnigen.BuildExecutor.executeAnt(
                 "${projectDir}/jni/build-web.xml",
                 "-Drelease=" + jnigen.release, "clean", "postcompile", "-v")) {
-            throw new RuntimeException("Ant execution for web failed.");
+            throw new RuntimeException("Ant execution for web failed.");F
         }
     }
 }
