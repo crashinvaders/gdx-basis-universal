@@ -118,6 +118,12 @@ configure(basisuLibProjects) {
                     artifactId = project.name
                     from components.java
 
+                    // basisu-wrapper has a composite task `jnigenJarNativesAll`
+                    // that aggregates the rest of jar native tasks.
+                    project.tasks.findByName('jnigenJarNativesAll')?.dependsOn?.forEach { jarNativesTask ->
+                        artifact jarNativesTask
+                    }
+
                     pom {
                         name = project.name
                         description = project.description
@@ -143,47 +149,11 @@ configure(basisuLibProjects) {
                         }
                     }
                 }
-                // libGDX natives all follow the "$name-platform" artifact structure.
-                if (project.tasks.findByName('jnigen')) {
-                    mavenNatives(MavenPublication) {
-                        artifactId = project.name
-                        project.tasks.findByName('jnigenJarNativesAll').dependsOn.forEach { jarNativesTask ->
-                            artifact jarNativesTask
-                        }
-                        pom {
-                            name = project.name + " Native Libraries"
-                            description = project.description
-                            url = POM_URL
-                            licenses {
-                                license {
-                                    name = POM_LICENCE_NAME
-                                    url = POM_LICENCE_URL
-                                    distribution = POM_LICENCE_DIST
-                                }
-                            }
-                            developers {
-                                developer {
-                                    id = POM_DEV0_ID
-                                    name = POM_DEV0_NAME
-                                    email = POM_DEV0_EMAIL
-                                }
-                            }
-                            scm {
-                                connection = POM_SCM_CONNECTION
-                                developerConnection = POM_SCM_DEV_CONNECTION
-                                url = POM_SCM_URL
-                            }
-                        }
-                    }
-                }
             }
         }
 
         signing {
             sign publishing.publications.mavenJava
-
-            if(project.tasks.findByName('jnigen'))
-                sign publishing.publications.mavenNatives
         }
 
         // Simply using "required" in signing block doesn't work because taskGraph isn't ready yet.
@@ -201,6 +171,14 @@ configure(basisuLibProjects) {
         }
         dependsOn project.assemble
         dependsOn project.publish
+    }
+
+    task boomba {
+        doFirst {
+            project.tasks.findByName('jnigenJarNativesAll')?.dependsOn?.forEach { jarNativesTask ->
+                println jarNativesTask.name
+            }
+        }
     }
 }
 
