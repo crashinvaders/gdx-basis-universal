@@ -34,3 +34,27 @@ task run(dependsOn: classes, type: JavaExec) {
         jvmArgs '-XstartOnFirstThread'
     }
 }
+
+task fatJar(type: Jar) {
+// sets the name of the .jar file this produces to the name of the game or app.
+    archiveBaseName.set(appName)
+// using 'lib' instead of the default 'libs' appears to be needed by jpackageimage.
+    destinationDirectory = file("${project.layout.buildDirectory.asFile.get().absolutePath}/lib")
+// the duplicatesStrategy matters starting in Gradle 7.0; this setting works.
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    dependsOn classes, configurations.runtimeClasspath
+    from configurations.runtimeClasspath.collect {it.isDirectory() ? it : zipTree(it) } with jar
+// these "exclude" lines remove some unnecessary duplicate files in the output JAR.
+    exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
+    dependencies {
+        exclude('META-INF/INDEX.LIST', 'META-INF/maven/**')
+    }
+// setting the manifest makes the JAR runnable.
+    manifest {
+        attributes 'Main-Class': "com.crashinvaders.basisu.demo.desktop.DesktopLauncher"
+    }
+// this last step may help on some OSes that need extra instruction to make runnable JARs.
+    doLast {
+        file(archiveFile).setExecutable(true, false)
+    }
+}
