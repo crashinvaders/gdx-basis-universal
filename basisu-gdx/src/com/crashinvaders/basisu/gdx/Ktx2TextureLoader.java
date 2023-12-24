@@ -35,7 +35,8 @@ public class Ktx2TextureLoader extends AsynchronousAssetLoader<Texture, TextureL
         Ktx2TextureData data;
         if (parameter instanceof Ktx2TextureParameter) {
             Ktx2TextureParameter basisParameter = (Ktx2TextureParameter) parameter;
-            data = new Ktx2TextureData(fileHandle, basisParameter.mipmapLevel);
+            data = new Ktx2TextureData(fileHandle);
+            data.setUseMipMaps(basisParameter.useMipmaps);
             if (basisParameter.formatSelector != null) {
                 data.setTextureFormatSelector(basisParameter.formatSelector);
             }
@@ -67,7 +68,7 @@ public class Ktx2TextureLoader extends AsynchronousAssetLoader<Texture, TextureL
      */
     public static class Ktx2TextureParameter extends TextureLoader.TextureParameter {
         // public int layerIndex = 0; // Not yet supported.
-        public int mipmapLevel = 0;
+        public boolean useMipmaps = true;
         public BasisuTextureFormatSelector formatSelector = null;
 
         public Ktx2TextureParameter() {

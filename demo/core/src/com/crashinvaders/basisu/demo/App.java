@@ -15,11 +15,13 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.crashinvaders.basisu.gdx.*;
@@ -61,14 +63,25 @@ public class App implements ApplicationListener {
         Gdx.app.log(TAG, BasisuGdxUtils.reportAvailableTranscoderFormats(BasisuTextureFormat.ETC1S));
         Gdx.app.log(TAG, BasisuGdxUtils.reportAvailableTranscoderFormats(BasisuTextureFormat.UASTC4x4));
 
+//        BasisuTextureLoader.BasisuTextureParameter basisMipmapParam = new BasisuTextureLoader.BasisuTextureParameter();
+//        basisMipmapParam.useMipmaps = true;
+//        basisMipmapParam.minFilter = Texture.TextureFilter.MipMapLinearLinear;
+//        basisMipmapParam.magFilter = Texture.TextureFilter.Linear;
+        Ktx2TextureLoader.Ktx2TextureParameter ktx2MipmapParam = new Ktx2TextureLoader.Ktx2TextureParameter();
+        ktx2MipmapParam.useMipmaps = true;
+        ktx2MipmapParam.minFilter = Texture.TextureFilter.MipMapLinearLinear;
+        ktx2MipmapParam.magFilter = Texture.TextureFilter.Linear;
+
         assetManager = new AssetManager();
         assetManager.setLoader(Texture.class, ".basis", new BasisuTextureLoader(assetManager.getFileHandleResolver()));
         assetManager.setLoader(Texture.class, ".ktx2", new Ktx2TextureLoader(assetManager.getFileHandleResolver()));
-        assetManager.load("screen-stuff-etc1s.basis", Texture.class);   // BASIS/ETC1S RGBA
-        assetManager.load("screen-stuff-uastc.basis", Texture.class);   // BASIS/UASTC RGBA
-        assetManager.load("kodim3.basis", Texture.class);               // BASIS/ETC1S RGB
-        assetManager.load("screen_stuff.uastc.ktx2", Texture.class);    // KTX2/UASTC RGBA
-        assetManager.load("basisu-atlas.atlas", TextureAtlas.class);    // Basis-based texture atlas
+        assetManager.load("screen-stuff-etc1s.basis", Texture.class);                               // BASIS/ETC1S RGBA
+        assetManager.load("screen-stuff-uastc.basis", Texture.class);                               // BASIS/UASTC RGBA
+        assetManager.load("kodim3.basis", Texture.class);                                           // BASIS/ETC1S RGB
+        assetManager.load("screen_stuff.uastc.ktx2", Texture.class);                                // KTX2/UASTC RGBA
+        assetManager.load("basisu-atlas.atlas", TextureAtlas.class);                                // Basis-based texture atlas
+//        assetManager.load("subarking512.etc1s.mipmap.basis", Texture.class, basisMipmapParam);    // Basis with mipmaps
+        assetManager.load("subarking512.uastc.mipmap.ktx2", Texture.class, ktx2MipmapParam);     // KTX2 with mipmaps
         assetManager.finishLoading();
 
         BasisuTextureData basisuData0 = new BasisuTextureData(Gdx.files.internal("level_temple0.basis"));  // ETC1S RGBA
@@ -84,31 +97,41 @@ public class App implements ApplicationListener {
             rootTable.add(new Image(new TextureRegionDrawable(texture0), Scaling.fit, Align.center));
 
             rootTable.add(new Image(
-                            new TextureRegionDrawable(assetManager.get("kodim3.basis", Texture.class)),
-                            Scaling.fit,
-                            Align.center));
+                    new TextureRegionDrawable(assetManager.get("kodim3.basis", Texture.class)),
+                    Scaling.fit,
+                    Align.center));
 
             rootTable.add(new Image(
-                            new TextureRegionDrawable(assetManager.get("screen-stuff-etc1s.basis", Texture.class)),
-                            Scaling.fit,
-                            Align.center));
+                    new TextureRegionDrawable(assetManager.get("screen-stuff-etc1s.basis", Texture.class)),
+                    Scaling.fit,
+                    Align.center));
+
+//            rootTable.add(new Image(
+//                    new TextureRegionDrawable(assetManager.get("subarking512.etc1s.mipmap.basis", Texture.class)),
+//                    Scaling.fit,
+//                    Align.center));
 
             rootTable.row();
 
             rootTable.add(new Image(
-                            new TextureRegionDrawable(assetManager.get("screen-stuff-uastc.basis", Texture.class)),
-                            Scaling.fit,
-                            Align.center));
+                    new TextureRegionDrawable(assetManager.get("screen-stuff-uastc.basis", Texture.class)),
+                    Scaling.fit,
+                    Align.center));
 
             rootTable.add(new Image(
-                            new TextureRegionDrawable(assetManager.get("basisu-atlas.atlas", TextureAtlas.class).findRegion("ic_env_picnic")),
-                            Scaling.fit,
-                            Align.center));
+                    new TextureRegionDrawable(assetManager.get("basisu-atlas.atlas", TextureAtlas.class).findRegion("ic_env_picnic")),
+                    Scaling.fit,
+                    Align.center));
 
             rootTable.add(new Image(
-                            new TextureRegionDrawable(assetManager.get("screen_stuff.uastc.ktx2", Texture.class)),
-                            Scaling.fit,
-                            Align.center));
+                    new TextureRegionDrawable(assetManager.get("screen_stuff.uastc.ktx2", Texture.class)),
+                    Scaling.fit,
+                    Align.center));
+
+            rootTable.add(new Image(
+                    new TextureRegionDrawable(assetManager.get("subarking512.uastc.mipmap.ktx2", Texture.class)),
+                    Scaling.fit,
+                    Align.center));
 
             stage.addActor(rootTable);
 
@@ -161,6 +184,11 @@ public class App implements ApplicationListener {
 
         stage.act();
         stage.draw();
+
+        int glError = Gdx.gl.glGetError();
+        if (glError != 0) {
+            throw new GdxRuntimeException("GL error code: " + glError);
+        }
     }
 
     private static void testBasisuClasses() {

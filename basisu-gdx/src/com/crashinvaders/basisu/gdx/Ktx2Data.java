@@ -105,10 +105,10 @@ public class Ktx2Data implements Disposable {
             mipmapLevelMap= new IntMap<>();
             imageInfoIndex.put(imageIndex, mipmapLevelMap);
         }
-        Ktx2ImageLevelInfo imageInfo = mipmapLevelMap.get(imageIndex);
+        Ktx2ImageLevelInfo imageInfo = mipmapLevelMap.get(mipmapLevel);
         if (imageInfo == null) {
             imageInfo = BasisuWrapper.ktx2GetImageLevelInfo(encodedData, imageIndex, mipmapLevel);
-            mipmapLevelMap.put(imageIndex, imageInfo);
+            mipmapLevelMap.put(mipmapLevel, imageInfo);
         }
         return imageInfo;
     }
