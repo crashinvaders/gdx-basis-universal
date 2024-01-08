@@ -9,18 +9,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 public class BasisuWrapperTest {
 
     private static final String IMAGE_BASIS_NAME = "kodim3.etc1s.basis";
+    private static final String IMAGE_BASIS_MIPMAP_NAME = "bananacat.mipmap.etc1s.basis";
     private static final String IMAGE_KTX2_NAME = "screen_stuff.uastc.ktx2";
 
     private static ByteBuffer imageBasisBuffer;
+    private static ByteBuffer imageBasisMipmapBuffer;
     private static ByteBuffer imageKtx2Buffer;
 
     @BeforeClass
@@ -32,6 +32,13 @@ public class BasisuWrapperTest {
             assert is != null;
             byte[] bytes = TestUtils.readToByteArray(is);
             imageBasisBuffer = TestUtils.asByteBuffer(bytes);
+        }
+
+        System.out.println("Loading " + IMAGE_BASIS_MIPMAP_NAME);
+        try (InputStream is = BasisuWrapperTest.class.getClassLoader().getResourceAsStream(IMAGE_BASIS_MIPMAP_NAME)) {
+            assert is != null;
+            byte[] bytes = TestUtils.readToByteArray(is);
+            imageBasisMipmapBuffer = TestUtils.asByteBuffer(bytes);
         }
 
         System.out.println("Loading " + IMAGE_KTX2_NAME);
@@ -102,6 +109,25 @@ public class BasisuWrapperTest {
             assertEquals(0, imageInfo.getFirstSliceIndex());
             assertFalse(imageInfo.hasAlphaFlag());
             assertFalse(imageInfo.hasIframeFlag());
+        }
+    }
+
+    @Test
+    public void testBasisGetImageLevelInfo() {
+        try (BasisuImageLevelInfo levelInfo = BasisuWrapper.basisGetImageLevelInfo(imageBasisMipmapBuffer, 0, 4)) {
+
+            assertEquals(0, levelInfo.getImageIndex());
+            assertEquals(4, levelInfo.getLevelIndex());
+            assertEquals(6, levelInfo.getOrigWidth());
+            assertEquals(6, levelInfo.getOrigHeight());
+            assertEquals(8, levelInfo.getWidth());
+            assertEquals(8, levelInfo.getHeight());
+            assertEquals(2, levelInfo.getNumBlocksX());
+            assertEquals(2, levelInfo.getNumBlocksY());
+            assertEquals(4, levelInfo.getTotalBlocks());
+            assertEquals(4, levelInfo.getFirstSliceIndex());
+            assertFalse(levelInfo.hasAlphaFlag());
+            assertFalse(levelInfo.hasIframeFlag());
         }
     }
 

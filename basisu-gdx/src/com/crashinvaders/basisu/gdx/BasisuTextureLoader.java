@@ -16,7 +16,7 @@ import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
 /**
  * {@link AssetManager} compliant loader for Basis Universal textures.
  * <p/>
- * Here's an example of how to setup the loader, so the {@link AssetManager} can support loading of ".basis" texture files: *
+ * Here's an example of how to set up the loader, so the {@link AssetManager} can support loading of ".basis" texture files: *
  * <br/>
  * <code>
  *     assetManager.setLoader(Texture.class, ".basis", new BasisuTextureLoader(assetManager.getFileHandleResolver()));
@@ -39,7 +39,8 @@ public class BasisuTextureLoader extends AsynchronousAssetLoader<Texture, Textur
         BasisuTextureData data;
         if (parameter instanceof BasisuTextureParameter) {
             BasisuTextureParameter basisParameter = (BasisuTextureParameter) parameter;
-            data = new BasisuTextureData(fileHandle, basisParameter.imageIndex, basisParameter.mipmapLevel);
+            data = new BasisuTextureData(fileHandle, basisParameter.imageIndex);
+            data.setUseMipMaps(basisParameter.useMipmaps);
             if (basisParameter.formatSelector != null) {
                 data.setTextureFormatSelector(basisParameter.formatSelector);
             }
@@ -71,7 +72,7 @@ public class BasisuTextureLoader extends AsynchronousAssetLoader<Texture, Textur
      */
     public static class BasisuTextureParameter extends TextureLoader.TextureParameter {
         public int imageIndex = 0;
-        public int mipmapLevel = 0;
+        public boolean useMipmaps = true;
         public BasisuTextureFormatSelector formatSelector = null;
 
         public BasisuTextureParameter() {

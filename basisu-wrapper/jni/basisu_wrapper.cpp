@@ -60,6 +60,16 @@ namespace basisuWrapper {
             }
             return successful;
         }
+        
+        bool getImageLevelInfo(basisu_image_level_info &imageInfo, uint8_t *data, uint32_t dataSize, uint32_t imageIndex, uint32_t imageLevel) {
+            initBasisu();
+            basisu_transcoder transcoder = {};
+            bool successful = transcoder.get_image_level_info(data, dataSize, imageInfo, imageIndex, imageLevel);
+            if (!successful) {
+                basisuUtils::logError(LOG_TAG, "Failed to obtain image level info.");
+            }
+            return successful;
+        }
 
         // Based on https://github.com/BinomialLLC/basis_universal/blob/master/webgl/transcoder/basis_wrappers.cpp
         bool transcode(basisu::vector<uint8_t> &out, uint8_t *data, uint32_t dataSize,

@@ -63,10 +63,10 @@ public class App implements ApplicationListener {
         Gdx.app.log(TAG, BasisuGdxUtils.reportAvailableTranscoderFormats(BasisuTextureFormat.ETC1S));
         Gdx.app.log(TAG, BasisuGdxUtils.reportAvailableTranscoderFormats(BasisuTextureFormat.UASTC4x4));
 
-//        BasisuTextureLoader.BasisuTextureParameter basisMipmapParam = new BasisuTextureLoader.BasisuTextureParameter();
-//        basisMipmapParam.useMipmaps = true;
-//        basisMipmapParam.minFilter = Texture.TextureFilter.MipMapLinearLinear;
-//        basisMipmapParam.magFilter = Texture.TextureFilter.Linear;
+        BasisuTextureLoader.BasisuTextureParameter basisMipmapParam = new BasisuTextureLoader.BasisuTextureParameter();
+        basisMipmapParam.useMipmaps = true;
+        basisMipmapParam.minFilter = Texture.TextureFilter.MipMapLinearLinear;
+        basisMipmapParam.magFilter = Texture.TextureFilter.Linear;
         Ktx2TextureLoader.Ktx2TextureParameter ktx2MipmapParam = new Ktx2TextureLoader.Ktx2TextureParameter();
         ktx2MipmapParam.useMipmaps = true;
         ktx2MipmapParam.minFilter = Texture.TextureFilter.MipMapLinearLinear;
@@ -81,7 +81,8 @@ public class App implements ApplicationListener {
         assetManager.load("screen_stuff.uastc.ktx2", Texture.class);                                // KTX2/UASTC RGBA
         assetManager.load("basisu-atlas.atlas", TextureAtlas.class);                                // Basis-based texture atlas
 //        assetManager.load("subarking512.etc1s.mipmap.basis", Texture.class, basisMipmapParam);    // Basis with mipmaps
-        assetManager.load("subarking512.uastc.mipmap.ktx2", Texture.class, ktx2MipmapParam);     // KTX2 with mipmaps
+        assetManager.load("bananacat.mipmap.etc1s.basis", Texture.class, basisMipmapParam);         // Basis with mipmaps
+        assetManager.load("subarking512.uastc.mipmap.ktx2", Texture.class, ktx2MipmapParam);        // KTX2 with mipmaps
         assetManager.finishLoading();
 
         BasisuTextureData basisuData0 = new BasisuTextureData(Gdx.files.internal("level_temple0.basis"));  // ETC1S RGBA
@@ -106,10 +107,10 @@ public class App implements ApplicationListener {
                     Scaling.fit,
                     Align.center));
 
-//            rootTable.add(new Image(
-//                    new TextureRegionDrawable(assetManager.get("subarking512.etc1s.mipmap.basis", Texture.class)),
-//                    Scaling.fit,
-//                    Align.center));
+            rootTable.add(new Image(
+                    new TextureRegionDrawable(assetManager.get("bananacat.mipmap.etc1s.basis", Texture.class)),
+                    Scaling.fit,
+                    Align.center));
 
             rootTable.row();
 

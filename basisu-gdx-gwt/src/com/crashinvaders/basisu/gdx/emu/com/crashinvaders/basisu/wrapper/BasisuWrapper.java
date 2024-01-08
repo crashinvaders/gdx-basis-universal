@@ -52,6 +52,14 @@ public class BasisuWrapper {
         return $wnd.basisuModule.basisGetImageInfo(data, imageIndex);
     }-*/;
 
+    public static BasisuImageLevelInfo basisGetImageLevelInfo(Buffer data, int imageIndex, int imageLevel) {
+        JavaScriptObject levelInfoJs = basisGetImageLevelInfoNative(toTypedArray(data), imageIndex, imageLevel);
+        return new BasisuImageLevelInfo(levelInfoJs);
+    }
+    static native JavaScriptObject basisGetImageLevelInfoNative(ArrayBufferView data, int imageIndex, int imageLevel)/*-{
+        return $wnd.basisuModule.basisGetImageLevelInfo(data, imageIndex, imageLevel);
+    }-*/;
+
     public static Ktx2FileInfo ktx2GetFileInfo(Buffer data) {
         JavaScriptObject fileInfoJs = ktx2GetFileInfoNative(toTypedArray(data));
         return new Ktx2FileInfo(fileInfoJs);

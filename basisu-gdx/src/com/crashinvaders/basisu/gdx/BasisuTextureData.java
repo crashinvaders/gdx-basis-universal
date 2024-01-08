@@ -27,11 +27,14 @@ public class BasisuTextureData implements TextureData {
 
     private final FileHandle file;  // May be null.
     private final int imageIndex;
-    private final int mipmapLevel;
+
+    private boolean useMipMaps = true;
 
     private BasisuData basisuData;
 
-    private ByteBuffer transcodedData = null;
+    /** Holds transcoded data buffer per each mipmap level.
+     * Index of the array corresponds to the index of mipmap level. */
+    private TranscodedLevelData[] transcodedLevels = null;
     private BasisuTranscoderTextureFormat transcodeFormat = null;
 
     private int width = 0;
@@ -42,7 +45,7 @@ public class BasisuTextureData implements TextureData {
      * @param file the file to load the Basis texture data from
      */
     public BasisuTextureData(FileHandle file) {
-        this(file, 0, 0);
+        this(file, 0);
     }
 
     /**
@@ -50,19 +53,8 @@ public class BasisuTextureData implements TextureData {
      * @param imageIndex the image index in the Basis file
      */
     public BasisuTextureData(FileHandle file, int imageIndex) {
-        this(file, imageIndex, 0);
-    }
-
-    /**
-     * @param file the file to load the Basis texture data from
-     * @param imageIndex the image index in the Basis file
-     * @param mipmapLevel the mipmap level of the image
-     *                    (mipmaps should be enabled by the Basis encoder when you generate the Basis file).
-     */
-    public BasisuTextureData(FileHandle file, int imageIndex, int mipmapLevel) {
         this.file = file;
         this.imageIndex = imageIndex;
-        this.mipmapLevel = mipmapLevel;
 
         this.basisuData = null;
     }
@@ -79,19 +71,8 @@ public class BasisuTextureData implements TextureData {
      * @param imageIndex the image index in the Basis file
      */
     public BasisuTextureData(BasisuData basisuData, int imageIndex) {
-        this(basisuData, imageIndex, 0);
-    }
-
-    /**
-     * @param basisuData the Basis texture data to transcode the texture from
-     * @param imageIndex the image index in the Basis file
-     * @param mipmapLevel the mipmap level of the image
-     *                    (mipmaps should be enabled by the Basis encoder when you generate the Basis file).
-     */
-    public BasisuTextureData(BasisuData basisuData, int imageIndex, int mipmapLevel) {
         this.file = null;
         this.imageIndex = imageIndex;
-        this.mipmapLevel = mipmapLevel;
 
         this.basisuData = basisuData;
     }
@@ -145,28 +126,30 @@ public class BasisuTextureData implements TextureData {
                     "the total number of images (" + totalImages + ") in the basis file.");
         }
 
-        int mipmapLevels = fileInfo.getImageMipmapLevels()[imageIndex];
-        if (mipmapLevel < 0 || mipmapLevel >= mipmapLevels) {
-            throw new BasisuGdxException("mipmapLevel " + mipmapLevel + " exceeds " +
-                    "the total number of mipmap levels (" + mipmapLevels + ") in the basis file.");
-        }
-
         BasisuTextureType textureType = fileInfo.getTextureType();
         if (textureType != BasisuTextureType.REGULAR_2D) {
             throw new BasisuGdxException("textureType " + textureType + " is not supported at the moment. " +
                     "Only BasisuTextureType.REGULAR_2D texture type is allowed.");
         }
 
-        BasisuImageInfo imageInfo = basisuData.getImageInfo(imageIndex);
-        width = imageInfo.getWidth();
-        height = imageInfo.getHeight();
-
         transcodeFormat = formatSelector.resolveTextureFormat(basisuData, imageIndex);
-        Gdx.app.debug(TAG, (file != null ? "["+file.path()+"] " : "") + "Transcoding to the " + transcodeFormat + " format");
 
-        this.transcodedData = basisuData.transcode(imageIndex, mipmapLevel, transcodeFormat);
+        int transcodeLevels = 1;
+        if (useMipMaps) {
+            transcodeLevels = fileInfo.getImageMipmapLevels()[imageIndex];
+        }
+        transcodedLevels = new TranscodedLevelData[transcodeLevels];
+        for (int level = 0; level < transcodeLevels; level++) {
+            BasisuImageLevelInfo levelInfo = basisuData.getImageLevelInfo(imageIndex, level);
+            int width = levelInfo.getOrigWidth();
+            int height = levelInfo.getOrigHeight();
+            ByteBuffer data = basisuData.transcode(imageIndex, level, transcodeFormat);
+            transcodedLevels[level] = new TranscodedLevelData(level, width, height, data);
+            Gdx.app.debug(TAG, (file != null ? "["+file.path()+"] " : "") + "Transcoded [mipmap:" + level + "] [size:" + width + "x" + height + "] [memory:" + MathUtils.round(data.capacity() / 1024.0f) + "kB]");
+        }
 
-        Gdx.app.debug(TAG, (file != null ? "["+file.path()+"] " : "") + "Transcoded texture size: " + MathUtils.round(this.transcodedData.capacity() / 1024.0f) + "kB");
+        this.width = transcodedLevels[0].width;
+        this.height = transcodedLevels[0].height;
 
         basisuData.dispose();
         basisuData = null;
@@ -177,22 +160,33 @@ public class BasisuTextureData implements TextureData {
     public void consumeCustomData(int target) {
         if (!isPrepared) throw new GdxRuntimeException("Call prepare() before calling consumeCompressedData()");
 
-        final int glInternalFormatCode = BasisuGdxUtils.toGlTextureFormat(transcodeFormat);
+        final int glFormatCode = BasisuGdxUtils.toGlTextureFormat(transcodeFormat);
+        boolean isCompressedFormat = transcodeFormat.isCompressedFormat();
 
-        if (transcodeFormat.isCompressedFormat()) {
-            BasisuGdxGl.glCompressedTexImage2D(target, 0, glInternalFormatCode,
-                    width, height, 0,
-                    transcodedData.capacity(), transcodedData);
-        } else {
-            int textureType = BasisuGdxUtils.toUncompressedGlTextureType(transcodeFormat);
-            Gdx.gl.glTexImage2D(target, 0, glInternalFormatCode,
-                    width, height, 0,
-                    glInternalFormatCode, textureType, transcodedData);
+        for (int level = 0; level < transcodedLevels.length; level++) {
+            TranscodedLevelData entry = transcodedLevels[level];
+            int width = entry.width;
+            int height = entry.height;
+            ByteBuffer data = entry.data;
+
+            if (isCompressedFormat) {
+                BasisuGdxGl.glCompressedTexImage2D(target, level, glFormatCode,
+                        width, height, 0,
+                        data.capacity(), data);
+            } else {
+                int textureType = BasisuGdxUtils.toUncompressedGlTextureType(transcodeFormat);
+                Gdx.gl.glTexImage2D(target, level, glFormatCode,
+                        width, height, 0,
+                        glFormatCode, textureType, data);
+            }
         }
 
         // Cleanup.
-        BasisuWrapper.disposeNativeBuffer(transcodedData);
-        transcodedData = null;
+        for (int i = 0; i < transcodedLevels.length; i++) {
+            ByteBuffer data = transcodedLevels[i].data;
+            BasisuWrapper.disposeNativeBuffer(data);
+        }
+        transcodedLevels = null;
         transcodeFormat = null;
 
         isPrepared = false;
@@ -223,13 +217,32 @@ public class BasisuTextureData implements TextureData {
         throw new GdxRuntimeException("This TextureData implementation does not return a Pixmap");
     }
 
+    public void setUseMipMaps(boolean useMipMaps) {
+        this.useMipMaps = useMipMaps;
+    }
+
     @Override
     public boolean useMipMaps() {
-        return false;
+        return useMipMaps;
     }
 
     @Override
     public boolean isManaged() {
         return true;
     }
+
+    private static class TranscodedLevelData {
+        public final int levelIndex;
+        public final int width;
+        public final int height;
+        public final ByteBuffer data;
+
+        public TranscodedLevelData(int levelIndex, int width, int height, ByteBuffer data) {
+            this.levelIndex = levelIndex;
+            this.width = width;
+            this.height = height;
+            this.data = data;
+        }
+    }
 }
+

@@ -34,6 +34,8 @@ namespace basisuWrapper {
 
         bool getImageInfo(basisu_image_info &imageInfo, uint8_t *data, uint32_t dataSize, uint32_t imageIndex);
 
+        bool getImageLevelInfo(basisu_image_level_info &imageInfo, uint8_t *data, uint32_t dataSize, uint32_t imageIndex, uint32_t imageLevel);
+
         bool transcode(basisu::vector<uint8_t> &out, uint8_t *data, uint32_t dataSize,
                        uint32_t imageIndex, uint32_t levelIndex, transcoder_texture_format format);
 

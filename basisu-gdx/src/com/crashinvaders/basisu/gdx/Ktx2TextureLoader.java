@@ -12,7 +12,7 @@ import com.badlogic.gdx.utils.Array;
 /**
  * {@link AssetManager} compliant loader for KTX2 textures.
  * <p/>
- * Here's an example of how to setup the loader, so the {@link AssetManager} can support loading of ".basis" texture files: *
+ * Here's an example of how to set up the loader, so the {@link AssetManager} can support loading of ".basis" texture files: *
  * <br/>
  * <code>
  *     assetManager.setLoader(Texture.class, ".ktx2", new Ktx2TextureLoader(assetManager.getFileHandleResolver()));

@@ -70,8 +70,17 @@ basist::basisu_image_info basisGetImageInfo_wrap(const val &jsData, uint32_t ima
     return imageInfo;
 }
 
-val basisTranscode_wrap(const val &jsData, uint32_t imageIndex, uint32_t levelIndex, uint32_t textureFormatId) {
+basist::basisu_image_level_info basisGetImageLevelInfo_wrap(const val &jsData, uint32_t imageIndex, uint32_t imageLevel) {
     basisu::vector<uint8_t> data = vecFromTypedArray(jsData);
+    basist::basisu_image_level_info levelInfo;
+    if (!basisuWrapper::basis::getImageLevelInfo(levelInfo, data.data(), data.size(), imageIndex, imageLevel)) {
+        basisuUtils::throwException(nullptr, "Failed to obtain Basis image level info.");
+    }
+    return levelInfo;
+}
+
+val basisTranscode_wrap(const val &jsData, uint32_t imageIndex, uint32_t levelIndex, uint32_t textureFormatId) {
+    basisu::vector<uint8_t> data = vecFromTtotalLevelsypedArray(jsData);
     basisu::vector<uint8_t> output;
     basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
 
@@ -157,6 +166,21 @@ EMSCRIPTEN_BINDINGS(my_module) {
         .field("iframeFlag", &basist::basisu_image_info::m_iframe_flag)             // bool
         ;
 
+    value_object<basist::basisu_image_level_info>("ImageLevelInfo")
+        .field("imageIndex", &basist::basisu_image_level_info::m_image_index)             // uint32_t
+        .field("levelIndex", &basist::basisu_image_level_info::m_level_index)             // uint32_t
+        .field("origWidth", &basist::basisu_image_level_info::m_orig_width)               // uint32_t
+        .field("origHeight", &basist::basisu_image_level_info::m_orig_height)             // uint32_t
+        .field("width", &basist::basisu_image_level_info::m_width)                        // uint32_t
+        .field("height", &basist::basisu_image_level_info::m_height)                      // uint32_t
+        .field("numBlocksX", &basist::basisu_image_level_info::m_num_blocks_x)            // uint32_t
+        .field("numBlocksY", &basist::basisu_image_level_info::m_num_blocks_y)            // uint32_t
+        .field("totalBlocks", &basist::basisu_image_level_info::m_total_blocks)           // uint32_t
+        .field("firstSliceIndex", &basist::basisu_image_level_info::m_first_slice_index)  // uint32_t
+        .field("alphaFlag", &basist::basisu_image_level_info::m_alpha_flag)               // bool
+        .field("iframeFlag", &basist::basisu_image_level_info::m_iframe_flag)             // bool
+        ;
+
     // Use "class_" mapping instead of "value_object" to define custom enum getter functions.
     class_<basist::basisu_file_info>("FileInfo")
 		.property("version", &basist::basisu_file_info::m_version)                              // uint32_t
@@ -175,7 +199,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
 		.property("etc1s", &basist::basisu_file_info::m_etc1s)                                  // bool
 		.property("hasAlphaSlices", &basist::basisu_file_info::m_has_alpha_slices)              // bool
 		.property("textureFormat", &basist::basisu_file_info::m_tex_format)                     // TextureFormat
-        .property("textureType", &basist::basisu_file_info::m_tex_type)                         // TextureType
+    .property("textureType", &basist::basisu_file_info::m_tex_type)                         // TextureType
 		// Properties simulated through functions (to return more JS friendly type).
 		.function("getImageMipmapLevels", &basisFileInfo_imageMipmapLevels)                     // val (Uint8Array)
 //		.function("getTexFormat", &fileInfo_texFormat)                                          // uint8_t
@@ -210,6 +234,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
     function("basisValidateChecksum", &basisValidateChecksum_wrap);
     function("basisGetFileInfo", &basisGetFileInfo_wrap);
     function("basisGetImageInfo", &basisGetImageInfo_wrap);
+    function("basisGetImageLevelInfo", &basisGetImageLevelInfo_wrap);
     function("basisTranscode", &basisTranscode_wrap);
     function("ktx2GetFileInfo", &ktx2GetFileInfo_wrap);
     function("ktx2GetImageLevelInfo", &ktx2GetImageLevelInfo_wrap);

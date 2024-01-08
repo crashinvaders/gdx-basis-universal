@@ -112,13 +112,25 @@ public class BasisuWrapper {
      */
     public static BasisuImageInfo basisGetImageInfo(Buffer dataBuffer, int imageIndex) {
         BasisuImageInfo imageInfo = new BasisuImageInfo();
-        basisGetImageInfoNative(dataBuffer, dataBuffer.capacity(), imageIndex, imageInfo.addr);
+        basisGetImageInfoNative(dataBuffer, dataBuffer.capacity(), imageInfo.addr, imageIndex);
         return imageInfo;
     }
-    private static native void basisGetImageInfoNative(Buffer dataBuffer, int dataSize, int imageIndex, long imageInfoAddr); /*
+    private static native void basisGetImageInfoNative(Buffer dataBuffer, int dataSize, long imageInfoAddr, int imageIndex); /*
         basist::basisu_image_info* imageInfo = (basist::basisu_image_info*)imageInfoAddr;
         if (!basisuWrapper::basis::getImageInfo(*imageInfo, (uint8_t*)dataBuffer, dataSize, imageIndex)) {
             basisuUtils::throwException(env, "Failed to obtain Basis image info.");
+        }
+    */
+
+    public static BasisuImageLevelInfo basisGetImageLevelInfo(Buffer dataBuffer, int imageIndex, int imageLevel) {
+        BasisuImageLevelInfo imageInfo = new BasisuImageLevelInfo();
+        basisGetImageLevelInfoNative(dataBuffer, dataBuffer.capacity(), imageInfo.addr, imageIndex, imageLevel);
+        return imageInfo;
+    }
+    private static native void basisGetImageLevelInfoNative(Buffer dataBuffer, int dataSize, long imageInfoAddr, int imageIndex, int imageLevel); /*
+        basist::basisu_image_level_info* imageInfo = (basist::basisu_image_level_info*)imageInfoAddr;
+        if (!basisuWrapper::basis::getImageLevelInfo(*imageInfo, (uint8_t*)dataBuffer, dataSize, imageIndex, imageLevel)) {
+            basisuUtils::throwException(env, "Failed to obtain Basis image level info.");
         }
     */
 

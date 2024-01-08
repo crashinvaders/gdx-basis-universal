@@ -99,8 +99,6 @@ public class Ktx2TextureData implements TextureData {
             ktx2Data = new Ktx2Data(file);
         }
 
-        int totalMipmapLevels = ktx2Data.getTotalMipmapLevels();
-
         //TODO Find a way to get texture type from KTX2 files and add sanity check.
 //        BasisuTextureType textureType = fileInfo.getTextureType();
 //        if (textureType != BasisuTextureType.REGULAR_2D) {
@@ -116,12 +114,12 @@ public class Ktx2TextureData implements TextureData {
 
         int layerIndex = 0; // We do not yet support multi-layer KTX2 formats.
 
-        int transcodeMipmapLevels = 1;
+        int transcodeLevels = 1;
         if (useMipMaps) {
-            transcodeMipmapLevels = totalMipmapLevels;
+            transcodeLevels = ktx2Data.getTotalMipmapLevels();;
         }
-        transcodedLevels = new TranscodedLevelData[transcodeMipmapLevels];
-        for (int level = 0; level < transcodeMipmapLevels; level++) {
+        transcodedLevels = new TranscodedLevelData[transcodeLevels];
+        for (int level = 0; level < transcodeLevels; level++) {
             Ktx2ImageLevelInfo levelInfo = ktx2Data.getImageLevelInfo(layerIndex, level);
             int width = levelInfo.getOrigWidth();
             int height = levelInfo.getOrigHeight();

@@ -61,6 +61,7 @@ jnigen {
                 'com_crashinvaders_basisu_wrapper_BasisuWrapper.cpp',
                 'com_crashinvaders_basisu_wrapper_BasisuFileInfo.cpp',
                 'com_crashinvaders_basisu_wrapper_BasisuImageInfo.cpp',
+                'com_crashinvaders_basisu_wrapper_BasisuImageLevelInfo.cpp',
                 'com_crashinvaders_basisu_wrapper_Ktx2FileInfo.cpp',
                 'com_crashinvaders_basisu_wrapper_Ktx2ImageLevelInfo.cpp',
         ]

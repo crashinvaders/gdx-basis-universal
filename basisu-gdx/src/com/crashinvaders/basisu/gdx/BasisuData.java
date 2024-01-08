@@ -3,10 +3,7 @@ package com.crashinvaders.basisu.gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.IntMap;
-import com.crashinvaders.basisu.wrapper.BasisuFileInfo;
-import com.crashinvaders.basisu.wrapper.BasisuImageInfo;
-import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
-import com.crashinvaders.basisu.wrapper.BasisuWrapper;
+import com.crashinvaders.basisu.wrapper.*;
 
 import java.nio.ByteBuffer;
 
@@ -21,9 +18,14 @@ public class BasisuData implements Disposable {
 
     /**
      * Keeps track of all the image info instances created by this object
-     * and calls "#close()" for them when disposed itself.
+     * and calls "#close()" for them on dispose.
      */
     private IntMap<BasisuImageInfo> imageInfoIndex = null;
+    /**
+     * Keeps track of all the image level info instances created by this object
+     * and calls "#close()" for them on dispose.
+     */
+    private IntMap<BasisuImageLevelInfo> imageLevelInfoIndex = null;
 
     /**
      * @param file the file to load the Basis texture data from
@@ -56,6 +58,13 @@ public class BasisuData implements Disposable {
                 value.close();
             }
             imageInfoIndex.clear();
+        }
+
+        if (imageLevelInfoIndex != null) {
+            for (BasisuImageLevelInfo value : imageLevelInfoIndex.values()) {
+                value.close();
+            }
+            imageLevelInfoIndex.clear();
         }
 
         //TODO Replace with BufferUtils.newUnsafeByteBuffer(fileSize) once it's compatible with GWT compiler.
@@ -96,6 +105,30 @@ public class BasisuData implements Disposable {
         if (imageInfo == null) {
             imageInfo = BasisuWrapper.basisGetImageInfo(encodedData, imageIndex);
             imageInfoIndex.put(imageIndex, imageInfo);
+        }
+        return imageInfo;
+    }
+
+    /**
+     * Retrieves the image info data for the specified image number.
+     * <br/>
+     * NOTE: You don't have to call {@link BasisuImageInfo#close()} as the returned instance is managed by the BasisuData.
+     * @see BasisuImageInfo
+     * @param imageIndex the image index in the Basis file
+     * @return the image info for the specified image index
+     */
+    public BasisuImageLevelInfo getImageLevelInfo(int imageIndex, int imageLevel) {
+        // Lazy create index map.
+        if (imageLevelInfoIndex == null) {
+            imageLevelInfoIndex = new IntMap<>();
+        }
+        // Eval aggregated index for.
+        int index = 1024 * imageIndex + imageLevel;
+
+        BasisuImageLevelInfo imageInfo = imageLevelInfoIndex.get(index);
+        if (imageInfo == null) {
+            imageInfo = BasisuWrapper.basisGetImageLevelInfo(encodedData, imageIndex, imageLevel);
+            imageLevelInfoIndex.put(index, imageInfo);
         }
         return imageInfo;
     }
