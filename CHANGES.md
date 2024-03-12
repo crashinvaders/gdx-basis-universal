@@ -1,3 +1,6 @@
+### 1.1.0
+- Mipmap support for KTX2/Basis textures. See #5 
+
 ### 1.0.2
 - Fixed: failed to load natives on old Android devices (5.1.1 and down). See #2
 
