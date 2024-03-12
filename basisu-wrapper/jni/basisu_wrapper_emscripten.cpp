@@ -80,7 +80,7 @@ basist::basisu_image_level_info basisGetImageLevelInfo_wrap(const val &jsData, u
 }
 
 val basisTranscode_wrap(const val &jsData, uint32_t imageIndex, uint32_t levelIndex, uint32_t textureFormatId) {
-    basisu::vector<uint8_t> data = vecFromTtotalLevelsypedArray(jsData);
+    basisu::vector<uint8_t> data = vecFromTypedArray(jsData);
     basisu::vector<uint8_t> output;
     basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
 
@@ -199,7 +199,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
 		.property("etc1s", &basist::basisu_file_info::m_etc1s)                                  // bool
 		.property("hasAlphaSlices", &basist::basisu_file_info::m_has_alpha_slices)              // bool
 		.property("textureFormat", &basist::basisu_file_info::m_tex_format)                     // TextureFormat
-    .property("textureType", &basist::basisu_file_info::m_tex_type)                         // TextureType
+		.property("textureType", &basist::basisu_file_info::m_tex_type)                         // TextureType
 		// Properties simulated through functions (to return more JS friendly type).
 		.function("getImageMipmapLevels", &basisFileInfo_imageMipmapLevels)                     // val (Uint8Array)
 //		.function("getTexFormat", &fileInfo_texFormat)                                          // uint8_t
