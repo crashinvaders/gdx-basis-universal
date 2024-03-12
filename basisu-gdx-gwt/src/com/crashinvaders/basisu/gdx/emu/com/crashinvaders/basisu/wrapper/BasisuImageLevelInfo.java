@@ -1,4 +1,4 @@
-package com.crashinvaders.basisu.gdx.emu.com.crashinvaders.basisu.wrapper;
+package com.crashinvaders.basisu.wrapper;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
