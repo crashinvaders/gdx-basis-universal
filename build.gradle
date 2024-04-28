@@ -166,19 +166,9 @@ configure(basisuLibProjects) {
 
     // Invokes publish task if the version is a snapshot.
     task publishSnapshot() {
-        if (!isSnapshot) {
-            return
-        }
+        onlyIf { isSnapshot }
         dependsOn project.assemble
         dependsOn project.publish
-    }
-
-    task boomba {
-        doFirst {
-            project.tasks.findByName('jnigenJarNativesAll')?.dependsOn?.forEach { jarNativesTask ->
-                println jarNativesTask.name
-            }
-        }
     }
 }
 
