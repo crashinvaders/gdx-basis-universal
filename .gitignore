@@ -2,6 +2,7 @@
 .idea
 .vscode
 build
+bin
 out
 /local.properties
 robovm-build
