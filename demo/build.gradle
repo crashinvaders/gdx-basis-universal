@@ -1,15 +1,18 @@
 buildscript {
     repositories {
-        google()
-        mavenLocal()
         mavenCentral()
+        maven { url 'https://s01.oss.sonatype.org' }
+        gradlePluginPortal()
+        mavenLocal()
+        google()
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
-        maven { url 'https://plugins.gradle.org/m2/' }
+        maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
     }
 
     dependencies {
         classpath "com.android.tools.build:gradle:$androidPluginVersion"
-        classpath "org.wisepersist:gwt-gradle-plugin:$gwtPluginVersion"
+//        classpath "org.wisepersist:gwt-gradle-plugin:$gwtPluginVersion"
+        classpath "org.docstr:gwt-gradle-plugin:$gwtPluginVersion"
         classpath "com.mobidevelop.robovm:robovm-gradle-plugin:$roboVmVersion"
         classpath "org.gretty:gretty:$grettyVersion"
     }
@@ -20,7 +23,7 @@ subprojects {
 
     // Set to true to connect GDX Basis Universal library dependencies to Demo modules
     // using Maven artifacts instead of directly pointing to the project's modules.
-    ext.useGdxBasisuMavenArtifacts = false
+    ext.useGdxBasisuMavenArtifacts = true
     ext.gdxBasisuVersion = ext.version
 
     version = ext.version

@@ -8,7 +8,7 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-sourceSets.main.java.srcDirs += [ "src" ]
+sourceSets.main.java.srcDirs += ["src"]
 sourceSets.main.resources.srcDirs += ['../assets']
 
 gwt {
@@ -17,12 +17,17 @@ gwt {
     minHeapSize = "1G"
 
     src = files(file('src/')) // Needs to be in front of "modules" below.
-    modules 'com.crashinvaders.basisu.demo.GdxDefinition'
-    devModules 'com.crashinvaders.basisu.demo.GdxDefinitionSuperdev'
+    modules += ['com.crashinvaders.basisu.demo.GdxDefinition']
+    devModules += ['com.crashinvaders.basisu.demo.GdxDefinitionSuperdev']
     project.webAppDirName = 'webapp'
 
     compiler.strict = true
     compiler.disableCastChecking = true
+//    // The next line can be useful to uncomment if you want output that hasn't been obfuscated.
+//    compiler.style = org.docstr.gradle.plugins.gwt.Style.DETAILED
+
+
+    sourceLevel = 1.11
 
 //    logLevel = 'DEBUG'
 }
@@ -34,7 +39,7 @@ dependencies {
     implementation "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion:sources"
 
     if (useGdxBasisuMavenArtifacts) {
-        implementation "com.crashinvaders.basisu:basisu-gdx-gwt"
+        implementation "com.crashinvaders.basisu:basisu-gdx-gwt:$gdxBasisuVersion"
         implementation "com.crashinvaders.basisu:basisu-gdx-gwt:$gdxBasisuVersion:sources"
         implementation "com.crashinvaders.basisu:basisu-gdx:$gdxBasisuVersion:sources"
         implementation "com.crashinvaders.basisu:basisu-wrapper:$gdxBasisuVersion:sources"
@@ -46,12 +51,16 @@ dependencies {
     }
 }
 
+import org.akhikhl.gretty.AppBeforeIntegrationTestTask
+import org.docstr.gradle.plugins.gwt.GwtSuperDev
+
 gretty.httpPort = 8080
 gretty.resourceBase = "${project.layout.buildDirectory.get()}/gwt/draftOut"
 gretty.contextPath = "/"
 gretty.portPropertiesFileName = "TEMP_PORTS.properties"
 
-task startHttpServer (dependsOn: [draftCompileGwt]) {
+tasks.register('startHttpServer') {
+    dependsOn('draftCompileGwt')
     doFirst {
         copy {
             from "webapp"
@@ -63,19 +72,24 @@ task startHttpServer (dependsOn: [draftCompileGwt]) {
         }
     }
 }
-task beforeRun(type: org.akhikhl.gretty.AppBeforeIntegrationTestTask, dependsOn: startHttpServer) {
-    // The next line allows ports to be reused instead of
-    // needing a process to be manually terminated.
-    file("build/TEMP_PORTS.properties").delete()
+tasks.register('beforeRun', AppBeforeIntegrationTestTask) {
+    dependsOn('startHttpServer')
     // Somewhat of a hack; uses Gretty's support for wrapping a task in
     // a start and then stop of a Jetty server that serves files while
     // also running the SuperDev code server.
-    integrationTestTask 'superDev'
+    gretty {
+        integrationTestTask('superDev')
+    }
+    // The next line allows ports to be reused instead of
+    // needing a process to be manually terminated.
+    file("build/TEMP_PORTS.properties").delete()
 
     interactive false
 }
 
-task superDev(type: org.wisepersist.gradle.plugins.gwt.GwtSuperDev) {
+tasks.register('superDev', GwtSuperDev) {
+    group('gwt')
+    dependsOn('beforeRun')
     doFirst {
         gwt.modules = gwt.devModules
     }
@@ -83,14 +97,15 @@ task superDev(type: org.wisepersist.gradle.plugins.gwt.GwtSuperDev) {
 
 // We delete the (temporary) war/ folder because if any extra files get into it, problems occur.
 // The war/ folder shouldn't be committed to version control.
-clean.delete += [file("war")]
+clean.delete += [file('war')]
 
 // This next line can be changed if you want to, for instance, always build into the
 // docs/ folder of a Git repo, which can be set to automatically publish on GitHub Pages.
 // This is relative to the html/ folder.
-var outputPath = "build/dist/"
+var outputPath = 'build/dist/'
 
-task dist(dependsOn: [clean, compileGwt]) {
+tasks.register('dist') {
+    dependsOn(['clean', 'compileGwt'])
     doLast {
         // Uncomment the next line if you have changed outputPath and know that its contents
         // should be replaced by a new dist build. Some large JS files are not cleaned up by
@@ -101,7 +116,7 @@ task dist(dependsOn: [clean, compileGwt]) {
 
         file(outputPath).mkdirs()
         copy {
-            from("build/gwt/out"){
+            from("build/gwt/out") {
                 exclude '**/*.symbolMap' // Not used by a dist, and these can be large.
             }
             into outputPath
@@ -131,16 +146,20 @@ task dist(dependsOn: [clean, compileGwt]) {
     }
 }
 
-task addSource {
+tasks.register('addSource') {
     doLast {
-        sourceSets.main.compileClasspath += files(project(':basisu-wrapper').sourceSets.main.allJava.srcDirs)
-        sourceSets.main.compileClasspath += files(project(':basisu-gdx').sourceSets.main.allJava.srcDirs)
-        sourceSets.main.compileClasspath += files(project(':basisu-gdx-gwt').sourceSets.main.allJava.srcDirs)
+        sourceSets.main.compileClasspath += files("../core/build/generated/sources/annotationProcessor/java/main")
         sourceSets.main.compileClasspath += files(project(':demo:core').sourceSets.main.allJava.srcDirs)
+        if (!useGdxBasisuMavenArtifacts) {
+            sourceSets.main.compileClasspath += files(project(':basisu-wrapper').sourceSets.main.allJava.srcDirs)
+            sourceSets.main.compileClasspath += files(project(':basisu-gdx').sourceSets.main.allJava.srcDirs)
+            sourceSets.main.compileClasspath += files(project(':basisu-gdx-gwt').sourceSets.main.allJava.srcDirs)
+        }
     }
 }
 
-task distZip(type: Zip, dependsOn: dist){
+tasks.register('distZip', Zip) {
+    dependsOn('dist')
     // This uses the output of the dist task, which removes the superdev button from index.html .
     from(outputPath)
     archiveBaseName.set("${appName}-dist")
@@ -148,6 +167,11 @@ task distZip(type: Zip, dependsOn: dist){
     destinationDirectory.set(file("build"))
 }
 
-tasks.compileGwt.dependsOn(addSource)
-tasks.draftCompileGwt.dependsOn(addSource)
-tasks.checkGwt.dependsOn(addSource)
+tasks.compileGwt.dependsOn('addSource')
+tasks.draftCompileGwt.dependsOn('addSource')
+tasks.checkGwt.dependsOn('addSource')
+
+// We need this, otherwise Gradle will spit out an error on "build" task.
+if (!useGdxBasisuMavenArtifacts) {
+    tasks.compileJava.dependsOn(':basisu-wrapper:jnigenJarNativesWeb')
+}

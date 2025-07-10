@@ -1,10 +1,12 @@
 buildscript {
     repositories {
-        google()
-        mavenLocal()
         mavenCentral()
+        maven { url 'https://s01.oss.sonatype.org' }
+        gradlePluginPortal()
+        mavenLocal()
+        google()
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
-        maven { url 'https://plugins.gradle.org/m2/' }
+        maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
     }
     dependencies {
         classpath "com.badlogicgames.gdx:gdx-jnigen-gradle:$jnigenVersion"
@@ -15,9 +17,10 @@ allprojects {
     apply plugin: "idea"
 
     repositories {
-        google()
-        mavenLocal()
         mavenCentral()
+        mavenLocal()
+        maven { url 'https://s01.oss.sonatype.org' }
+        google()
         maven { url "https://repo1.maven.org/maven2/" }
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         maven { url "https://oss.sonatype.org/content/repositories/releases/" }
@@ -25,7 +28,7 @@ allprojects {
 
     ext {
         projectGroup = 'com.crashinvaders.basisu'
-        versionName = '1.0.2'
+        versionName = '1.0.3'
         isSnapshot = false
         version = "$versionName${isSnapshot ? '-SNAPSHOT' : ''}"
     }
