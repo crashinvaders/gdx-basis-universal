@@ -133,6 +133,7 @@ public class BasisuTextureData implements TextureData {
         }
 
         transcodeFormat = formatSelector.resolveTextureFormat(basisuData, imageIndex);
+        Gdx.app.debug(TAG, (file != null ? "["+file.path()+"] " : "") + "Transcoding to the " + transcodeFormat + " format");
 
         int transcodeLevels = 1;
         if (useMipMaps) {
@@ -178,6 +179,12 @@ public class BasisuTextureData implements TextureData {
                 Gdx.gl.glTexImage2D(target, level, glFormatCode,
                         width, height, 0,
                         glFormatCode, textureType, data);
+            }
+
+            int glError = Gdx.gl.glGetError();
+            if (glError != 0) {
+                Gdx.app.error(TAG, (file != null ? "["+file.path()+"] " : "") +
+                        "Failed to upload texture (mimpap: " + level + ") to GPU. GL error: " + glError);
             }
         }
 

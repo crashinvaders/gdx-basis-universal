@@ -156,6 +156,12 @@ public class Ktx2TextureData implements TextureData {
                         width, height, 0,
                         glFormatCode, textureType, data);
             }
+
+            int glError = Gdx.gl.glGetError();
+            if (glError != 0) {
+                Gdx.app.error(TAG, (file != null ? "["+file.path()+"] " : "") +
+                        "Failed to upload texture (mimpap: " + level + ") to GPU. GL error: " + glError);
+            }
         }
 
         // Cleanup.

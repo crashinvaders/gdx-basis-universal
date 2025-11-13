@@ -39,7 +39,7 @@ public class Ktx2Data implements Disposable {
         this.encodedData = encodedData;
 
         // KTX2 codec doesn't provide a simple validation method.
-        // We assume we're good if we can read a file info.
+        // We assume we're good if we can read the file info.
         fileInfo = BasisuWrapper.ktx2GetFileInfo(encodedData);
     }
 
