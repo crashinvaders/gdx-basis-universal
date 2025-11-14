@@ -1,16 +1,17 @@
 buildscript {
     repositories {
+        google()
         mavenCentral()
         maven { url 'https://s01.oss.sonatype.org' }
         gradlePluginPortal()
         mavenLocal()
-        google()
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
         maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
     }
 
     dependencies {
         classpath "com.android.tools.build:gradle:$androidPluginVersion"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
 //        classpath "org.wisepersist:gwt-gradle-plugin:$gwtPluginVersion"
         classpath "org.docstr:gwt-gradle-plugin:$gwtPluginVersion"
         classpath "com.mobidevelop.robovm:robovm-gradle-plugin:$roboVmVersion"
