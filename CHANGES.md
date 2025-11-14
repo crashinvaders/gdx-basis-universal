@@ -23,5 +23,4 @@
 - Added: support for macOS arm64 target.
 
 ### 0.1.0
-
 - Initial release.
