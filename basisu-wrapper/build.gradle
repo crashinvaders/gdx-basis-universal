@@ -122,8 +122,10 @@ jnigen {
 
         // NDK doesn't include a standard lib, we should explicitly ask for it.
         androidApplicationMk += 'APP_STL := c++_static'
-        // This min SDK comes from the NDK 21 itself.
+        // This min SDK comes from the NDK itself.
         androidApplicationMk += 'APP_PLATFORM := android-21'
+        // Force enable 16kB mem page alignment.
+        androidApplicationMk += 'APP_SUPPORT_FLEXIBLE_PAGE_SIZES := true'
 
         // We use "log.h" lib and should explicitly declare it.
         linkerFlags += ' -llog '
@@ -139,6 +141,11 @@ jnigen {
         // Without this, the natives failed to load on Android API 22 and older.
         // https://stackoverflow.com/a/59649817/3802890
         linkerFlags += ' -Wl,--hash-style=both '
+
+        // Force extend to 16kB mem page size.
+        // This is coupled with APP_SUPPORT_FLEXIBLE_PAGE_SIZES in makefile
+        // and has effect only for armeabi-v7a and x86 ABIs (they are 4kB aligned by default).
+        linkerFlags += ' -Wl,-z,max-page-size=16384 '
     }
     add(IOS) {
         cppFlags += ' -stdlib=libc++ '  // iOS compiler toolchain is pretty whiny about this...

@@ -53,15 +53,15 @@ brew install temurin ant
 ```
 
 #### Android
-> The build is configured and tested for NDK 26.0.10792818 and may not work with any other version. 
+> The build is configured and tested for NDK 29.0.14206865 and may not work with any other version. 
 > It's recommended that you install and use this exact NDK release.
 - Install the NDK (using `sdkmanager` or IntelliJ Idea/Android Studio's Android SDK manager or from [the official web page](https://developer.android.com/ndk/downloads)).
 - Create an environment variable `NDK_HOME` pointing to the installed NDK location.
 
 > Follow the steps from [this answer](https://stackoverflow.com/a/62914315/3802890) to install `sdkmanager` on a Debian based Linux system.
 ```shell
-sdkmanager --install "ndk;26.0.10792818" 
-export NDK_HOME='/usr/lib/android-sdk/ndk/26.0.10792818'
+sdkmanager --install "ndk;29.0.14206865" 
+export NDK_HOME='/usr/lib/android-sdk/ndk/29.0.14206865'
 ```
 
 #### Web
