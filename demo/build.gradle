@@ -23,7 +23,7 @@ subprojects {
 
     // Set to true to connect GDX Basis Universal library dependencies to Demo modules
     // using Maven artifacts instead of directly pointing to the project's modules.
-    ext.useGdxBasisuMavenArtifacts = true
+    ext.useGdxBasisuMavenArtifacts = false
     ext.gdxBasisuVersion = ext.version
 
     version = ext.version
