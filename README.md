@@ -69,7 +69,7 @@ buildscript {
 And then just add these records to the dependency section of your `build.gradle` files. 
 
 > Don't forget to set `gdxBasisuVersion` property with the correct library version 
-> (e.g. declaring `gdxBasisuVersion=1.0.2` in the project's root `settings.gradle` file).
+> (e.g. declaring `gdxBasisuVersion=1.1.0` in the project's root `settings.gradle` file).
 
 #### Core module
 
