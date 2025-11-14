@@ -29,7 +29,7 @@ allprojects {
     ext {
         projectGroup = 'com.crashinvaders.basisu'
         versionName = '1.1.0'
-        isSnapshot = false
+        isSnapshot = true
         version = "$versionName${isSnapshot ? '-SNAPSHOT' : ''}"
     }
 }
@@ -48,8 +48,8 @@ void resolveProperty(String propertyName, String envVariableName) {
 // Setup Nexus repo and GitHub package repo credentials.
 // They usually defined in user global gradle.properties file
 // or as environment variables (Travis-CI).
-resolveProperty('ossrhUsername', 'OSSRH_USERNAME')
-resolveProperty('ossrhPassword', 'OSSRH_PASSWORD')
+resolveProperty('sonatypeUsername', 'SONATYPE_USERNAME')
+resolveProperty('sonatypePassword', 'SONATYPE_PASSWORD')
 resolveProperty('githubUsername', 'GITHUB_USERNAME')
 resolveProperty('githubAccessToken', 'GITHUB_ACCESS_TOKEN')
 
@@ -95,12 +95,12 @@ configure(basisuLibProjects) {
         publishing {
             repositories {
                 maven {
-                    def urlRelease = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
-                    def urlSnapshot = 'https://oss.sonatype.org/content/repositories/snapshots/'
+                    def urlRelease = 'https://ossrh-staging-api.central.sonatype.com/service/local/'
+                    def urlSnapshot = 'https://central.sonatype.com/repository/maven-snapshots/'
                     url = isSnapshot ? urlSnapshot : urlRelease
                     credentials {
-                        username ossrhUsername
-                        password ossrhPassword
+                        username sonatypeUsername
+                        password sonatypePassword
                     }
                 }
 
@@ -172,17 +172,17 @@ configure(basisuLibProjects) {
         onlyIf { isSnapshot }
         dependsOn project.assemble
         dependsOn project.publish
+
+        doFirst {
+            println "#### User:" + sonatypeUsername
+            println "#### Password:" + sonatypePassword
+        }
     }
 }
 
 task publishAll {
     group 'GDX Basis Universal'
     description 'Publish all the Maven artifacts to the public repos.'
-
-    basisuLibProjects.forEach {project ->
-        dependsOn project.build
-        dependsOn project.publish
-    }
 }
 
 task publishAllSnapshots {

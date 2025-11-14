@@ -61,7 +61,7 @@ The release and snapshot Maven artifacts are available on the Maven Central repo
 buildscript {
     repositories {
         mavenCentral()
-        maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' } // <-- optional, for snapshot versions
+        maven { url 'https://central.sonatype.com/repository/maven-snapshots/' } // <-- optional, for snapshot versions
     }
 }
 ```
