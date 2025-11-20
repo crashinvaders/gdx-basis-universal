@@ -174,17 +174,17 @@ configure(basisuLibProjects) {
         onlyIf { isSnapshot }
         dependsOn project.assemble
         dependsOn project.publish
-
-        doFirst {
-            println "#### User:" + sonatypeUsername
-            println "#### Password:" + sonatypePassword
-        }
     }
 }
 
 task publishAll {
     group 'GDX Basis Universal'
     description 'Publish all the Maven artifacts to the public repos.'
+
+    basisuLibProjects.forEach {project ->
+        dependsOn project.build
+        dependsOn project.publish
+    }
 }
 
 task publishAllSnapshots {
