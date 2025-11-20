@@ -55,7 +55,7 @@ resolveProperty('sonatypePassword', 'SONATYPE_PASSWORD')
 resolveProperty('githubUsername', 'GITHUB_USERNAME')
 resolveProperty('githubAccessToken', 'GITHUB_ACCESS_TOKEN')
 
-def basisuLibProjects = [ project(':basisu-wrapper'), project(':basisu-gdx'), project(':basisu-gdx-gwt') ]
+def basisuLibProjects = [project(':basisu-wrapper'), project(':basisu-gdx'), project(':basisu-gdx-gwt')]
 
 configure(basisuLibProjects) {
     apply plugin: 'java-library'
@@ -170,40 +170,92 @@ configure(basisuLibProjects) {
     }
 
     // Invokes publish task if the version is a snapshot.
-    task publishSnapshot() {
+    tasks.register("publishSnapshot") {
         onlyIf { isSnapshot }
-        dependsOn project.assemble
-        dependsOn project.publish
-    }
-}
-
-task publishAll {
-    group 'GDX Basis Universal'
-    description 'Publish all the Maven artifacts to the public repos.'
-
-    basisuLibProjects.forEach {project ->
         dependsOn project.build
         dependsOn project.publish
     }
 }
 
-task publishAllSnapshots {
+tasks.register("publishAll") {
+    group 'GDX Basis Universal'
+    description 'Publish all the Maven artifacts to the public repos.'
+
+    basisuLibProjects.forEach { project ->
+        dependsOn project.build
+        dependsOn project.publish
+    }
+}
+
+tasks.register("publishAllSnapshots") {
     group 'GDX Basis Universal'
     description 'Publish all the Maven artifacts to the public repos.' +
             'This task will only be execute if the current version is a snapshot.'
 
-    basisuLibProjects.forEach {project ->
-        dependsOn project.build
+    basisuLibProjects.forEach { project ->
         dependsOn project.publishSnapshot
     }
 }
 
-task installAll {
+tasks.register("installAll") {
     group 'GDX Basis Universal'
     description 'Installes all the Maven artifacts to the local Maven repo.'
 
-    basisuLibProjects.forEach {project ->
+    basisuLibProjects.forEach { project ->
         dependsOn project.build
         dependsOn project.publishToMavenLocal
+    }
+}
+
+// One-shot task to trigger Portal upload + (optionally) automatic release
+tasks.register("publishToMavenCentral") {
+    group = "publishing"
+    description = "Upload artifacts to Sonatype staging and trigger release to Maven Central"
+
+    // Make sure everything is uploaded first.
+    // If you use a different aggregate publish task, change this line.
+    dependsOn("publishAll")
+
+    doLast {
+        def username = sonatypeUsername
+        def password = sonatypePassword
+
+        if (!username || !password) {
+            throw new GradleException("Missing Sonatype credentials: sonatypeUsername/sonatypePassword")
+        }
+
+        def namespace = projectGroup
+        // publishing_type:
+        //  - user_managed (default): just shows up in Portal; you click Release manually
+        //  - automatic: try to auto-release to Maven Central if validation passes
+        def url = new URL("https://ossrh-staging-api.central.sonatype.com" +
+                "/manual/upload/defaultRepository/${namespace}?publishing_type=automatic")
+
+        def authString = "${username}:${password}"
+        def token = Base64.encoder.encodeToString(authString.getBytes("UTF-8"))
+
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection()
+        conn.setRequestMethod("POST")
+        conn.setDoOutput(true)
+        conn.setRequestProperty("Authorization", "Bearer ${token}")
+        conn.setRequestProperty("Content-Type", "application/json")
+
+        // Body is required; empty JSON is fine
+        conn.outputStream.withWriter("UTF-8") { writer ->
+            writer << "{}"
+        }
+
+        int code = conn.responseCode
+        def stream = (code >= 200 && code < 300) ? conn.inputStream : (conn.errorStream ?: conn.inputStream)
+        def body = stream != null ? stream.text : ""
+
+        println "Sonatype manual upload responded with HTTP ${code}"
+        if (body) {
+            println body
+        }
+
+        if (code < 200 || code >= 300) {
+            throw new GradleException("Manual upload failed with HTTP ${code}")
+        }
     }
 }
