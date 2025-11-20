@@ -134,6 +134,8 @@ Don't forget to add a GWT module entry to your `GdxDefinition.gwt.xml` file.
 </module>
 ```
 
+In case you have an issue with your GWT setup, check on #gwt-module-troubleshooting section, it might be helpful.
+
 ### Example code
 
 The library provides transparent support for `KTX2`/`Basis` format textures using `Ktx2TextureData`/`BasisuTextureData` classes respectively. Each acts very similar to libGDX's implementation of `ETC1TextureData`. The only difference is that libGDX doesn't know how to load `.ktx2`/`.basis` texture files out of the box, so you have to explicitly use the proper texture data class when creating a texture.
@@ -169,9 +171,9 @@ TextureAtlas myAtlas = assetManager.get("MyAtlas.atlas", TextureAtlas.class);
 
 Here's the list of the limitations you should be aware of when using this library (on top of regular libGDX backend limitations).
 
-- __[Android]__ Due to NDK specs, __Android 5.0 (API 21) is the minimum supported version__.
+- __[Android]__ Due to NDK specs, __Android 5.1 (API 22) is the minimum supported version__.
 - __[GWT]__ WebAssembly is available pretty much on every modern browser ([compatibility chart](https://caniuse.com/wasm)). Just for reference, the support is enabled by default as of __Firefox 52__, __Chrome 57__, __Opera 44__, and __Edge 16__.
-- __[iOS]__ Due to OpenGL deprecation, working with compressed textures is troublesome. Please read [this section](#ios-module-robovm-backend). 
+- __[iOS]__ Due to OpenGL deprecation, working with compressed textures is troublesome. Please read [this section](#ios-module-robovm-backend).
 
 ## Basis Universal feature support notes
 
@@ -268,5 +270,23 @@ If you require a different selection strategy, you can always create a custom im
 ## Native dependencies
 
 The project uses [Basis Universal C/C++ code](https://github.com/BinomialLLC/basis_universal) and [JNI](https://en.wikipedia.org/wiki/Java_Native_Interface) wrappers to connect to libGDX cross-platform code. [basisu-wrapper](basisu-wrapper) module provides a pure Java (no dependencies) abstraction layer over the native libs.
+
+## GWT module troubleshooting
+GWT is historically quite meticulous backend that requires extra care. Currently we have a few issues reported for it and I will track them all under this section.
+
+### Error "Cannot read properties of undefined"
+@damnedpie has done a great job covering an issue related to it in #7.
+Long story short, if run your game in a browser and see this an error looking like this in the console:
+```
+GwtApplication: exception: com.badlogic.gdx.utils.GdxRuntimeException: Could not submit AsyncTask: (TypeError) : Cannot read properties of undefined (reading 'ktx2GetFileInfo')
+```
+The chances are you're missing a library's JS module in your GWT app. To fix this, check if your `index.html` contain the line `<script type="text/javascript" src="html/gdx-basis-universal.js"></script>`. If not, add it manually and it should do the trick.
+
+### Basis file with mipmaps
+We have confirmed problem with ETC1S based Basis textures that contain mipmaps. As it seen in the web demo, the top right image appears as black square with numerous errors in the console:
+```
+html-0.js:115 BasisuTextureData: [bananacat.mipmap.etc1s.basis] Failed to upload texture (mimpap: 1) to GPU. GL error: 1281
+```
+For now we have not enough details to understand why it happens. So I'd suggest to stay away from mipmap containing ETC1S Basis textures if you looking to supprt GWT backend.
 
 Read more about the module and the native library building notes on [the module's page](basisu-wrapper).
