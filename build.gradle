@@ -31,7 +31,7 @@ allprojects {
     ext {
         projectGroup = 'com.crashinvaders.basisu'
         versionName = '1.1.0'
-        isSnapshot = true
+        isSnapshot = false
         version = "$versionName${isSnapshot ? '-SNAPSHOT' : ''}"
     }
 }
