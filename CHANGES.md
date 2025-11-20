@@ -1,4 +1,5 @@
 ### 1.1.0
+- Updated to libGDX 1.14.0
 - Mipmap support for KTX2/Basis textures. See #5 
 - Android natives are 16KB page size aligned and is compatible with [the latest Android requirements](https://developer.android.com/guide/practices/page-sizes). See #6
 
