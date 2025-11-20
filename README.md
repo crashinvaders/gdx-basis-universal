@@ -275,7 +275,7 @@ The project uses [Basis Universal C/C++ code](https://github.com/BinomialLLC/bas
 GWT is historically quite meticulous backend that requires extra care. Currently we have a few issues reported for it and I will track them all under this section.
 
 ### Error "Cannot read properties of undefined"
-@damnedpie has done a great job covering an issue [here](#7).
+@damnedpie has done a great job covering an issue [here](../../issues/7).
 Long story short, if run your game in a browser and see this an error looking like this in the console:
 ```
 GwtApplication: exception: com.badlogic.gdx.utils.GdxRuntimeException: Could not submit AsyncTask: (TypeError) : Cannot read properties of undefined (reading 'ktx2GetFileInfo')
