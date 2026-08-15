@@ -1,5 +1,6 @@
 package com.crashinvaders.basisu.gdx;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -116,7 +117,16 @@ public class Ktx2TextureData implements TextureData {
 
         int transcodeLevels = 1;
         if (useMipMaps) {
-            transcodeLevels = ktx2Data.getTotalMipmapLevels();;
+            transcodeLevels = ktx2Data.getTotalMipmapLevels();
+        }
+        // WebGL1 rejects any mip level beyond 0 on a non-power-of-two texture (desktop GL doesn't care).
+        if (transcodeLevels > 1 && Gdx.app.getType() == Application.ApplicationType.WebGL) {
+            if (!MathUtils.isPowerOfTwo(width) || !MathUtils.isPowerOfTwo(height)) {
+                Gdx.app.error(TAG, (file != null ? "["+file.path()+"] " : "") +
+                        "Non-power-of-two texture, WebGL1 can't use its mip chain - loading level 0 only.");
+                transcodeLevels = 1;
+                useMipMaps = false;
+            }
         }
         transcodedLevels = new TranscodedLevelData[transcodeLevels];
         for (int level = 0; level < transcodeLevels; level++) {
@@ -142,18 +152,16 @@ public class Ktx2TextureData implements TextureData {
 
         for (int level = 0; level < transcodedLevels.length; level++) {
             TranscodedLevelData entry = transcodedLevels[level];
-            int width = entry.width;
-            int height = entry.height;
             ByteBuffer data = entry.data;
 
             if (isCompressedFormat) {
                 BasisuGdxGl.glCompressedTexImage2D(target, level, glFormatCode,
-                        width, height, 0,
+                        entry.width, entry.height, 0,
                         data.capacity(), data);
             } else {
                 int textureType = BasisuGdxUtils.toUncompressedGlTextureType(transcodeFormat);
                 Gdx.gl.glTexImage2D(target, level, glFormatCode,
-                        width, height, 0,
+                        entry.width, entry.height, 0,
                         glFormatCode, textureType, data);
             }
 

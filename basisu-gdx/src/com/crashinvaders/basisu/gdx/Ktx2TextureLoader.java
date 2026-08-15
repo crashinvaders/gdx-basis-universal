@@ -7,6 +7,7 @@ import com.badlogic.gdx.assets.loaders.FileHandleResolver;
 import com.badlogic.gdx.assets.loaders.TextureLoader;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.utils.Array;
 
 /**
@@ -48,11 +49,17 @@ public class Ktx2TextureLoader extends AsynchronousAssetLoader<Texture, TextureL
     }
 
     public Texture loadSync(AssetManager manager, String fileName, FileHandle fileHandle, TextureLoader.TextureParameter parameter) {
-        Texture texture = new Texture(this.textureData);
+        Ktx2TextureData data = this.textureData;
+        Texture texture = new Texture(data);
         this.textureData = null;
 
         if (parameter != null) {
-            texture.setFilter(parameter.minFilter, parameter.magFilter);
+            // data.useMipMaps() can end up false even if requested true (e.g. a non-power-of-two
+            // texture on WebGL1), only 1 level is actually uploaded then - a mipmap filter would
+            // make the texture GL-incomplete (silently sampled as black, no error).
+            TextureFilter minFilter = (!data.useMipMaps() && parameter.minFilter.isMipMap())
+                    ? TextureFilter.Linear : parameter.minFilter;
+            texture.setFilter(minFilter, parameter.magFilter);
             texture.setWrap(parameter.wrapU, parameter.wrapV);
         }
 
