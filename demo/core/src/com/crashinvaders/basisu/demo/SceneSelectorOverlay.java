@@ -11,7 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 /**
  * A self-contained overlay meant to be hosted (in composition, not via {@link App#setScreen}) by every demo screen.
@@ -47,7 +47,7 @@ public class SceneSelectorOverlay implements Screen {
     @Override
     public void show() {
         skin = buildMinimalSkin();
-        stage = new Stage(new ScreenViewport());
+        stage = new Stage(new ExtendViewport(800f, 480f));
 
         TextButton screensButton = new TextButton("Demo Scenes", skin);
         screensButton.pad(16f);

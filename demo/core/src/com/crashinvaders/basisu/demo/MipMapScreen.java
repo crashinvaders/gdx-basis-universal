@@ -25,7 +25,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.GdxRuntimeException;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.crashinvaders.basisu.gdx.Ktx2Data;
 import com.crashinvaders.basisu.gdx.Ktx2TextureData;
 
@@ -157,7 +157,7 @@ public class MipMapScreen implements Screen {
     private void setUpUi() {
         skin = buildMinimalSkin();
 
-        stage = new Stage(new ScreenViewport());
+        stage = new Stage(new ExtendViewport(800f, 480f));
 
         mipLevelLabel = new Label("", skin);
         updateMipLevelLabel();
