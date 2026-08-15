@@ -8,7 +8,7 @@ Cross-platform support for Binomial's [Basis Universal](https://github.com/Binom
 
 Use the same intermediate [compressed texture](https://en.wikipedia.org/wiki/Texture_compression) assets (`.ktx2`/`.basis`) for all the [libGDX](https://github.com/libgdx/libgdx) backends and save on video memory leveraging the platforms' natively supported GPU compression.
 
-Try the [web demo](https://crashinvaders.github.io/gdx-basis-universal).
+Try the <a href="https://crashinvaders.github.io/gdx-basis-universal" target="_blank" rel="noopener noreferrer">web demo</a>.
 
 <details>
     <summary>
