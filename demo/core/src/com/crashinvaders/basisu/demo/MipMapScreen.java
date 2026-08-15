@@ -1,6 +1,8 @@
 package com.crashinvaders.basisu.demo;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -16,6 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.crashinvaders.basisu.gdx.Ktx2Data;
@@ -26,6 +29,7 @@ public class MipMapScreen implements Screen {
     private static final float CUBE_SIZE = 1f;
     private static final float CORNER_TILT_DEG = 45f;
     private static final float SPIN_SPEED_DEG_PER_SEC = 30f;
+    private static final float DRAG_ROTATE_DEG_PER_PIXEL = 0.5f;
 
     private final App app;
     private final SceneSelectorOverlay sceneSelectorOverlay;
@@ -46,6 +50,37 @@ public class MipMapScreen implements Screen {
     private Label mipLevelLabel;
     /** -1 means "let the GPU pick automatically", otherwise the forced mip level. */
     private int forcedMipLevel = -1;
+    private boolean rotationEnabled = true;
+    private boolean linearFilteringEnabled = false;
+    private boolean manualDragging = false;
+
+    /**
+     * Handles manually spinning the cube by dragging with the left mouse button.
+     * Registered as the lowest-priority input processor (added last), so it only ever
+     * sees a touch that no UI actor (this screen's own stage, or the scene selector overlay) consumed first.
+     */
+    private final InputAdapter cubeDragInputProcessor = new InputAdapter() {
+        @Override
+        public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+            if (button != Input.Buttons.LEFT) return false;
+            manualDragging = true;
+            return true;
+        }
+
+        @Override
+        public boolean touchDragged(int screenX, int screenY, int pointer) {
+            if (!manualDragging) return false;
+            spinDeg = (spinDeg + Gdx.input.getDeltaX() * DRAG_ROTATE_DEG_PER_PIXEL) % 360f;
+            return true;
+        }
+
+        @Override
+        public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+            if (button != Input.Buttons.LEFT) return false;
+            manualDragging = false;
+            return true;
+        }
+    };
 
     public MipMapScreen(App app) {
         this.app = app;
@@ -73,8 +108,7 @@ public class MipMapScreen implements Screen {
 
         Ktx2TextureData textureData = new Ktx2TextureData(Gdx.files.internal(TEXTURE_FILE));
         cubeTexture = new Texture(textureData);
-        // Nearest (no linear blending within/between levels) so the actual per-level texel quality stays visible.
-        cubeTexture.setFilter(Texture.TextureFilter.MipMapNearestNearest, Texture.TextureFilter.Nearest);
+        applyTextureFilter();
         applyMipLevelClamp();
 
         ModelBuilder modelBuilder = new ModelBuilder();
@@ -86,6 +120,7 @@ public class MipMapScreen implements Screen {
         setUpUi();
 
         app.getInputMultiplexer().addProcessor(stage);
+        app.getInputMultiplexer().addProcessor(cubeDragInputProcessor);
 
         sceneSelectorOverlay.show();
     }
@@ -116,6 +151,36 @@ public class MipMapScreen implements Screen {
         uiTable.add(mipLevelSlider).width(320f);
 
         stage.addActor(uiTable);
+
+        final TextButton rotateButton = new TextButton("Rotation", skin);
+        rotateButton.pad(16f);
+        rotateButton.setChecked(rotationEnabled);
+        rotateButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                rotationEnabled = rotateButton.isChecked();
+            }
+        });
+
+        final TextButton linearFilteringButton = new TextButton("Linear Filtering", skin);
+        linearFilteringButton.pad(16f);
+        linearFilteringButton.setChecked(linearFilteringEnabled);
+        linearFilteringButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                linearFilteringEnabled = linearFilteringButton.isChecked();
+                applyTextureFilter();
+            }
+        });
+
+        Table bottomLeftTable = new Table();
+        bottomLeftTable.defaults().fillX();
+        bottomLeftTable.setFillParent(true);
+        bottomLeftTable.bottom().left().pad(8f);
+        bottomLeftTable.add(rotateButton).left().row();
+        bottomLeftTable.add(linearFilteringButton).left().padTop(8f);
+
+        stage.addActor(bottomLeftTable);
     }
 
     private Skin buildMinimalSkin() {
@@ -139,7 +204,25 @@ public class MipMapScreen implements Screen {
         sliderStyle.knob.setMinHeight(16f);
         skin.add("default-horizontal", sliderStyle);
 
+        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
+        buttonStyle.up = skin.newDrawable("white", new Color(0.25f, 0.25f, 0.25f, 0.9f));
+        buttonStyle.over = skin.newDrawable("white", new Color(0.35f, 0.35f, 0.35f, 0.9f));
+        buttonStyle.checked = skin.newDrawable("white", new Color(0.2f, 0.6f, 0.35f, 0.95f));
+        buttonStyle.checkedOver = skin.newDrawable("white", new Color(0.25f, 0.7f, 0.42f, 0.95f));
+        buttonStyle.font = font;
+        buttonStyle.fontColor = Color.WHITE;
+        skin.add("default", buttonStyle);
+
         return skin;
+    }
+
+    private void applyTextureFilter() {
+        if (linearFilteringEnabled) {
+            cubeTexture.setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear);
+        } else {
+            // Nearest (no linear blending within/between levels) so the actual per-level texel quality stays visible.
+            cubeTexture.setFilter(Texture.TextureFilter.MipMapNearestNearest, Texture.TextureFilter.Nearest);
+        }
     }
 
     private void applyMipLevelClamp() {
@@ -174,6 +257,7 @@ public class MipMapScreen implements Screen {
     @Override
     public void hide() {
         app.getInputMultiplexer().removeProcessor(stage);
+        app.getInputMultiplexer().removeProcessor(cubeDragInputProcessor);
 
         sceneSelectorOverlay.hide();
     }
@@ -208,7 +292,10 @@ public class MipMapScreen implements Screen {
         // Matrix4#rotate() post-multiplies, so the call order is reversed from application order:
         // the first call here ends up as the outermost (world-space) rotation, applied last to each vertex.
         // Spinning around world Y first keeps the corner tilt as a fixed local pose underneath the spin.
-        spinDeg = (spinDeg + delta * SPIN_SPEED_DEG_PER_SEC) % 360f;
+        // Manual dragging (see cubeDragInputProcessor) always takes precedence over the automatic spin.
+        if (rotationEnabled && !manualDragging) {
+            spinDeg = (spinDeg + delta * SPIN_SPEED_DEG_PER_SEC) % 360f;
+        }
         cubeInstance.transform
                 .idt()
                 .rotate(Vector3.Y, spinDeg)
