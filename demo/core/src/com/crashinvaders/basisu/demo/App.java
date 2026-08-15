@@ -5,10 +5,13 @@ import com.badlogic.gdx.*;
 public class App extends Game {
 
     private final PlatformLauncher launcher;
+    private final AppParams appParams;
     private final InputMultiplexer inputMultiplexer;
 
-    public App(PlatformLauncher launcher) {
+    public App(PlatformLauncher launcher, AppParams appParams) {
         this.launcher = launcher;
+        this.appParams = appParams;
+
         this.inputMultiplexer = new InputMultiplexer();
     }
 
@@ -18,8 +21,8 @@ public class App extends Game {
 
         Gdx.input.setInputProcessor(inputMultiplexer);
 
-//        setScreen(new MipMapScreen(this));
-        setScreen(new TextureGalleryScreen(this));
+        Screen initialScreen = createInitialScreen(appParams.screen);
+        setScreen(initialScreen);
     }
 
     @Override
@@ -46,7 +49,26 @@ public class App extends Game {
         }
     }
 
+    public AppParams getAppParams() {
+        return appParams;
+    }
+
     public InputMultiplexer getInputMultiplexer() {
         return inputMultiplexer;
+    }
+
+    private Screen createInitialScreen(AppParams.Screen screenValue) {
+        if (screenValue == null)
+            return new MipMapScreen(this);
+
+        switch (screenValue) {
+            case MIPMAPS:
+                return new MipMapScreen(this);
+            case TEXTURE_GALLERY:
+                return new TextureGalleryScreen(this);
+            default:
+                Gdx.app.error("App", "Unexpected AppParams.Screen value: " + screenValue + ". Falling back to gallery screen.");
+                return new MipMapScreen(this);
+        }
     }
 }

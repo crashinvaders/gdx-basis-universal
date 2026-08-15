@@ -3,6 +3,7 @@ package com.crashinvaders.basisu.demo.desktop;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.crashinvaders.basisu.demo.App;
+import com.crashinvaders.basisu.demo.AppParams;
 import com.crashinvaders.basisu.demo.PlatformLauncher;
 
 public class DesktopLauncher implements PlatformLauncher {
@@ -19,7 +20,9 @@ public class DesktopLauncher implements PlatformLauncher {
         config.setResizable(true);
         config.setWindowedMode(800, 480);
 
-        this.app = new App(this);
+        AppParams params = new AppParams();
+
+        this.app = new App(this, params);
         new Lwjgl3Application(app, config);
     }
 

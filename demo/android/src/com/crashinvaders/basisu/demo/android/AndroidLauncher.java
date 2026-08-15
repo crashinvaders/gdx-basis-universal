@@ -4,6 +4,7 @@ import android.os.Bundle;
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 import com.crashinvaders.basisu.demo.App;
+import com.crashinvaders.basisu.demo.AppParams;
 import com.crashinvaders.basisu.demo.PlatformLauncher;
 
 public class AndroidLauncher extends AndroidApplication implements PlatformLauncher {
@@ -20,7 +21,7 @@ public class AndroidLauncher extends AndroidApplication implements PlatformLaunc
         cfg.useImmersiveMode = true;
         cfg.useWakelock = true;
 
-        app = new App(this);
+        app = new App(this, new AppParams());
 
         initialize(app, cfg);
     }

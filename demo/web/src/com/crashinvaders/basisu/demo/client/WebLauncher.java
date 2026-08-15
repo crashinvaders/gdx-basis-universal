@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.gwt.GwtApplication;
 import com.badlogic.gdx.backends.gwt.GwtApplicationConfiguration;
 import com.crashinvaders.basisu.demo.App;
+import com.crashinvaders.basisu.demo.AppParams;
 import com.crashinvaders.basisu.demo.PlatformLauncher;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
@@ -55,6 +56,21 @@ public class WebLauncher extends GwtApplication implements PlatformLauncher {
             }
         });
 
-        return new App(this);
+        AppParams params = new AppParams();
+
+        String screenParam = Window.Location.getParameter("screen");
+        if (screenParam != null) {
+            try {
+                params.screen = AppParams.Screen.valueOf(screenParam.trim().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                consoleError("Unexpected \"screen\" URL parameter value: " + screenParam);
+            }
+        }
+
+        return new App(this, params);
     }
+
+    private static native void consoleError(String message) /*-{
+        console.error(message);
+    }-*/;
 }

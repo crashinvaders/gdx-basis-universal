@@ -4,6 +4,7 @@ import com.badlogic.gdx.backends.iosrobovm.IOSApplication;
 import com.badlogic.gdx.backends.iosrobovm.IOSApplicationConfiguration;
 import com.badlogic.gdx.backends.iosrobovm.IOSAudio;
 import com.crashinvaders.basisu.demo.App;
+import com.crashinvaders.basisu.demo.AppParams;
 import com.crashinvaders.basisu.demo.PlatformLauncher;
 import org.robovm.apple.foundation.NSAutoreleasePool;
 import org.robovm.apple.uikit.UIApplication;
@@ -13,7 +14,9 @@ public class IOSLauncher extends IOSApplication.Delegate implements PlatformLaun
     protected IOSApplication createApplication() {
         IOSApplicationConfiguration config = new IOSApplicationConfiguration();
 
-        return new IOSApplication(new App(this), config) {
+        AppParams params = new AppParams();
+
+        return new IOSApplication(new App(this, params), config) {
             @Override
             protected IOSAudio createAudio(IOSApplicationConfiguration config) {
                 // This helps to run the demo on a simulator inside
