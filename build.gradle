@@ -179,3 +179,29 @@ tasks.register("installAll") {
         dependsOn project.publishToMavenLocal
     }
 }
+
+apply from: 'gradle/github-release.gradle'
+githubReleaseDraft {
+    githubRepository = 'crashinvaders/gdx-basis-universal'
+    mavenGroup = 'com.crashinvaders.basisu'
+    artifactIds = ['basisu-wrapper', 'basisu-gdx', 'basisu-gdx-gwt']
+    classifiers = ['', 'sources', 'javadoc']
+
+    // basisu-wrapper additionally ships native library jars per platform/ABI.
+    extraClassifiers = [
+            'basisu-wrapper': [
+                    'natives-desktop', 'natives-ios', 'natives-web',
+                    'natives-armeabi-v7a', 'natives-arm64-v8a', 'natives-x86', 'natives-x86_64'
+            ]
+    ]
+
+    // Changelog sections in CHANGES.md are headed "### <version>", not the default "## <version>".
+    releaseNotesProvider = { file, version ->
+        def pattern = java.util.regex.Pattern.compile("(?ms)^(###\\s+${java.util.regex.Pattern.quote(version)}\\s*)\\R(.*?)(?=^###\\s|\\z)")
+        def matcher = pattern.matcher(file.getText('UTF-8'))
+        if (!matcher.find() || matcher.group(2).trim().isEmpty()) {
+            throw new GradleException("No changelog entry found for version ${version} in ${file}.")
+        }
+        [header: matcher.group(1).trim(), message: matcher.group(2).trim()]
+    }
+}
