@@ -23,8 +23,8 @@ buildscript {
 subprojects {
     ext.appName = 'gdx-basis-universal-demo'
 
-    // Set to true to connect GDX Basis Universal library dependencies to Demo modules
-    // using Maven artifacts instead of directly pointing to the project's modules.
+    // true: depend on published Maven artifacts.
+    // false: depend on the local library modules directly.
     ext.useGdxBasisuMavenArtifacts = false
     ext.gdxBasisuVersion = ext.version
 
