@@ -46,8 +46,8 @@ nexusStaging {
     // Maven Central's OSSRH Staging API compatibility endpoint.
     serverUrl = 'https://ossrh-staging-api.central.sonatype.com/service/local/'
     packageGroup = 'com.crashinvaders.basisu'
-    username = sonatypeUsername
-    password = sonatypePassword
+    username = ossrhUsername
+    password = ossrhPassword
 }
 
 /** Checks if the property exists and if not tries to resolve it from the environment variable. */
@@ -64,8 +64,8 @@ void resolveProperty(String propertyName, String envVariableName) {
 // Setup Nexus repo and GitHub package repo credentials.
 // They usually defined in user global gradle.properties file
 // or as environment variables (Travis-CI).
-resolveProperty('sonatypeUsername', 'SONATYPE_USERNAME')
-resolveProperty('sonatypePassword', 'SONATYPE_PASSWORD')
+resolveProperty('ossrhUsername', 'OSSRH_USERNAME')
+resolveProperty('ossrhPassword', 'OSSRH_PASSWORD')
 resolveProperty('githubUsername', 'GITHUB_USERNAME')
 resolveProperty('githubAccessToken', 'GITHUB_ACCESS_TOKEN')
 
@@ -115,8 +115,8 @@ configure(basisuLibProjects) {
                     def urlSnapshot = 'https://central.sonatype.com/repository/maven-snapshots/'
                     url = isSnapshot ? urlSnapshot : urlRelease
                     credentials {
-                        username sonatypeUsername
-                        password sonatypePassword
+                        username ossrhUsername
+                        password ossrhPassword
                     }
                 }
 
