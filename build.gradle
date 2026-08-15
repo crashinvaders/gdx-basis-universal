@@ -11,8 +11,7 @@ buildscript {
     }
     dependencies {
         classpath "com.badlogicgames.gdx:gdx-jnigen-gradle:$jnigenVersion"
-        // https://github.com/Codearte/gradle-nexus-staging-plugin#tasks
-        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.30.0"
+        classpath "com.vanniktech:gradle-maven-publish-plugin:0.37.0"
     }
 }
 
@@ -38,28 +37,6 @@ allprojects {
     }
 }
 
-// TODO Migrate off this legacy setup to the "com.vanniktech.maven.publish" plugin.
-//  This whole publishing block (maven-publish + signing + nexus-staging) talks to
-//  Maven Central only through the "OSSRH Staging API" compatibility shim (visible as
-//  "(via OSSRH Staging API)" on deployments in the Central Portal UI) - a back-compat
-//  bridge in front of infrastructure Sonatype has otherwise replaced, not the modern
-//  Central Publisher API. "com.vanniktech.maven.publish" talks to the native Publisher
-//  API directly and handles signing/credentials/snapshots out of the box. Migrating is
-//  a real priority, not a someday-cleanup item.
-//  https://vanniktech.github.io/gradle-maven-publish-plugin/central/
-
-// As ugly as it gets, but Nexus Staging plugin must be applied to the root project only.
-apply plugin: 'io.codearte.nexus-staging'
-
-nexusStaging {
-    // OSSRH shut down in 2025. Keep the legacy staging-plugin workflow through
-    // Maven Central's OSSRH Staging API compatibility endpoint.
-    serverUrl = 'https://ossrh-staging-api.central.sonatype.com/service/local/'
-    packageGroup = 'com.crashinvaders.basisu'
-    username = ossrhUsername
-    password = ossrhPassword
-}
-
 /** Checks if the property exists and if not tries to resolve it from the environment variable. */
 void resolveProperty(String propertyName, String envVariableName) {
     if (!project.hasProperty(propertyName)) {
@@ -74,8 +51,6 @@ void resolveProperty(String propertyName, String envVariableName) {
 // Setup Nexus repo and GitHub package repo credentials.
 // They usually defined in user global gradle.properties file
 // or as environment variables (Travis-CI).
-resolveProperty('ossrhUsername', 'OSSRH_USERNAME')
-resolveProperty('ossrhPassword', 'OSSRH_PASSWORD')
 resolveProperty('githubUsername', 'GITHUB_USERNAME')
 resolveProperty('githubAccessToken', 'GITHUB_ACCESS_TOKEN')
 
@@ -83,8 +58,8 @@ def basisuLibProjects = [project(':basisu-wrapper'), project(':basisu-gdx'), pro
 
 configure(basisuLibProjects) {
     apply plugin: 'java-library'
-    apply plugin: 'maven-publish'
-    apply plugin: 'signing'
+    // ".base" = extension only, no auto pomFromGradleProperties() (avoids duplicate POM entries against our own pom{} below).
+    apply plugin: 'com.vanniktech.maven.publish.base'
 
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
@@ -92,6 +67,12 @@ configure(basisuLibProjects) {
 
     version = ext.version
     group = ext.projectGroup
+
+    // Relax doclint: sources have pre-existing errors (e.g. self-closing "<p/>") that
+    // only now surface since the plugin properly depends on the real javadoc task.
+    tasks.withType(Javadoc).configureEach {
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
 
     jar {
         from project.sourceSets.main.output
@@ -102,83 +83,55 @@ configure(basisuLibProjects) {
         duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
     }
 
-    task sourcesJar(type: Jar) {
-        archiveClassifier.set('sources')
-        from sourceSets.main.allSource
-    }
+    // Publication name is fixed to "maven". Credentials: mavenCentralUsername/mavenCentralPassword
+    // (Central Portal user token). Signing still uses signing.keyId/password/secretKeyRingFile.
+    mavenPublishing {
+        publishToMavenCentral(true) // automaticRelease
+        signAllPublications()
 
-    task javadocJar(type: Jar) {
-        archiveClassifier.set('javadoc')
-        from javadoc.destinationDir
-    }
+        coordinates(project.group.toString(), project.name, project.version.toString())
 
-    java {
-        withJavadocJar()
-        withSourcesJar()
+        // basisu-gdx-gwt's GWT super-source classes only javadoc under JDK 8, so ship an
+        // empty javadoc jar for it instead (Central still requires the artifact to exist).
+        def javadocJarOption = project.name == 'basisu-gdx-gwt'
+                ? new com.vanniktech.maven.publish.JavadocJar.Empty()
+                : new com.vanniktech.maven.publish.JavadocJar.Javadoc()
+
+        configure(new com.vanniktech.maven.publish.JavaLibrary(
+                javadocJarOption,
+                new com.vanniktech.maven.publish.SourcesJar.Sources()))
+
+        pom {
+            name = project.name
+            description = project.description
+            url = POM_URL
+            licenses {
+                license {
+                    name = POM_LICENCE_NAME
+                    url = POM_LICENCE_URL
+                    distribution = POM_LICENCE_DIST
+                }
+            }
+            developers {
+                developer {
+                    id = POM_DEV0_ID
+                    name = POM_DEV0_NAME
+                    email = POM_DEV0_EMAIL
+                }
+            }
+            scm {
+                connection = POM_SCM_CONNECTION
+                developerConnection = POM_SCM_DEV_CONNECTION
+                url = POM_SCM_URL
+            }
+        }
     }
 
     afterEvaluate { project ->
-        publishing {
-            repositories {
-                maven {
-                    def urlRelease = 'https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/'
-                    def urlSnapshot = 'https://central.sonatype.com/repository/maven-snapshots/'
-                    url = isSnapshot ? urlSnapshot : urlRelease
-                    credentials {
-                        username ossrhUsername
-                        password ossrhPassword
-                    }
-                }
-
-//              maven {
-//                  name = "MavenLocalExplicit"
-//                  url = "file://${System.properties['user.home']}/.m2/repository"
-//              }
-
-//              // Read about setting up a personal GitHub access token if you don't have one.
-//              // https://docs.github.com/en/free-pro-team@latest/packages/learn-github-packages/about-github-packages#authenticating-to-github-packages
-//              repository(url: "https://maven.pkg.github.com/crashinvaders/gdx-basis-universal") {
-//                  authentication(userName: project.githubUsername, password: project.githubAccessToken)
-//              }
-            }
-            publications {
-                mavenJava(MavenPublication) {
-
-                    artifactId = project.name
-                    from components.java
-
-                    // basisu-wrapper has a composite task `jnigenJarNativesAll`
-                    // that aggregates the rest of jar native tasks.
-                    project.tasks.findByName('jnigenJarNativesAll')?.dependsOn?.forEach { jarNativesTask ->
-                        artifact jarNativesTask
-                    }
-
-                    pom {
-                        name = project.name
-                        description = project.description
-                        url = POM_URL
-                        licenses {
-                            license {
-                                name = POM_LICENCE_NAME
-                                url = POM_LICENCE_URL
-                                distribution = POM_LICENCE_DIST
-                            }
-                        }
-                        developers {
-                            developer {
-                                id = POM_DEV0_ID
-                                name = POM_DEV0_NAME
-                                email = POM_DEV0_EMAIL
-                            }
-                        }
-                        scm {
-                            connection = POM_SCM_CONNECTION
-                            developerConnection = POM_SCM_DEV_CONNECTION
-                            url = POM_SCM_URL
-                        }
-                    }
-                }
-            }
+        // basisu-wrapper has a composite task `jnigenJarNativesAll`
+        // that aggregates the rest of jar native tasks.
+        project.tasks.findByName('jnigenJarNativesAll')?.dependsOn?.forEach { jarNativesTask ->
+            publishing.publications.getByName('maven').artifact(jarNativesTask)
         }
 
         // The aggregate tasks below request `build` and `publish` together. Without
@@ -186,17 +139,6 @@ configure(basisuLibProjects) {
         // archive while the build task is still producing it.
         tasks.matching { it.name.startsWith('publish') && it.name.contains('PublicationToMaven') }.configureEach {
             mustRunAfter tasks.named('build')
-        }
-
-        signing {
-            sign publishing.publications.mavenJava
-        }
-
-        // Simply using "required" in signing block doesn't work because taskGraph isn't ready yet.
-        gradle.taskGraph.whenReady {
-            tasks.withType(Sign) {
-                onlyIf { !isSnapshot }
-            }
         }
     }
 
@@ -216,9 +158,6 @@ tasks.register("publishAll") {
         dependsOn project.build
         dependsOn project.publish
     }
-
-    // Once the artifacts are uploaded, close and release the staging repo separately:
-    // ./gradlew closeAndReleaseRepository
 }
 
 tasks.register("publishAllSnapshots") {
