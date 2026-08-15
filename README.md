@@ -1,12 +1,12 @@
 # GDX Basis Universal
 
-![Maven Central](https://img.shields.io/maven-central/v/com.crashinvaders.basisu/basisu-gdx?label=Maven%20Central)
+[![Maven Central](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Frepo1.maven.org%2Fmaven2%2Fcom%2Fcrashinvaders%2Fbasisu%2Fbasisu-gdx%2Fmaven-metadata.xml&query=%2Fmetadata%2Fversioning%2Frelease&label=Maven%20Central)](https://central.sonatype.com/artifact/com.crashinvaders.basisu/basisu-gdx)
 [![libGDX](https://img.shields.io/badge/libGDX-1.14.2-blue.svg)](https://libgdx.com/)
 [![Basis Universal](https://img.shields.io/badge/Basis%20Universal-1.16.4-blue.svg)](https://github.com/BinomialLLC/basis_universal)
 
 Cross-platform support for Binomial's [Basis Universal](https://github.com/BinomialLLC/basis_universal) supercompressed GPU textures.
 
-Use the same intermediate [compressed texture](https://en.wikipedia.org/wiki/Texture_compression) assets (`.ktx2`/`.basis`) for all the [libGDX](https://github.com/libGDX/libGDX) backends and save on video memory leveraging the platforms' natively supported GPU compression.
+Use the same intermediate [compressed texture](https://en.wikipedia.org/wiki/Texture_compression) assets (`.ktx2`/`.basis`) for all the [libGDX](https://github.com/libgdx/libgdx) backends and save on video memory leveraging the platforms' natively supported GPU compression.
 
 Try the [web demo](https://crashinvaders.github.io/gdx-basis-universal).
 
@@ -71,7 +71,7 @@ buildscript {
 And then just add these records to the dependency section of your `build.gradle` files. 
 
 > Don't forget to set `gdxBasisuVersion` property with the correct library version 
-> (e.g. declaring `gdxBasisuVersion=1.1.0` in the project's root `settings.gradle` file).
+> (e.g. declaring `gdxBasisuVersion=1.1.2` in the project's root `settings.gradle` file).
 
 #### Core module
 
@@ -82,14 +82,14 @@ dependencies {
 }
 ```
 
-#### Desktop module ([LWJGL](https://github.com/libGDX/libGDX/tree/master/backends/gdx-backend-lwjgl), [LWJGL3](https://github.com/libGDX/libGDX/tree/master/backends/gdx-backend-lwjgl3), [Headless](https://github.com/libGDX/libGDX/tree/master/backends/gdx-backend-headless) backends)
+#### Desktop module ([LWJGL](https://github.com/libgdx/libgdx/tree/master/backends/gdx-backend-lwjgl), [LWJGL3](https://github.com/libgdx/libgdx/tree/master/backends/gdx-backend-lwjgl3), [Headless](https://github.com/libgdx/libgdx/tree/master/backends/gdx-backend-headless) backends)
 ```gradle
 dependencies {
     runtimeOnly "com.crashinvaders.basisu:basisu-wrapper:$gdxBasisuVersion:natives-desktop"
 }
 ```
 
-#### Android module ([Android](https://github.com/libGDX/libGDX/tree/master/backends/gdx-backend-android) backend)
+#### Android module ([Android](https://github.com/libgdx/libgdx/tree/master/backends/gdx-backend-android) backend)
 ```gradle
 dependencies {
     natives "com.crashinvaders.basisu:basisu-wrapper:$gdxBasisuVersion:natives-armeabi-v7a"
@@ -99,7 +99,7 @@ dependencies {
 }
 ```
 
-#### iOS module ([RoboVM](https://github.com/libGDX/libGDX/tree/master/backends/gdx-backend-robovm-metalangle) backend)
+#### iOS module ([RoboVM](https://github.com/libgdx/libgdx/tree/master/backends/gdx-backend-robovm-metalangle) backend)
 
 > It's highly recommended to use `robovm-metalangle` libGDX backend in favor of classic `robovm`,
 > as this is the only way to unlock access to more compressed texture formats on Apple devices.
@@ -113,7 +113,7 @@ dependencies {
 }
 ```
 
-#### Web module ([GWT](https://github.com/libGDX/libGDX/tree/master/backends/gdx-backends-gwt) backend)
+#### Web module ([GWT](https://github.com/libgdx/libgdx/tree/master/backends/gdx-backends-gwt) backend)
 
 As usual, the GWT module requires a bit more dance around.
 You need to declare an extra dependency and the sources for all the used jars.
@@ -173,7 +173,7 @@ TextureAtlas myAtlas = assetManager.get("MyAtlas.atlas", TextureAtlas.class);
 
 Here's the list of the limitations you should be aware of when using this library (on top of regular libGDX backend limitations).
 
-- __[Android]__ Due to NDK specs, __Android 5.1 (API 22) is the minimum supported version__.
+- __[Android]__ Due to NDK specs, __Android 5.0 (API 21) is the minimum supported version__.
 - __[GWT]__ WebAssembly is available pretty much on every modern browser ([compatibility chart](https://caniuse.com/wasm)). Just for reference, the support is enabled by default as of __Firefox 52__, __Chrome 57__, __Opera 44__, and __Edge 16__.
 - __[iOS]__ Due to OpenGL deprecation, working with compressed textures is troublesome. Please read [this section](#ios-module-robovm-backend).
 
