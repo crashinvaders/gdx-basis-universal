@@ -1,5 +1,6 @@
 package com.crashinvaders.basisu.demo;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
@@ -10,7 +11,10 @@ import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -20,6 +24,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.crashinvaders.basisu.gdx.Ktx2Data;
 import com.crashinvaders.basisu.gdx.Ktx2TextureData;
@@ -42,6 +47,25 @@ public class MipMapScreen implements Screen {
     private ModelInstance cubeInstance;
     private Texture cubeTexture;
     private int mipLevelCount;
+
+    /**
+     * True only on the GWT/WebGL backend, which is limited to WebGL1 and has no
+     * {@code GL_TEXTURE_BASE_LEVEL}/{@code MAX_LEVEL} (that's a GLES3.0/WebGL2-only feature).
+     * NOTE: this is deliberately keyed off the actual backend type, not {@code Gdx.graphics.isGL30Available()} -
+     * that flag only reflects whether the app opted into GL30 Java bindings (default is GL20 even on desktop,
+     * see Lwjgl3ApplicationConfiguration#glEmulation), whereas the real desktop/Android/iOS GL context supports
+     * these enums regardless of that flag.
+     * <p/>
+     * On GWT, the cube is rendered with {@link #cubeShader} instead of {@link #modelBatch}. It forces the
+     * level via GL_EXT_shader_texture_lod's texture2DLodEXT() where available - a true absolute LOD, matching
+     * what GL_TEXTURE_MAX_LEVEL does on desktop - falling back to the texture-sample LOD bias (core GLSL ES
+     * 1.00, no extension needed) only if that extension is missing, which merely offsets the auto-derived
+     * per-fragment LOD rather than forcing one exact level everywhere.
+     */
+    private boolean useCustomShader;
+    private ShaderProgram cubeShader;
+    private final Matrix3 normalMatrix = new Matrix3();
+    private final Vector3 lightDir = new Vector3(-1f, -0.8f, -0.2f).nor();
 
     private float spinDeg;
 
@@ -101,6 +125,11 @@ public class MipMapScreen implements Screen {
         environment = new Environment();
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.35f, 0.35f, 0.35f, 1f));
         environment.add(new DirectionalLight().set(1.0f, 1.0f, 1.0f, -1f, -0.8f, -0.2f));
+
+        useCustomShader = Gdx.app.getType() == Application.ApplicationType.WebGL;
+        if (useCustomShader) {
+            cubeShader = buildCubeShader();
+        }
 
         Ktx2Data probeData = new Ktx2Data(Gdx.files.internal(TEXTURE_FILE));
         mipLevelCount = probeData.getTotalMipmapLevels();
@@ -216,6 +245,98 @@ public class MipMapScreen implements Screen {
         return skin;
     }
 
+    private ShaderProgram buildCubeShader() {
+        String vertexShader =
+                "attribute vec3 a_position;\n" +
+                "attribute vec3 a_normal;\n" +
+                "attribute vec2 a_texCoord0;\n" +
+                "uniform mat4 u_worldTrans;\n" +
+                "uniform mat4 u_projViewTrans;\n" +
+                "uniform mat3 u_normalMatrix;\n" +
+                "varying vec3 v_normal;\n" +
+                "varying vec2 v_texCoord0;\n" +
+                "void main() {\n" +
+                "    v_normal = normalize(u_normalMatrix * a_normal);\n" +
+                "    v_texCoord0 = a_texCoord0;\n" +
+                "    gl_Position = u_projViewTrans * u_worldTrans * vec4(a_position, 1.0);\n" +
+                "}\n";
+
+        // texture2D's optional bias argument only offsets whatever LOD the GPU auto-derives per-fragment
+        // from screen-space derivatives - it still varies across the surface, it doesn't force one exact
+        // level everywhere. GL_EXT_shader_texture_lod's texture2DLodEXT() gives a true absolute LOD
+        // (WebGL1's equivalent of GLES3's textureLod()), matching what GL_TEXTURE_MAX_LEVEL does on desktop.
+        // It's very widely supported but not universal, so fall back to the bias approximation if missing.
+        // Gdx.graphics.supportsExtension() queries the WebGL/JS extension name, which - unlike the
+        // GLSL "#extension" pragma below - is NOT prefixed with "GL_" (e.g. "EXT_shader_texture_lod").
+        boolean supportsExplicitLod = Gdx.graphics.supportsExtension("EXT_shader_texture_lod");
+        Gdx.app.log("MipMapScreen", "GL_EXT_shader_texture_lod " + (supportsExplicitLod ? "available" : "NOT available, falling back to LOD bias"));
+
+        String fragmentShader =
+                (supportsExplicitLod ? "#extension GL_EXT_shader_texture_lod : enable\n" : "") +
+                "#ifdef GL_ES\n" +
+                "precision mediump float;\n" +
+                "#endif\n" +
+                "varying vec3 v_normal;\n" +
+                "varying vec2 v_texCoord0;\n" +
+                "uniform sampler2D u_texture;\n" +
+                "uniform float u_lod;\n" + // < 0 means "auto", otherwise the absolute level to force
+                "uniform vec3 u_ambientLight;\n" +
+                "uniform vec3 u_lightColor;\n" +
+                "uniform vec3 u_lightDir;\n" +
+                "void main() {\n" +
+                "    vec4 texColor;\n" +
+                (supportsExplicitLod
+                        ? "    if (u_lod < 0.0) {\n" +
+                          "        texColor = texture2D(u_texture, v_texCoord0);\n" +
+                          "    } else {\n" +
+                          "        texColor = texture2DLodEXT(u_texture, v_texCoord0, u_lod);\n" +
+                          "    }\n"
+                        : "    texColor = texture2D(u_texture, v_texCoord0, max(u_lod, 0.0));\n") +
+                "    float ndotl = max(dot(v_normal, -u_lightDir), 0.0);\n" +
+                "    vec3 lighting = u_ambientLight + u_lightColor * ndotl;\n" +
+                "    gl_FragColor = vec4(texColor.rgb * lighting, texColor.a);\n" +
+                "}\n";
+
+        ShaderProgram.pedantic = false;
+        ShaderProgram shader = new ShaderProgram(vertexShader, fragmentShader);
+        if (!shader.isCompiled()) {
+            throw new GdxRuntimeException("Failed to compile cube shader: " + shader.getLog());
+        }
+        return shader;
+    }
+
+    private void renderCubeWithCustomShader() {
+        // ModelBatch normally sets these up via its RenderContext; since this path bypasses it entirely,
+        // do it manually so back faces don't overdraw front faces.
+        Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+        Gdx.gl.glDepthMask(true);
+        Gdx.gl.glEnable(GL20.GL_CULL_FACE);
+        Gdx.gl.glCullFace(GL20.GL_BACK);
+
+        normalMatrix.set(cubeInstance.transform);
+
+        cubeShader.bind();
+        cubeShader.setUniformMatrix("u_worldTrans", cubeInstance.transform);
+        cubeShader.setUniformMatrix("u_projViewTrans", camera.combined);
+        cubeShader.setUniformMatrix("u_normalMatrix", normalMatrix);
+        cubeShader.setUniformf("u_lod", (float) forcedMipLevel);
+        cubeShader.setUniformf("u_ambientLight", 0.35f, 0.35f, 0.35f);
+        cubeShader.setUniformf("u_lightColor", 1f, 1f, 1f);
+        cubeShader.setUniformf("u_lightDir", lightDir);
+
+        cubeTexture.bind(0);
+        cubeShader.setUniformi("u_texture", 0);
+
+        MeshPart meshPart = cubeModel.meshParts.first();
+        meshPart.render(cubeShader);
+
+        // Undo the state changes from above: ModelBatch's RenderContext would normally do this for us,
+        // but since this path bypasses it, leaving these enabled would make the Stage UI drawn right
+        // after fail the depth test against the cube's leftover depth-buffer values and vanish entirely.
+        Gdx.gl.glDisable(GL20.GL_CULL_FACE);
+        Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
+    }
+
     private void applyTextureFilter() {
         if (linearFilteringEnabled) {
             cubeTexture.setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear);
@@ -226,6 +347,10 @@ public class MipMapScreen implements Screen {
     }
 
     private void applyMipLevelClamp() {
+        // GL_TEXTURE_BASE_LEVEL/MAX_LEVEL are GLES3.0/WebGL2-only; GWT/WebGL1 raises INVALID_ENUM for
+        // them, so that backend forces a level via cubeShader's LOD bias instead (see useCustomShader).
+        if (useCustomShader) return;
+
         cubeTexture.bind();
         if (forcedMipLevel < 0) {
             Gdx.gl.glTexParameteri(GL20.GL_TEXTURE_2D, GL30.GL_TEXTURE_BASE_LEVEL, 0);
@@ -269,6 +394,9 @@ public class MipMapScreen implements Screen {
         cubeTexture.dispose();
         stage.dispose();
         skin.dispose();
+        if (cubeShader != null) {
+            cubeShader.dispose();
+        }
 
         sceneSelectorOverlay.dispose();
     }
@@ -302,9 +430,13 @@ public class MipMapScreen implements Screen {
                 .rotate(Vector3.X, CORNER_TILT_DEG)
                 .rotate(Vector3.Z, CORNER_TILT_DEG);
 
-        modelBatch.begin(camera);
-        modelBatch.render(cubeInstance, environment);
-        modelBatch.end();
+        if (useCustomShader) {
+            renderCubeWithCustomShader();
+        } else {
+            modelBatch.begin(camera);
+            modelBatch.render(cubeInstance, environment);
+            modelBatch.end();
+        }
 
         stage.act(delta);
         stage.draw();
