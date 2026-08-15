@@ -282,11 +282,4 @@ GwtApplication: exception: com.badlogic.gdx.utils.GdxRuntimeException: Could not
 ```
 The chances are you're missing a library's JS module in your GWT app. To fix this, check if your `index.html` contain the line `<script type="text/javascript" src="html/gdx-basis-universal.js"></script>`. If not, add it manually and it should do the trick.
 
-### Basis file with mipmaps
-We have confirmed problem with ETC1S based Basis textures that contain mipmaps. As it seen in the web demo, the top right image appears as black square with numerous errors in the console:
-```
-html-0.js:115 BasisuTextureData: [bananacat.mipmap.etc1s.basis] Failed to upload texture (mimpap: 1) to GPU. GL error: 1281
-```
-For now we have not enough details to understand why it happens. So I'd suggest to stay away from mipmap containing ETC1S Basis textures if you looking to supprt GWT backend.
-
 Read more about the module and the native library building notes on [the module's page](basisu-wrapper).
