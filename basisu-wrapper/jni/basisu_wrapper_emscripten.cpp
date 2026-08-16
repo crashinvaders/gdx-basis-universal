@@ -87,6 +87,19 @@ public:
         return levelInfo;
     }
 
+    // Reads m_image_mipmap_levels straight off a freshly-obtained (live) basisu_file_info, since
+    // that vector member isn't a registered FileInfo field and would come back empty if read from
+    // the JS-side plain object instead (see the comment on the FileInfo value_object binding).
+    val getImageMipmapLevels() {
+        basist::basisu_file_info fileInfo = getFileInfo();
+        basisu::vector<uint32_t> vec32 = fileInfo.m_image_mipmap_levels;
+        basisu::vector<uint8_t> vec8(vec32.size());
+        for (size_t i = 0; i < vec32.size(); i++) {
+            vec8[i] = (uint8_t)vec32[i];
+        }
+        return vecToTypedArray(vec8);
+    }
+
     val transcode(uint32_t imageIndex, uint32_t levelIndex, uint32_t textureFormatId) {
         basisu::vector<uint8_t> output;
         basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
@@ -181,15 +194,6 @@ private:
 //    return (uint8_t)fileInfo.m_tex_format;
 //}
 
-val basisFileInfo_imageMipmapLevels(basist::basisu_file_info &fileInfo) {
-    basisu::vector<uint32_t> vec32 = fileInfo.m_image_mipmap_levels;
-    basisu::vector<uint8_t> vec8(vec32.size());
-    for (int i = 0; i < vec32.size(); i++) {
-        vec8[i] = (uint8_t)vec32[i];
-    }
-    return vecToTypedArray(vec8);
-}
-
 EMSCRIPTEN_BINDINGS(my_module) {
 
 	enum_<basist::basis_texture_type>("TextureType")
@@ -236,9 +240,12 @@ EMSCRIPTEN_BINDINGS(my_module) {
         ;
 
     // "value_object" (not "class_") so the returned JS object is a plain value - no "delete()"
-    // needed, so a missed close() on the Java/GWT side can't leak it. getImageMipmapLevels() used
-    // to force "class_" (value_object has no ".function()"), so it's now a free function instead -
-    // see "basisFileInfo_imageMipmapLevels" registered below.
+    // needed, so a missed close() on the Java/GWT side can't leak it. "m_image_mipmap_levels" is
+    // deliberately NOT registered as a field here: it's a vector, and any free function taking
+    // "basisu_file_info&" would receive a reconstructed struct with that field defaulted to empty
+    // (embind only fills registered fields on the JS->C++ conversion) - see
+    // BasisFileTranscoder::getImageMipmapLevels(), which reads it straight off the live session
+    // instead of round-tripping through this JS object.
     value_object<basist::basisu_file_info>("FileInfo")
 		.field("version", &basist::basisu_file_info::m_version)                              // uint32_t
 		.field("totalHeaderSize", &basist::basisu_file_info::m_total_header_size)            // uint32_t
@@ -284,7 +291,6 @@ EMSCRIPTEN_BINDINGS(my_module) {
         ;
 
     function("isTranscoderTexFormatSupported", &isTranscoderTexFormatSupported_wrap);
-    function("basisFileInfo_imageMipmapLevels", &basisFileInfo_imageMipmapLevels);
 
     // Data buffer is uploaded once (constructor), then reused by all method calls below.
     class_<BasisFileTranscoder>("BasisFileTranscoder")
@@ -294,6 +300,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
         .function("getFileInfo", &BasisFileTranscoder::getFileInfo)
         .function("getImageInfo", &BasisFileTranscoder::getImageInfo)
         .function("getImageLevelInfo", &BasisFileTranscoder::getImageLevelInfo)
+        .function("getImageMipmapLevels", &BasisFileTranscoder::getImageMipmapLevels)
         .function("transcode", &BasisFileTranscoder::transcode)
         .function("transcodeAllLevels", &BasisFileTranscoder::transcodeAllLevels)
         ;

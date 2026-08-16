@@ -48,7 +48,12 @@ public class BasisuGdxGl {
         HasArrayBufferView arrayHolder = (HasArrayBufferView)pixels;
         ArrayBufferView webGLArray = arrayHolder.getTypedArray();
         int remainingBytes = pixels.remaining();
-        ArrayBufferView buffer = Uint8ArrayNative.create(webGLArray.buffer(), 0, remainingBytes);
+        // Must include pixels.position(): duplicate()'d slices (see TranscodedMipChain) share one
+        // backing ArrayBuffer across all mip levels and are only distinguished by position/limit,
+        // not by a fresh ArrayBuffer per level - ignoring position here silently re-reads level 0's
+        // bytes for every other level. Matches GwtGL20#glTexImage2D's own ByteBuffer handling.
+        int byteOffset = webGLArray.byteOffset() + pixels.position();
+        ArrayBufferView buffer = Uint8ArrayNative.create(webGLArray.buffer(), byteOffset, remainingBytes);
 
         glCompressedTexImage2DNative(getGlContext(), target, level, internalFormat, width, height, border, imageSize, buffer);
     }

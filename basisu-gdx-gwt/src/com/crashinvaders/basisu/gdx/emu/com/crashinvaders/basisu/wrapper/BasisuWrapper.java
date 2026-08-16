@@ -40,12 +40,22 @@ public class BasisuWrapper {
     }-*/;
 
     public static BasisuFileInfo basisGetFileInfo(Buffer data) {
-        JavaScriptObject fileInfoJs = basisGetFileInfoNative(toTypedArray(data));
-        return new BasisuFileInfo(fileInfoJs);
+        ArrayBufferView typedArray = toTypedArray(data);
+        JavaScriptObject fileInfoJs = basisGetFileInfoNative(typedArray);
+        Uint8Array mipmapLevelsArray = basisGetImageMipmapLevelsNative(typedArray);
+        int[] imageMipmapLevels = new int[mipmapLevelsArray.length()];
+        for (int i = 0; i < imageMipmapLevels.length; i++) {
+            imageMipmapLevels[i] = mipmapLevelsArray.get(i);
+        }
+        return new BasisuFileInfo(fileInfoJs, imageMipmapLevels);
     }
     static native JavaScriptObject basisGetFileInfoNative(ArrayBufferView data)/*-{
         var file = @com.crashinvaders.basisu.wrapper.BasisuWrapper::basisFileOf(Lcom/google/gwt/typedarrays/shared/ArrayBufferView;)(data);
         return file.getFileInfo();
+    }-*/;
+    static native Uint8Array basisGetImageMipmapLevelsNative(ArrayBufferView data)/*-{
+        var file = @com.crashinvaders.basisu.wrapper.BasisuWrapper::basisFileOf(Lcom/google/gwt/typedarrays/shared/ArrayBufferView;)(data);
+        return file.getImageMipmapLevels();
     }-*/;
 
     public static BasisuImageInfo basisGetImageInfo(Buffer data, int imageIndex) {

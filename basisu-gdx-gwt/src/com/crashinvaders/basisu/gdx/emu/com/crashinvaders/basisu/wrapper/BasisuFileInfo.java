@@ -1,7 +1,6 @@
 package com.crashinvaders.basisu.wrapper;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.typedarrays.shared.Uint8Array;
 
 import java.io.Closeable;
 
@@ -10,13 +9,15 @@ import static com.crashinvaders.basisu.wrapper.UniqueIdUtils.findOrThrow;
 public class BasisuFileInfo implements Closeable {
 
     final JavaScriptObject fileInfoJs;
+    private final int[] imageMipmapLevels;
 
     BasisuFileInfo() {
         throw new UnsupportedOperationException("GWT doesn't support this constructor.");
     }
 
-    BasisuFileInfo(Object fileInfoJs) {
+    BasisuFileInfo(Object fileInfoJs, int[] imageMipmapLevels) {
         this.fileInfoJs = (JavaScriptObject)fileInfoJs;
+        this.imageMipmapLevels = imageMipmapLevels;
     }
 
     @Override
@@ -50,17 +51,8 @@ public class BasisuFileInfo implements Closeable {
 
     /** The number of mipmap levels for each image. */
     public int[] getImageMipmapLevels() {
-        Uint8Array typedArray = getImageMipmapLevelsNative();
-        int[] result = new int[typedArray.length()];
-        for (int i = 0; i < result.length; i++) {
-            result[i] = typedArray.get(i);
-        }
-        return result;
+        return imageMipmapLevels;
     }
-    native Uint8Array getImageMipmapLevelsNative() /*-{
-        var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
-        return $wnd.basisuModule.basisFileInfo_imageMipmapLevels(data);
-    }-*/;
 
     public native int getVersion() /*-{
         var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;

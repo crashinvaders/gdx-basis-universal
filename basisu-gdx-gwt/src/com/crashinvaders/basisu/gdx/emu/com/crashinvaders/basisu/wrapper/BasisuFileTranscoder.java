@@ -44,10 +44,19 @@ public class BasisuFileTranscoder implements Closeable {
     }-*/;
 
     public BasisuFileInfo getFileInfo() {
-        return new BasisuFileInfo(getFileInfoNative(handleJs));
+        JavaScriptObject fileInfoJs = getFileInfoNative(handleJs);
+        Uint8Array mipmapLevelsArray = getImageMipmapLevelsNative(handleJs);
+        int[] imageMipmapLevels = new int[mipmapLevelsArray.length()];
+        for (int i = 0; i < imageMipmapLevels.length; i++) {
+            imageMipmapLevels[i] = mipmapLevelsArray.get(i);
+        }
+        return new BasisuFileInfo(fileInfoJs, imageMipmapLevels);
     }
     private static native JavaScriptObject getFileInfoNative(JavaScriptObject handle) /*-{
         return handle.getFileInfo();
+    }-*/;
+    private static native Uint8Array getImageMipmapLevelsNative(JavaScriptObject handle) /*-{
+        return handle.getImageMipmapLevels();
     }-*/;
 
     public BasisuImageInfo getImageInfo(int imageIndex) {
