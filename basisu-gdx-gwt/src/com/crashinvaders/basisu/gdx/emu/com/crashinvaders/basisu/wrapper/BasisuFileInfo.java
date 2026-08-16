@@ -59,7 +59,7 @@ public class BasisuFileInfo implements Closeable {
     }
     native Uint8Array getImageMipmapLevelsNative() /*-{
         var data = this.@com.crashinvaders.basisu.wrapper.BasisuFileInfo::fileInfoJs;
-        return data.getImageMipmapLevels();
+        return $wnd.basisuModule.basisFileInfo_imageMipmapLevels(data);
     }-*/;
 
     public native int getVersion() /*-{

@@ -235,28 +235,28 @@ EMSCRIPTEN_BINDINGS(my_module) {
         .field("iframeFlag", &basist::basisu_image_level_info::m_iframe_flag)             // bool
         ;
 
-    // Use "class_" mapping instead of "value_object" to define custom enum getter functions.
-    class_<basist::basisu_file_info>("FileInfo")
-		.property("version", &basist::basisu_file_info::m_version)                              // uint32_t
-		.property("totalHeaderSize", &basist::basisu_file_info::m_total_header_size)            // uint32_t
-		.property("totalSelectors", &basist::basisu_file_info::m_total_selectors)               // uint32_t
-		.property("selectorCodebookSize", &basist::basisu_file_info::m_selector_codebook_size)  // uint32_t
-		.property("totalEndpoints", &basist::basisu_file_info::m_total_endpoints)               // uint32_t
-		.property("endpointCodebookSize", &basist::basisu_file_info::m_endpoint_codebook_size)  // uint32_t
-		.property("tablesSize", &basist::basisu_file_info::m_tables_size)                       // uint32_t
-		.property("slicesSize", &basist::basisu_file_info::m_slices_size)                       // uint32_t
-		.property("usPerFrame", &basist::basisu_file_info::m_us_per_frame)                      // uint32_t
-		.property("totalImages", &basist::basisu_file_info::m_total_images)                     // uint32_t
-		.property("userdata0", &basist::basisu_file_info::m_userdata0)                          // uint32_t
-		.property("userdata1", &basist::basisu_file_info::m_userdata1)                          // uint32_t
-		.property("yFlipped", &basist::basisu_file_info::m_y_flipped)                           // bool
-		.property("etc1s", &basist::basisu_file_info::m_etc1s)                                  // bool
-		.property("hasAlphaSlices", &basist::basisu_file_info::m_has_alpha_slices)              // bool
-		.property("textureFormat", &basist::basisu_file_info::m_tex_format)                     // TextureFormat
-		.property("textureType", &basist::basisu_file_info::m_tex_type)                         // TextureType
-		// Properties simulated through functions (to return more JS friendly type).
-		.function("getImageMipmapLevels", &basisFileInfo_imageMipmapLevels)                     // val (Uint8Array)
-//		.function("getTexFormat", &fileInfo_texFormat)                                          // uint8_t
+    // "value_object" (not "class_") so the returned JS object is a plain value - no "delete()"
+    // needed, so a missed close() on the Java/GWT side can't leak it. getImageMipmapLevels() used
+    // to force "class_" (value_object has no ".function()"), so it's now a free function instead -
+    // see "basisFileInfo_imageMipmapLevels" registered below.
+    value_object<basist::basisu_file_info>("FileInfo")
+		.field("version", &basist::basisu_file_info::m_version)                              // uint32_t
+		.field("totalHeaderSize", &basist::basisu_file_info::m_total_header_size)            // uint32_t
+		.field("totalSelectors", &basist::basisu_file_info::m_total_selectors)               // uint32_t
+		.field("selectorCodebookSize", &basist::basisu_file_info::m_selector_codebook_size)  // uint32_t
+		.field("totalEndpoints", &basist::basisu_file_info::m_total_endpoints)               // uint32_t
+		.field("endpointCodebookSize", &basist::basisu_file_info::m_endpoint_codebook_size)  // uint32_t
+		.field("tablesSize", &basist::basisu_file_info::m_tables_size)                       // uint32_t
+		.field("slicesSize", &basist::basisu_file_info::m_slices_size)                       // uint32_t
+		.field("usPerFrame", &basist::basisu_file_info::m_us_per_frame)                      // uint32_t
+		.field("totalImages", &basist::basisu_file_info::m_total_images)                     // uint32_t
+		.field("userdata0", &basist::basisu_file_info::m_userdata0)                          // uint32_t
+		.field("userdata1", &basist::basisu_file_info::m_userdata1)                          // uint32_t
+		.field("yFlipped", &basist::basisu_file_info::m_y_flipped)                           // bool
+		.field("etc1s", &basist::basisu_file_info::m_etc1s)                                  // bool
+		.field("hasAlphaSlices", &basist::basisu_file_info::m_has_alpha_slices)              // bool
+		.field("textureFormat", &basist::basisu_file_info::m_tex_format)                     // TextureFormat
+		.field("textureType", &basist::basisu_file_info::m_tex_type)                         // TextureType
 		;
 
     value_object<basisuWrapper::ktx2_file_info>("Ktx2FileInfo")
@@ -284,6 +284,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
         ;
 
     function("isTranscoderTexFormatSupported", &isTranscoderTexFormatSupported_wrap);
+    function("basisFileInfo_imageMipmapLevels", &basisFileInfo_imageMipmapLevels);
 
     // Data buffer is uploaded once (constructor), then reused by all method calls below.
     class_<BasisFileTranscoder>("BasisFileTranscoder")
