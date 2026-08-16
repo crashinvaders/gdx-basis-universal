@@ -27,9 +27,8 @@ public class BasisuFileTranscoder implements Closeable {
         // Marked "static" (internal linkage) since "com_crashinvaders_basisu_wrapper_BasisuWrapper.cpp"
         // already defines a function with the same name and signature.
         static jobject wrapIntoBuffer(JNIEnv* env, basisu::vector<uint8_t>& imageData) {
-            uint32_t imageDataSize = imageData.size_in_bytes();
-            uint8_t* nativeBuffer = (uint8_t*)malloc(imageDataSize);
-            memcpy(nativeBuffer, imageData.data(), imageDataSize);
+            uint32_t imageDataSize;
+            uint8_t* nativeBuffer = basisuUtils::detachBuffer(imageData, imageDataSize);
             return env->NewDirectByteBuffer(nativeBuffer, imageDataSize);
         }
 	 */
