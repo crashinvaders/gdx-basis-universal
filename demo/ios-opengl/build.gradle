@@ -1,0 +1,36 @@
+apply plugin: 'robovm'
+apply plugin: 'java-library'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+sourceSets.main.java.srcDirs += ['../ios-metalangle/src/']
+sourceSets.main.resources.srcDirs += ['../assets']
+
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+dependencies {
+    implementation project(":demo:core")
+    implementation "com.mobidevelop.robovm:robovm-rt:$roboVmVersion"
+    implementation "com.mobidevelop.robovm:robovm-cocoatouch:$roboVmVersion"
+    implementation "com.badlogicgames.gdx:gdx-backend-robovm:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-ios"
+
+    if (useGdxBasisuMavenArtifacts) {
+        implementation "com.crashinvaders.basisu:basisu-wrapper:$gdxBasisuVersion:natives-ios"
+    } else {
+        def wrapperBuildDir = project(':basisu-wrapper').layout.buildDirectory.get()
+        implementation files("${wrapperBuildDir}/libs/basisu-wrapper-${gdxBasisuVersion}-natives-ios.jar")
+    }
+}
+
+robovm {
+    archs = "arm64"
+}
+
+launchIPhoneSimulator.dependsOn build
+launchIPadSimulator.dependsOn build
+launchIOSDevice.dependsOn build
+createIPA.dependsOn build
