@@ -12,8 +12,6 @@
 
 using namespace emscripten;
 
-//FIXME Array double copying (Java->JS->C++) is really ugly. Find a way to pass data arrays more easily. Look into GWT types that libGDX uses.
-
 // From https://github.com/emscripten-core/emscripten/issues/5519#issuecomment-624775352
 basisu::vector<uint8_t> vecFromTypedArray(const val &jsValue) {
     const unsigned length = jsValue["length"].as<unsigned>();
@@ -42,86 +40,96 @@ bool isTranscoderTexFormatSupported_wrap(uint32_t transcoderTexFormatId, uint32_
     return basisuWrapper::isTranscoderTexFormatSupported(transcoderTexFormat, basisTexFormat);
 }
 
-bool basisValidateHeader_wrap(const val &jsData) {
-    basisu::vector<uint8_t> data = vecFromTypedArray(jsData);
-    return basisuWrapper::basis::validateHeader(data.data(), data.size());
-}
+// Holds the encoded file bytes in Wasm memory once (copied in on construction) so repeated
+// info/transcode calls reuse the same buffer instead of re-uploading it from JS every time.
+class BasisFile {
+public:
+    explicit BasisFile(const val &jsData) : data(vecFromTypedArray(jsData)) {}
 
-bool basisValidateChecksum_wrap(const val &jsData, bool fullValidation) {
-    basisu::vector<uint8_t> data = vecFromTypedArray(jsData);
-    return basisuWrapper::basis::validateChecksum(data.data(), data.size(), fullValidation);
-}
-
-basist::basisu_file_info basisGetFileInfo_wrap(const val &jsData) {
-    basisu::vector<uint8_t> data = vecFromTypedArray(jsData);
-    basist::basisu_file_info fileInfo;
-    if (!basisuWrapper::basis::getFileInfo(fileInfo, data.data(), data.size())) {
-        basisuUtils::throwException(nullptr, "Failed to obtain Basis file info.");
-    }
-    return fileInfo;
-}
-
-basist::basisu_image_info basisGetImageInfo_wrap(const val &jsData, uint32_t imageIndex) {
-    basisu::vector<uint8_t> data = vecFromTypedArray(jsData);
-    basist::basisu_image_info imageInfo;
-    if (!basisuWrapper::basis::getImageInfo(imageInfo, data.data(), data.size(), imageIndex)) {
-        basisuUtils::throwException(nullptr, "Failed to obtain Basis image info.");
-    }
-    return imageInfo;
-}
-
-basist::basisu_image_level_info basisGetImageLevelInfo_wrap(const val &jsData, uint32_t imageIndex, uint32_t imageLevel) {
-    basisu::vector<uint8_t> data = vecFromTypedArray(jsData);
-    basist::basisu_image_level_info levelInfo;
-    if (!basisuWrapper::basis::getImageLevelInfo(levelInfo, data.data(), data.size(), imageIndex, imageLevel)) {
-        basisuUtils::throwException(nullptr, "Failed to obtain Basis image level info.");
-    }
-    return levelInfo;
-}
-
-val basisTranscode_wrap(const val &jsData, uint32_t imageIndex, uint32_t levelIndex, uint32_t textureFormatId) {
-    basisu::vector<uint8_t> data = vecFromTypedArray(jsData);
-    basisu::vector<uint8_t> output;
-    basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
-
-    if (!basisuWrapper::basis::transcode(output, data.data(), data.size(), imageIndex, levelIndex, format)) {
-        basisuUtils::logError(LOG_TAG, "Error during Basis image transcoding!");
-        basisuUtils::throwException(nullptr, "Error during basis image transcoding!");
+    bool validateHeader() {
+        return basisuWrapper::basis::validateHeader(data.data(), data.size());
     }
 
-    return vecToTypedArray(output);
-}
-
-basisuWrapper::ktx2_file_info ktx2GetFileInfo_wrap(const val &jsData) {
-    basisu::vector<uint8_t> data = vecFromTypedArray(jsData);
-    basisuWrapper::ktx2_file_info fileInfo;
-    if (!basisuWrapper::ktx2::getFileInfo(fileInfo, data.data(), data.size())) {
-        basisuUtils::throwException(nullptr, "Failed to obtain KTX2 file info.");
-    }
-    return fileInfo;
-}
-
-basist::ktx2_image_level_info ktx2GetImageLevelInfo_wrap(const val &jsData, uint32_t layerIndex, uint32_t levelIndex) {
-    basisu::vector<uint8_t> data = vecFromTypedArray(jsData);
-    basist::ktx2_image_level_info imageInfo;
-    if (!basisuWrapper::ktx2::getImageLevelInfo(imageInfo, data.data(), data.size(), layerIndex, levelIndex)) {
-        basisuUtils::throwException(nullptr, "Failed to obtain KTX2 image level info.");
-    }
-    return imageInfo;
-}
-
-val ktx2Transcode_wrap(const val &jsData, uint32_t layerIndex, uint32_t levelIndex, uint32_t textureFormatId) {
-    basisu::vector<uint8_t> data = vecFromTypedArray(jsData);
-    basisu::vector<uint8_t> output;
-    basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
-
-    if (!basisuWrapper::ktx2::transcode(output, data.data(), data.size(), layerIndex, levelIndex, format)) {
-        basisuUtils::logError(LOG_TAG, "Error during KTX2 image transcoding!");
-        basisuUtils::throwException(nullptr, "Error during KTX2 image transcoding!");
+    bool validateChecksum(bool fullValidation) {
+        return basisuWrapper::basis::validateChecksum(data.data(), data.size(), fullValidation);
     }
 
-    return vecToTypedArray(output);
-}
+    basist::basisu_file_info getFileInfo() {
+        basist::basisu_file_info fileInfo;
+        if (!basisuWrapper::basis::getFileInfo(fileInfo, data.data(), data.size())) {
+            basisuUtils::throwException(nullptr, "Failed to obtain Basis file info.");
+        }
+        return fileInfo;
+    }
+
+    basist::basisu_image_info getImageInfo(uint32_t imageIndex) {
+        basist::basisu_image_info imageInfo;
+        if (!basisuWrapper::basis::getImageInfo(imageInfo, data.data(), data.size(), imageIndex)) {
+            basisuUtils::throwException(nullptr, "Failed to obtain Basis image info.");
+        }
+        return imageInfo;
+    }
+
+    basist::basisu_image_level_info getImageLevelInfo(uint32_t imageIndex, uint32_t imageLevel) {
+        basist::basisu_image_level_info levelInfo;
+        if (!basisuWrapper::basis::getImageLevelInfo(levelInfo, data.data(), data.size(), imageIndex, imageLevel)) {
+            basisuUtils::throwException(nullptr, "Failed to obtain Basis image level info.");
+        }
+        return levelInfo;
+    }
+
+    val transcode(uint32_t imageIndex, uint32_t levelIndex, uint32_t textureFormatId) {
+        basisu::vector<uint8_t> output;
+        basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
+
+        if (!basisuWrapper::basis::transcode(output, data.data(), data.size(), imageIndex, levelIndex, format)) {
+            basisuUtils::logError(LOG_TAG, "Error during Basis image transcoding!");
+            basisuUtils::throwException(nullptr, "Error during basis image transcoding!");
+        }
+
+        return vecToTypedArray(output);
+    }
+
+private:
+    basisu::vector<uint8_t> data;
+};
+
+// Same idea as BasisFile, but for KTX2 containers.
+class Ktx2File {
+public:
+    explicit Ktx2File(const val &jsData) : data(vecFromTypedArray(jsData)) {}
+
+    basisuWrapper::ktx2_file_info getFileInfo() {
+        basisuWrapper::ktx2_file_info fileInfo;
+        if (!basisuWrapper::ktx2::getFileInfo(fileInfo, data.data(), data.size())) {
+            basisuUtils::throwException(nullptr, "Failed to obtain KTX2 file info.");
+        }
+        return fileInfo;
+    }
+
+    basist::ktx2_image_level_info getImageLevelInfo(uint32_t layerIndex, uint32_t levelIndex) {
+        basist::ktx2_image_level_info imageInfo;
+        if (!basisuWrapper::ktx2::getImageLevelInfo(imageInfo, data.data(), data.size(), layerIndex, levelIndex)) {
+            basisuUtils::throwException(nullptr, "Failed to obtain KTX2 image level info.");
+        }
+        return imageInfo;
+    }
+
+    val transcode(uint32_t layerIndex, uint32_t levelIndex, uint32_t textureFormatId) {
+        basisu::vector<uint8_t> output;
+        basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
+
+        if (!basisuWrapper::ktx2::transcode(output, data.data(), data.size(), layerIndex, levelIndex, format)) {
+            basisuUtils::logError(LOG_TAG, "Error during KTX2 image transcoding!");
+            basisuUtils::throwException(nullptr, "Error during KTX2 image transcoding!");
+        }
+
+        return vecToTypedArray(output);
+    }
+
+private:
+    basisu::vector<uint8_t> data;
+};
 
 //uint8_t basisFileInfo_texFormat(basist::basisu_file_info &fileInfo) {
 //    return (uint8_t)fileInfo.m_tex_format;
@@ -230,15 +238,24 @@ EMSCRIPTEN_BINDINGS(my_module) {
         ;
 
     function("isTranscoderTexFormatSupported", &isTranscoderTexFormatSupported_wrap);
-    function("basisValidateHeader", &basisValidateHeader_wrap);
-    function("basisValidateChecksum", &basisValidateChecksum_wrap);
-    function("basisGetFileInfo", &basisGetFileInfo_wrap);
-    function("basisGetImageInfo", &basisGetImageInfo_wrap);
-    function("basisGetImageLevelInfo", &basisGetImageLevelInfo_wrap);
-    function("basisTranscode", &basisTranscode_wrap);
-    function("ktx2GetFileInfo", &ktx2GetFileInfo_wrap);
-    function("ktx2GetImageLevelInfo", &ktx2GetImageLevelInfo_wrap);
-    function("ktx2Transcode", &ktx2Transcode_wrap);
+
+    // Data buffer is uploaded once (constructor), then reused by all method calls below.
+    class_<BasisFile>("BasisFile")
+        .constructor<const val&>()
+        .function("validateHeader", &BasisFile::validateHeader)
+        .function("validateChecksum", &BasisFile::validateChecksum)
+        .function("getFileInfo", &BasisFile::getFileInfo)
+        .function("getImageInfo", &BasisFile::getImageInfo)
+        .function("getImageLevelInfo", &BasisFile::getImageLevelInfo)
+        .function("transcode", &BasisFile::transcode)
+        ;
+
+    class_<Ktx2File>("Ktx2File")
+        .constructor<const val&>()
+        .function("getFileInfo", &Ktx2File::getFileInfo)
+        .function("getImageLevelInfo", &Ktx2File::getImageLevelInfo)
+        .function("transcode", &Ktx2File::transcode)
+        ;
 }
 
 #endif // __EMSCRIPTEN__

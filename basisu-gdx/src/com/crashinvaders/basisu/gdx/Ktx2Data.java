@@ -54,6 +54,8 @@ public class Ktx2Data implements Disposable {
 
         fileInfo.close();
 
+        BasisuWrapper.releaseEncodedData(encodedData);
+
         //TODO Replace with BufferUtils.newUnsafeByteBuffer(fileSize) once it's compatible with GWT compiler.
         if (BasisuBufferUtils.isUnsafeByteBuffer(encodedData)) {
             BasisuBufferUtils.disposeUnsafeByteBuffer(encodedData);

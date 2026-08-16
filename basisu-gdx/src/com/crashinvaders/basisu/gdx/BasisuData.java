@@ -67,6 +67,8 @@ public class BasisuData implements Disposable {
             imageLevelInfoIndex.clear();
         }
 
+        BasisuWrapper.releaseEncodedData(encodedData);
+
         //TODO Replace with BufferUtils.newUnsafeByteBuffer(fileSize) once it's compatible with GWT compiler.
         if (BasisuBufferUtils.isUnsafeByteBuffer(encodedData)) {
             BasisuBufferUtils.disposeUnsafeByteBuffer(encodedData);

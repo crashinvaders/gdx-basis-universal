@@ -1,3 +1,6 @@
+### Next Release
+- Reduce redundant data copies in the web (Wasm) backend by reusing native file handles.
+
 ### 1.1.2
 - Fixed: non-power-of-two mipmapped textures rendered as black squares on GWT/WebGL1. Mip chain now falls back to level 0 only on that backend.
 - Fixed: forcing a specific mip level on GWT (`GL_TEXTURE_BASE_LEVEL`/`MAX_LEVEL` aren't available on WebGL1) - now uses `GL_EXT_shader_texture_lod` where supported, falling back to a LOD bias otherwise.

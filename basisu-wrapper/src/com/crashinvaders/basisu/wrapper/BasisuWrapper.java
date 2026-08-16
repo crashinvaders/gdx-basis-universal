@@ -184,4 +184,14 @@ public class BasisuWrapper {
     public static native void disposeNativeBuffer(ByteBuffer dataBuffer); /*
         free(dataBuffer);
     */
+
+    /**
+     * Releases any native-side state cached for the given encoded data buffer.
+     * On JNI platforms calls operate directly on the buffer's pointer and keep no persistent
+     * native state, so this is a no-op here (the GWT/Emscripten backend overrides this to free
+     * its cached Wasm-side copy of the buffer).
+     */
+    public static void releaseEncodedData(Buffer dataBuffer) {
+        // No-op on JNI platforms.
+    }
 }
