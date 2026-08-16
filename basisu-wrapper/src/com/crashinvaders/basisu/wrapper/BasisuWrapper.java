@@ -20,10 +20,9 @@ public class BasisuWrapper {
     #define LOG_TAG "BasisuWrapper.java"
     #define BASE_PACKAGE com/crashinvaders/basisu/wrapper
 
-    jobject wrapIntoBuffer(JNIEnv* env, basisu::vector<uint8_t> imageData) {
-        uint32_t imageDataSize = imageData.size_in_bytes();
-        uint8_t* nativeBuffer = (uint8_t*)malloc(imageDataSize);
-        memcpy(nativeBuffer, imageData.data(), imageDataSize);
+    jobject wrapIntoBuffer(JNIEnv* env, basisu::vector<uint8_t>& imageData) {
+        uint32_t imageDataSize;
+        uint8_t* nativeBuffer = basisuUtils::detachBuffer(imageData, imageDataSize);
         return env->NewDirectByteBuffer(nativeBuffer, imageDataSize);
     }
 

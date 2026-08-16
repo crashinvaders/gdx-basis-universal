@@ -1,5 +1,18 @@
 #include "basisu_native_utils.h"
 
+// Needed here (not in the header) for the full "basisu::vector<uint8_t>" definition used below -
+// see the comment on the forward declaration in basisu_native_utils.h.
+#include "basisu_wrapper.h"
+
+// BUFFER OWNERSHIP TRANSFER ==============================
+
+uint8_t* basisuUtils::detachBuffer(basisu::vector<uint8_t> &vec, uint32_t &outSizeInBytes) {
+    basisu::vector<uint8_t> *stolen = new basisu::vector<uint8_t>();
+    vec.swap(*stolen);
+    outSizeInBytes = stolen->size_in_bytes();
+    return stolen->data();
+}
+
 
 // LOGGING ==============================
 
