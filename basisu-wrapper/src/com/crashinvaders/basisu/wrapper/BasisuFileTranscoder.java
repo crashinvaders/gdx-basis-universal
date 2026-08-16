@@ -195,19 +195,28 @@ public class BasisuFileTranscoder implements Closeable {
      */
     public TranscodedMipChain transcodeAllLevels(int imageIndex, BasisuTranscoderTextureFormat textureFormat) {
         int totalLevels = getImageInfo(imageIndex).getTotalLevels();
-        int[] levelOffsets = new int[totalLevels + 1];
-        ByteBuffer data = jniTranscodeAllLevels(addr, imageIndex, textureFormat.getId(), levelOffsets);
+        return transcodeAllLevels(imageIndex, totalLevels, textureFormat);
+    }
+
+    /**
+     * Same as {@link #transcodeAllLevels(int, BasisuTranscoderTextureFormat)}, but only transcodes
+     * the first "levelCount" mipmap levels, so a caller that doesn't need the full chain (e.g.
+     * mipmaps disabled) doesn't pay for transcoding the rest of it.
+     */
+    public TranscodedMipChain transcodeAllLevels(int imageIndex, int levelCount, BasisuTranscoderTextureFormat textureFormat) {
+        int[] levelOffsets = new int[levelCount + 1];
+        ByteBuffer data = jniTranscodeAllLevels(addr, imageIndex, levelCount, textureFormat.getId(), levelOffsets);
         if (data == null) {
             throw new BasisuWrapperException("Error during Basis image transcoding.");
         }
         return new TranscodedMipChain(data, levelOffsets);
     }
-    private native ByteBuffer jniTranscodeAllLevels(long addr, int imageIndex, int textureFormatId, int[] outLevelOffsets); /*MANUAL
+    private native ByteBuffer jniTranscodeAllLevels(long addr, int imageIndex, int levelCount, int textureFormatId, int[] outLevelOffsets); /*MANUAL
         basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
         basisu::vector<uint8_t> transcodedData;
         basisu::vector<uint32_t> levelOffsets;
 
-        if (!getWrapped(addr)->transcodeAllLevels(transcodedData, levelOffsets, imageIndex, format)) {
+        if (!getWrapped(addr)->transcodeAllLevels(transcodedData, levelOffsets, imageIndex, (uint32_t)levelCount, format)) {
             basisuUtils::throwException(env, "Error during Basis image transcoding.");
             return 0;
         }

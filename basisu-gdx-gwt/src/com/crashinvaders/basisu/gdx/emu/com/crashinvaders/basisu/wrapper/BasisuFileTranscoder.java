@@ -85,7 +85,17 @@ public class BasisuFileTranscoder implements Closeable {
      * Decodes every mipmap level of the image, packed into a single buffer (see {@link TranscodedMipChain}).
      */
     public TranscodedMipChain transcodeAllLevels(int imageIndex, BasisuTranscoderTextureFormat textureFormat) {
-        JavaScriptObject result = transcodeAllLevelsNative(handleJs, imageIndex, textureFormat.getId());
+        int totalLevels = getImageInfo(imageIndex).getTotalLevels();
+        return transcodeAllLevels(imageIndex, totalLevels, textureFormat);
+    }
+
+    /**
+     * Same as {@link #transcodeAllLevels(int, BasisuTranscoderTextureFormat)}, but only transcodes
+     * the first "levelCount" mipmap levels, so a caller that doesn't need the full chain (e.g.
+     * mipmaps disabled) doesn't pay for transcoding the rest of it.
+     */
+    public TranscodedMipChain transcodeAllLevels(int imageIndex, int levelCount, BasisuTranscoderTextureFormat textureFormat) {
+        JavaScriptObject result = transcodeAllLevelsNative(handleJs, imageIndex, levelCount, textureFormat.getId());
         Uint8Array dataArray = getResultDataNative(result);
         Uint32Array offsetsArray = getResultLevelOffsetsNative(result);
 
@@ -96,8 +106,8 @@ public class BasisuFileTranscoder implements Closeable {
 
         return new TranscodedMipChain(BasisuWrapper.fromTypedArray(dataArray), levelOffsets);
     }
-    private static native JavaScriptObject transcodeAllLevelsNative(JavaScriptObject handle, int imageIndex, int textureFormat) /*-{
-        return handle.transcodeAllLevels(imageIndex, textureFormat);
+    private static native JavaScriptObject transcodeAllLevelsNative(JavaScriptObject handle, int imageIndex, int levelCount, int textureFormat) /*-{
+        return handle.transcodeAllLevels(imageIndex, levelCount, textureFormat);
     }-*/;
     private static native Uint8Array getResultDataNative(JavaScriptObject result) /*-{
         return result.data;

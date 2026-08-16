@@ -137,7 +137,7 @@ public class Ktx2TextureData implements TextureData {
             transcodedLevels[level] = new TranscodedLevelData(level, levelInfo.getOrigWidth(), levelInfo.getOrigHeight());
         }
 
-        mipChain = ktx2Data.transcodeAllLevels(layerIndex, transcodeFormat);
+        mipChain = ktx2Data.transcodeAllLevels(layerIndex, transcodeLevels, transcodeFormat);
         for (int level = 0; level < transcodeLevels; level++) {
             TranscodedLevelData entry = transcodedLevels[level];
             Gdx.app.debug(TAG, (file != null ? "["+file.path()+"] " : "") + "Transcoded [mipmap:" + level + "] [size:" + entry.width + "x" + entry.height + "] [memory:" + MathUtils.round(mipChain.getLevelSize(level) / 1024.0f) + "kB]");

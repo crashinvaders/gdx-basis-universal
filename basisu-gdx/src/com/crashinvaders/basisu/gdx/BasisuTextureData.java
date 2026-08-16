@@ -158,7 +158,7 @@ public class BasisuTextureData implements TextureData {
             transcodedLevels[level] = new TranscodedLevelData(level, levelInfo.getOrigWidth(), levelInfo.getOrigHeight());
         }
 
-        mipChain = basisuData.transcodeAllLevels(imageIndex, transcodeFormat);
+        mipChain = basisuData.transcodeAllLevels(imageIndex, transcodeLevels, transcodeFormat);
         for (int level = 0; level < transcodeLevels; level++) {
             TranscodedLevelData entry = transcodedLevels[level];
             Gdx.app.debug(TAG, (file != null ? "["+file.path()+"] " : "") + "Transcoded [mipmap:" + level + "] [size:" + entry.width + "x" + entry.height + "] [memory:" + MathUtils.round(mipChain.getLevelSize(level) / 1024.0f) + "kB]");

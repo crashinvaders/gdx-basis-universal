@@ -143,4 +143,13 @@ public class Ktx2Data implements Disposable {
     public TranscodedMipChain transcodeAllLevels(int imageIndex, BasisuTranscoderTextureFormat textureFormat) {
         return fileTranscoder.transcodeAllLevels(imageIndex, textureFormat);
     }
+
+    /**
+     * Same as {@link #transcodeAllLevels(int, BasisuTranscoderTextureFormat)}, but only transcodes
+     * the first "levelCount" mipmap levels, so a caller that doesn't need the full chain (e.g.
+     * mipmaps disabled) doesn't pay for transcoding the rest of it.
+     */
+    public TranscodedMipChain transcodeAllLevels(int imageIndex, int levelCount, BasisuTranscoderTextureFormat textureFormat) {
+        return fileTranscoder.transcodeAllLevels(imageIndex, levelCount, textureFormat);
+    }
 }

@@ -112,14 +112,16 @@ public:
         return vecToTypedArray(output);
     }
 
-    // Decodes every mipmap level of the image into one contiguous buffer (one allocation for the
-    // whole chain instead of one per level). Returns {data: Uint8Array, levelOffsets: Uint32Array}.
-    val transcodeAllLevels(uint32_t imageIndex, uint32_t textureFormatId) {
+    // Decodes the first "levelCount" mipmap levels of the image into one contiguous buffer (one
+    // allocation for the whole chain instead of one per level), so a caller that only needs a
+    // subset (e.g. mipmaps disabled) doesn't pay for transcoding the rest of the chain.
+    // Returns {data: Uint8Array, levelOffsets: Uint32Array}.
+    val transcodeAllLevels(uint32_t imageIndex, uint32_t levelCount, uint32_t textureFormatId) {
         basisu::vector<uint8_t> output;
         basisu::vector<uint32_t> levelOffsets;
         basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
 
-        if (!session.transcodeAllLevels(output, levelOffsets, imageIndex, format)) {
+        if (!session.transcodeAllLevels(output, levelOffsets, imageIndex, levelCount, format)) {
             basisuUtils::logError(LOG_TAG, "Error during Basis image transcoding!");
             basisuUtils::throwException(nullptr, "Error during basis image transcoding!");
         }
@@ -169,12 +171,12 @@ public:
     }
 
     // Same idea as BasisFileTranscoder::transcodeAllLevels.
-    val transcodeAllLevels(uint32_t layerIndex, uint32_t textureFormatId) {
+    val transcodeAllLevels(uint32_t layerIndex, uint32_t levelCount, uint32_t textureFormatId) {
         basisu::vector<uint8_t> output;
         basisu::vector<uint32_t> levelOffsets;
         basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
 
-        if (!session.transcodeAllLevels(output, levelOffsets, layerIndex, format)) {
+        if (!session.transcodeAllLevels(output, levelOffsets, layerIndex, levelCount, format)) {
             basisuUtils::logError(LOG_TAG, "Error during KTX2 image transcoding!");
             basisuUtils::throwException(nullptr, "Error during KTX2 image transcoding!");
         }

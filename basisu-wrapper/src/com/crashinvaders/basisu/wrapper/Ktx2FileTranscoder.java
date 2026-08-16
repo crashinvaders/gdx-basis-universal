@@ -129,19 +129,28 @@ public class Ktx2FileTranscoder implements Closeable {
      */
     public TranscodedMipChain transcodeAllLevels(int layerIndex, BasisuTranscoderTextureFormat textureFormat) {
         int totalLevels = getFileInfo().getTotalMipmapLevels();
-        int[] levelOffsets = new int[totalLevels + 1];
-        ByteBuffer data = jniTranscodeAllLevels(addr, layerIndex, textureFormat.getId(), levelOffsets);
+        return transcodeAllLevels(layerIndex, totalLevels, textureFormat);
+    }
+
+    /**
+     * Same as {@link #transcodeAllLevels(int, BasisuTranscoderTextureFormat)}, but only transcodes
+     * the first "levelCount" mipmap levels, so a caller that doesn't need the full chain (e.g.
+     * mipmaps disabled) doesn't pay for transcoding the rest of it.
+     */
+    public TranscodedMipChain transcodeAllLevels(int layerIndex, int levelCount, BasisuTranscoderTextureFormat textureFormat) {
+        int[] levelOffsets = new int[levelCount + 1];
+        ByteBuffer data = jniTranscodeAllLevels(addr, layerIndex, levelCount, textureFormat.getId(), levelOffsets);
         if (data == null) {
             throw new BasisuWrapperException("Error during KTX2 image transcoding.");
         }
         return new TranscodedMipChain(data, levelOffsets);
     }
-    private native ByteBuffer jniTranscodeAllLevels(long addr, int layerIndex, int textureFormatId, int[] outLevelOffsets); /*MANUAL
+    private native ByteBuffer jniTranscodeAllLevels(long addr, int layerIndex, int levelCount, int textureFormatId, int[] outLevelOffsets); /*MANUAL
         basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
         basisu::vector<uint8_t> transcodedData;
         basisu::vector<uint32_t> levelOffsets;
 
-        if (!getWrapped(addr)->transcodeAllLevels(transcodedData, levelOffsets, layerIndex, format)) {
+        if (!getWrapped(addr)->transcodeAllLevels(transcodedData, levelOffsets, layerIndex, (uint32_t)levelCount, format)) {
             basisuUtils::throwException(env, "Error during KTX2 image transcoding.");
             return 0;
         }

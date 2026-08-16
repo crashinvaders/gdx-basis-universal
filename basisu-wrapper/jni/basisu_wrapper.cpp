@@ -209,29 +209,27 @@ namespace basisuWrapper {
         }
 
         bool TranscoderSession::transcodeAllLevels(basisu::vector<uint8_t> &out, basisu::vector<uint32_t> &outLevelOffsets,
-                                                    uint32_t imageIndex, transcoder_texture_format format) {
-            basisu_image_info imageInfo;
-            if (!transcoder.get_image_info(data, dataSize, imageInfo, imageIndex)) {
-                basisuUtils::logError(LOG_TAG, "Failed to obtain image info.");
-                return false;
-            }
-            uint32_t totalLevels = imageInfo.m_total_levels;
-
+                                                    uint32_t imageIndex, uint32_t levelCount, transcoder_texture_format format) {
             // First pass: compute every level's output size (cheap, header-only) so we can allocate
-            // "out" once for the whole mip chain instead of once per level.
-            basisu::vector<uint32_t> levelBlocksOrPixels(totalLevels);
-            outLevelOffsets.resize(totalLevels + 1);
+            // "out" once for the whole mip chain instead of once per level. Caches origWidth/origHeight
+            // too, so the transcode pass below doesn't have to re-fetch the same header info per level.
+            basisu::vector<uint32_t> levelBlocksOrPixels(levelCount);
+            basisu::vector<uint32_t> levelOrigWidths(levelCount);
+            basisu::vector<uint32_t> levelOrigHeights(levelCount);
+            outLevelOffsets.resize(levelCount + 1);
             uint32_t totalSize = 0;
-            for (uint32_t level = 0; level < totalLevels; level++) {
+            for (uint32_t level = 0; level < levelCount; level++) {
                 uint32_t origWidth, origHeight, totalBlocks;
                 if (!transcoder.get_image_level_desc(data, dataSize, imageIndex, level, origWidth, origHeight, totalBlocks)) {
                     basisuUtils::logError(LOG_TAG, "Failed to retrieve image level description.");
                     return false;
                 }
+                levelOrigWidths[level] = origWidth;
+                levelOrigHeights[level] = origHeight;
                 outLevelOffsets[level] = totalSize;
                 totalSize += computeTranscodedLevelSize(format, origWidth, origHeight, totalBlocks, levelBlocksOrPixels[level]);
             }
-            outLevelOffsets[totalLevels] = totalSize;
+            outLevelOffsets[levelCount] = totalSize;
 
             out.resize(totalSize);
 
@@ -243,9 +241,7 @@ namespace basisuWrapper {
                 transcodingStarted = true;
             }
 
-            for (uint32_t level = 0; level < totalLevels; level++) {
-                uint32_t origWidth, origHeight, totalBlocks;
-                transcoder.get_image_level_desc(data, dataSize, imageIndex, level, origWidth, origHeight, totalBlocks);
+            for (uint32_t level = 0; level < levelCount; level++) {
                 uint8_t *levelOut = out.data() + outLevelOffsets[level];
 
                 bool status;
@@ -253,7 +249,7 @@ namespace basisuWrapper {
                     status = transcoder.transcode_image_level(
                         data, dataSize, imageIndex, level,
                         levelOut, levelBlocksOrPixels[level],
-                        format, 0, origWidth, nullptr, origHeight);
+                        format, 0, levelOrigWidths[level], nullptr, levelOrigHeights[level]);
                 } else {
                     status = transcoder.transcode_image_level(
                         data, dataSize, imageIndex, level,
@@ -420,21 +416,20 @@ namespace basisuWrapper {
         }
 
         bool TranscoderSession::transcodeAllLevels(basisu::vector<uint8_t> &out, basisu::vector<uint32_t> &outLevelOffsets,
-                                                    uint32_t layerIndex, transcoder_texture_format format) {
+                                                    uint32_t layerIndex, uint32_t levelCount, transcoder_texture_format format) {
             if (!initialized) {
                 return false;
             }
 
             // This value is hardcoded for now as cube-textures aren't support ATM.
             int faceIndex = 0;
-            uint32_t totalLevels = transcoder.get_levels();
 
             // First pass: compute every level's output size (cheap, header-only) so we can allocate
             // "out" once for the whole mip chain instead of once per level.
-            basisu::vector<uint32_t> levelBlocksOrPixels(totalLevels);
-            outLevelOffsets.resize(totalLevels + 1);
+            basisu::vector<uint32_t> levelBlocksOrPixels(levelCount);
+            outLevelOffsets.resize(levelCount + 1);
             uint32_t totalSize = 0;
-            for (uint32_t level = 0; level < totalLevels; level++) {
+            for (uint32_t level = 0; level < levelCount; level++) {
                 ktx2_image_level_info levelInfo = {};
                 if (!transcoder.get_image_level_info(levelInfo, level, layerIndex, faceIndex)) {
                     basisuUtils::logError(LOG_TAG, "Failed to read image level info from KTX2 data.");
@@ -443,7 +438,7 @@ namespace basisuWrapper {
                 outLevelOffsets[level] = totalSize;
                 totalSize += computeTranscodedLevelSize(format, levelInfo.m_orig_width, levelInfo.m_orig_height, levelInfo.m_total_blocks, levelBlocksOrPixels[level]);
             }
-            outLevelOffsets[totalLevels] = totalSize;
+            outLevelOffsets[levelCount] = totalSize;
 
             out.resize(totalSize);
 
@@ -455,7 +450,7 @@ namespace basisuWrapper {
                 transcodingStarted = true;
             }
 
-            for (uint32_t level = 0; level < totalLevels; level++) {
+            for (uint32_t level = 0; level < levelCount; level++) {
                 uint8_t *levelOut = out.data() + outLevelOffsets[level];
                 if (!transcoder.transcode_image_level(level, layerIndex, 0, levelOut, levelBlocksOrPixels[level], format, 0)) {
                     return false;

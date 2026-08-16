@@ -54,11 +54,13 @@ namespace basisuWrapper {
             bool getImageLevelInfo(basisu_image_level_info &imageInfo, uint32_t imageIndex, uint32_t imageLevel);
             bool transcode(basisu::vector<uint8_t> &out, uint32_t imageIndex, uint32_t levelIndex, transcoder_texture_format format);
 
-            // Transcodes every mipmap level of the image into one contiguous buffer (one allocation
-            // for the whole chain instead of one per level). "outLevelOffsets" is filled with
-            // totalLevels+1 byte offsets into "out" - level i occupies [outLevelOffsets[i], outLevelOffsets[i+1]).
+            // Transcodes the first "levelCount" mipmap levels of the image into one contiguous
+            // buffer (one allocation for the whole chain instead of one per level), so a caller
+            // that only needs e.g. level 0 doesn't pay for transcoding the rest of the chain.
+            // "outLevelOffsets" is filled with levelCount+1 byte offsets into "out" - level i
+            // occupies [outLevelOffsets[i], outLevelOffsets[i+1]).
             bool transcodeAllLevels(basisu::vector<uint8_t> &out, basisu::vector<uint32_t> &outLevelOffsets,
-                                     uint32_t imageIndex, transcoder_texture_format format);
+                                     uint32_t imageIndex, uint32_t levelCount, transcoder_texture_format format);
 
         private:
             uint8_t *data;
@@ -91,7 +93,7 @@ namespace basisuWrapper {
 
             // Same idea as basis::TranscoderSession::transcodeAllLevels.
             bool transcodeAllLevels(basisu::vector<uint8_t> &out, basisu::vector<uint32_t> &outLevelOffsets,
-                                     uint32_t layerIndex, transcoder_texture_format format);
+                                     uint32_t layerIndex, uint32_t levelCount, transcoder_texture_format format);
 
         private:
             ktx2_transcoder transcoder;
