@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <cstring>
+#include <mutex>
 
 #include "basisu_wrapper.h"
 #include "basisu_native_utils.h"
@@ -11,16 +12,13 @@ namespace basisuWrapper {
 #define LOG_TAG "basisu_wrapper.cpp"
 
     void initBasisu() {
-        static bool basisuInitialized;
-        if (basisuInitialized)
-            return;
+        static std::once_flag basisuInitFlag;
+        std::call_once(basisuInitFlag, []() {
+            basisuUtils::logInfo(LOG_TAG, (std::string("Basis Universal ") + BASISD_VERSION_STRING).c_str());
+            basisuUtils::logInfo(LOG_TAG, "Initializing global basisu parser.");
 
-        basisuUtils::logInfo(LOG_TAG, (std::string("Basis Universal ") + BASISD_VERSION_STRING).c_str());
-        basisuUtils::logInfo(LOG_TAG, "Initializing global basisu parser.");
-
-        basisuInitialized = true;
-
-        basisu_transcoder_init();
+            basisu_transcoder_init();
+        });
     }
 
     bool isTranscoderTexFormatSupported(transcoder_texture_format transcoderTexFormat, basis_tex_format basisTexFormat) {
