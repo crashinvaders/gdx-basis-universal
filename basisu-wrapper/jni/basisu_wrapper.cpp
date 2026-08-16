@@ -11,6 +11,33 @@ namespace basisuWrapper {
 
 #define LOG_TAG "basisu_wrapper.cpp"
 
+    // Computes the required output buffer size (in bytes) and the block/pixel count expected by
+    // basisu_transcoder::transcode_image_level() for the given format and level dimensions.
+    static uint32_t computeTranscodedLevelSize(transcoder_texture_format format, uint32_t origWidth, uint32_t origHeight,
+                                                uint32_t totalBlocks, uint32_t &outBlocksOrPixels) {
+        if (basis_transcoder_format_is_uncompressed(format)) {
+            const uint32_t bytesPerPixel = basis_get_uncompressed_bytes_per_pixel(format);
+            outBlocksOrPixels = origWidth * origHeight;
+            return outBlocksOrPixels * bytesPerPixel;
+        }
+
+        const uint32_t bytesPerBlock = basis_get_bytes_per_block_or_pixel(format);
+        uint32_t requiredSize = totalBlocks * bytesPerBlock;
+
+        if (format == transcoder_texture_format::cTFPVRTC1_4_RGB || format == transcoder_texture_format::cTFPVRTC1_4_RGBA) {
+            // For PVRTC1, Basis only writes (or requires) total_blocks * bytes_per_block. But GL requires extra padding for very small textures:
+            // https://www.khronos.org/registry/OpenGL/extensions/IMG/IMG_texture_compression_pvrtc.txt
+            // The transcoder will clear the extra bytes followed the used blocks to 0.
+            const uint32_t width = (origWidth + 3) & ~3;
+            const uint32_t height = (origHeight + 3) & ~3;
+            requiredSize = (std::max(8U, width) * std::max(8U, height) * 4 + 7) / 8;
+            assert(requiredSize >= totalBlocks * bytesPerBlock);
+        }
+
+        outBlocksOrPixels = requiredSize / bytesPerBlock;
+        return requiredSize;
+    }
+
     void initBasisu() {
         static std::once_flag basisuInitFlag;
         std::call_once(basisuInitFlag, []() {
@@ -81,55 +108,25 @@ namespace basisuWrapper {
                 return false;
             }
 
-            uint32_t flags = 0;
-
-            bool status;
-
             if (!transcoder.start_transcoding(data, dataSize)) {
                 basisuUtils::logError(LOG_TAG, "Failed to init transcoding for Basis data.");
                 return false;
             }
 
+            uint32_t blocksOrPixels;
+            out.resize(computeTranscodedLevelSize(format, origWidth, origHeight, totalBlocks, blocksOrPixels));
+
+            bool status;
             if (basis_transcoder_format_is_uncompressed(format)) {
-
-                const uint32_t bytesPerPixel = basis_get_uncompressed_bytes_per_pixel(format);
-                const uint32_t bytesPerLine = origWidth * bytesPerPixel;
-                const uint32_t bytesPerSlice = bytesPerLine * origHeight;
-
-                out.resize(bytesPerSlice);
-
                 status = transcoder.transcode_image_level(
                     data, dataSize, imageIndex, levelIndex,
-                    out.data(), origWidth * origHeight,
-//                    format,
-                    static_cast<basist::transcoder_texture_format>(format),
-                    flags,
-                    origWidth,
-                    nullptr,
-                    origHeight);
-
+                    out.data(), blocksOrPixels,
+                    format, 0, origWidth, nullptr, origHeight);
             } else {
-
-                uint32_t bytesPerBlock = basis_get_bytes_per_block_or_pixel(format);
-                uint32_t requiredSize = totalBlocks * bytesPerBlock;
-
-                if (format == transcoder_texture_format::cTFPVRTC1_4_RGB || format == transcoder_texture_format::cTFPVRTC1_4_RGBA) {
-                    // For PVRTC1, Basis only writes (or requires) total_blocks * bytes_per_block. But GL requires extra padding for very small textures:
-                    // https://www.khronos.org/registry/OpenGL/extensions/IMG/IMG_texture_compression_pvrtc.txt
-                    // The transcoder will clear the extra bytes followed the used blocks to 0.
-                    const uint32_t width = (origWidth + 3) & ~3;
-                    const uint32_t height = (origHeight + 3) & ~3;
-                    requiredSize = (std::max(8U, width) * std::max(8U, height) * 4 + 7) / 8;
-                    assert(requiredSize >= totalBlocks * bytesPerBlock);
-                }
-
-                out.resize(requiredSize);
-
                 status = transcoder.transcode_image_level(
                     data, dataSize, imageIndex, levelIndex,
-                    out.data(), out.size() / bytesPerBlock,
-                    static_cast<basist::transcoder_texture_format>(format),
-                    flags);
+                    out.data(), blocksOrPixels,
+                    format, 0);
             }
 
             transcoder.stop_transcoding();
@@ -188,9 +185,55 @@ namespace basisuWrapper {
                 return false;
             }
 
-            uint32_t flags = 0;
+            if (!transcodingStarted) {
+                if (!transcoder.start_transcoding(data, dataSize)) {
+                    basisuUtils::logError(LOG_TAG, "Failed to init transcoding for Basis data.");
+                    return false;
+                }
+                transcodingStarted = true;
+            }
 
-            bool status;
+            uint32_t blocksOrPixels;
+            out.resize(computeTranscodedLevelSize(format, origWidth, origHeight, totalBlocks, blocksOrPixels));
+
+            if (basis_transcoder_format_is_uncompressed(format)) {
+                return transcoder.transcode_image_level(
+                    data, dataSize, imageIndex, levelIndex,
+                    out.data(), blocksOrPixels,
+                    format, 0, origWidth, nullptr, origHeight);
+            }
+            return transcoder.transcode_image_level(
+                data, dataSize, imageIndex, levelIndex,
+                out.data(), blocksOrPixels,
+                format, 0);
+        }
+
+        bool TranscoderSession::transcodeAllLevels(basisu::vector<uint8_t> &out, basisu::vector<uint32_t> &outLevelOffsets,
+                                                    uint32_t imageIndex, transcoder_texture_format format) {
+            basisu_image_info imageInfo;
+            if (!transcoder.get_image_info(data, dataSize, imageInfo, imageIndex)) {
+                basisuUtils::logError(LOG_TAG, "Failed to obtain image info.");
+                return false;
+            }
+            uint32_t totalLevels = imageInfo.m_total_levels;
+
+            // First pass: compute every level's output size (cheap, header-only) so we can allocate
+            // "out" once for the whole mip chain instead of once per level.
+            basisu::vector<uint32_t> levelBlocksOrPixels(totalLevels);
+            outLevelOffsets.resize(totalLevels + 1);
+            uint32_t totalSize = 0;
+            for (uint32_t level = 0; level < totalLevels; level++) {
+                uint32_t origWidth, origHeight, totalBlocks;
+                if (!transcoder.get_image_level_desc(data, dataSize, imageIndex, level, origWidth, origHeight, totalBlocks)) {
+                    basisuUtils::logError(LOG_TAG, "Failed to retrieve image level description.");
+                    return false;
+                }
+                outLevelOffsets[level] = totalSize;
+                totalSize += computeTranscodedLevelSize(format, origWidth, origHeight, totalBlocks, levelBlocksOrPixels[level]);
+            }
+            outLevelOffsets[totalLevels] = totalSize;
+
+            out.resize(totalSize);
 
             if (!transcodingStarted) {
                 if (!transcoder.start_transcoding(data, dataSize)) {
@@ -200,48 +243,29 @@ namespace basisuWrapper {
                 transcodingStarted = true;
             }
 
-            if (basis_transcoder_format_is_uncompressed(format)) {
+            for (uint32_t level = 0; level < totalLevels; level++) {
+                uint32_t origWidth, origHeight, totalBlocks;
+                transcoder.get_image_level_desc(data, dataSize, imageIndex, level, origWidth, origHeight, totalBlocks);
+                uint8_t *levelOut = out.data() + outLevelOffsets[level];
 
-                const uint32_t bytesPerPixel = basis_get_uncompressed_bytes_per_pixel(format);
-                const uint32_t bytesPerLine = origWidth * bytesPerPixel;
-                const uint32_t bytesPerSlice = bytesPerLine * origHeight;
-
-                out.resize(bytesPerSlice);
-
-                status = transcoder.transcode_image_level(
-                    data, dataSize, imageIndex, levelIndex,
-                    out.data(), origWidth * origHeight,
-                    static_cast<basist::transcoder_texture_format>(format),
-                    flags,
-                    origWidth,
-                    nullptr,
-                    origHeight);
-
-            } else {
-
-                uint32_t bytesPerBlock = basis_get_bytes_per_block_or_pixel(format);
-                uint32_t requiredSize = totalBlocks * bytesPerBlock;
-
-                if (format == transcoder_texture_format::cTFPVRTC1_4_RGB || format == transcoder_texture_format::cTFPVRTC1_4_RGBA) {
-                    // For PVRTC1, Basis only writes (or requires) total_blocks * bytes_per_block. But GL requires extra padding for very small textures:
-                    // https://www.khronos.org/registry/OpenGL/extensions/IMG/IMG_texture_compression_pvrtc.txt
-                    // The transcoder will clear the extra bytes followed the used blocks to 0.
-                    const uint32_t width = (origWidth + 3) & ~3;
-                    const uint32_t height = (origHeight + 3) & ~3;
-                    requiredSize = (std::max(8U, width) * std::max(8U, height) * 4 + 7) / 8;
-                    assert(requiredSize >= totalBlocks * bytesPerBlock);
+                bool status;
+                if (basis_transcoder_format_is_uncompressed(format)) {
+                    status = transcoder.transcode_image_level(
+                        data, dataSize, imageIndex, level,
+                        levelOut, levelBlocksOrPixels[level],
+                        format, 0, origWidth, nullptr, origHeight);
+                } else {
+                    status = transcoder.transcode_image_level(
+                        data, dataSize, imageIndex, level,
+                        levelOut, levelBlocksOrPixels[level],
+                        format, 0);
                 }
-
-                out.resize(requiredSize);
-
-                status = transcoder.transcode_image_level(
-                    data, dataSize, imageIndex, levelIndex,
-                    out.data(), out.size() / bytesPerBlock,
-                    static_cast<basist::transcoder_texture_format>(format),
-                    flags);
+                if (!status) {
+                    return false;
+                }
             }
 
-            return status;
+            return true;
         }
 
     } // namespace basis
@@ -311,51 +335,13 @@ namespace basisuWrapper {
                 return false;
             }
 
-            uint32_t origWidth = levelInfo.m_orig_width;
-            uint32_t origHeight = levelInfo.m_orig_height;
-            uint32_t totalBlocks = levelInfo.m_total_blocks;
-            uint32_t outBufSize = 0;
-            uint32_t outBufBlocks = 0;
-            uint32_t decodeFlags = 0;
-            bool status;
+            uint32_t blocksOrPixels;
+            out.resize(computeTranscodedLevelSize(format, levelInfo.m_orig_width, levelInfo.m_orig_height, levelInfo.m_total_blocks, blocksOrPixels));
 
-            // Compute the output buffer size and total block/pixel amount.
-            if (basis_transcoder_format_is_uncompressed(format)) {
-
-                const uint32_t bytesPerPixel = basis_get_uncompressed_bytes_per_pixel(format);
-                const uint32_t bytesPerLine = origWidth * bytesPerPixel;
-                const uint32_t bytesPerSlice = bytesPerLine * origHeight;
-
-                outBufSize = bytesPerSlice;
-                outBufBlocks = origWidth * origHeight;
-
-            } else {
-
-                uint32_t bytesPerBlock = basis_get_bytes_per_block_or_pixel(format);
-                uint32_t requiredSize = totalBlocks * bytesPerBlock;
-
-                if (format == transcoder_texture_format::cTFPVRTC1_4_RGB ||
-                    format == transcoder_texture_format::cTFPVRTC1_4_RGBA) {
-                   // For PVRTC1, Basis only writes (or requires) total_blocks * bytes_per_block. But GL requires extra padding for very small textures:
-                   // https://www.khronos.org/registry/OpenGL/extensions/IMG/IMG_texture_compression_pvrtc.txt
-                   // The transcoder will clear the extra bytes followed the used blocks to 0.
-                   const uint32_t width = (origWidth + 3) & ~3;
-                   const uint32_t height = (origHeight + 3) & ~3;
-                   requiredSize = (std::max(8U, width) * std::max(8U, height) * 4 + 7) / 8;
-                   assert(requiredSize >= totalBlocks * bytesPerBlock);
-                }
-
-                outBufSize = requiredSize;
-                outBufBlocks = requiredSize / bytesPerBlock;
-            }
-
-            out.resize(outBufSize);
-
-            status = transcoder.transcode_image_level(
+            bool status = transcoder.transcode_image_level(
                 levelIndex, layerIndex, 0,
-                out.data(), outBufBlocks,
-                static_cast<basist::transcoder_texture_format>(format),
-                decodeFlags);
+                out.data(), blocksOrPixels,
+                format, 0);
 
             transcoder.clear();
 
@@ -424,53 +410,59 @@ namespace basisuWrapper {
                 return false;
             }
 
-            uint32_t origWidth = levelInfo.m_orig_width;
-            uint32_t origHeight = levelInfo.m_orig_height;
-            uint32_t totalBlocks = levelInfo.m_total_blocks;
-            uint32_t outBufSize = 0;
-            uint32_t outBufBlocks = 0;
-            uint32_t decodeFlags = 0;
-            bool status;
+            uint32_t blocksOrPixels;
+            out.resize(computeTranscodedLevelSize(format, levelInfo.m_orig_width, levelInfo.m_orig_height, levelInfo.m_total_blocks, blocksOrPixels));
 
-            // Compute the output buffer size and total block/pixel amount.
-            if (basis_transcoder_format_is_uncompressed(format)) {
+            return transcoder.transcode_image_level(
+                levelIndex, layerIndex, 0,
+                out.data(), blocksOrPixels,
+                format, 0);
+        }
 
-                const uint32_t bytesPerPixel = basis_get_uncompressed_bytes_per_pixel(format);
-                const uint32_t bytesPerLine = origWidth * bytesPerPixel;
-                const uint32_t bytesPerSlice = bytesPerLine * origHeight;
-
-                outBufSize = bytesPerSlice;
-                outBufBlocks = origWidth * origHeight;
-
-            } else {
-
-                uint32_t bytesPerBlock = basis_get_bytes_per_block_or_pixel(format);
-                uint32_t requiredSize = totalBlocks * bytesPerBlock;
-
-                if (format == transcoder_texture_format::cTFPVRTC1_4_RGB ||
-                    format == transcoder_texture_format::cTFPVRTC1_4_RGBA) {
-                   // For PVRTC1, Basis only writes (or requires) total_blocks * bytes_per_block. But GL requires extra padding for very small textures:
-                   // https://www.khronos.org/registry/OpenGL/extensions/IMG/IMG_texture_compression_pvrtc.txt
-                   // The transcoder will clear the extra bytes followed the used blocks to 0.
-                   const uint32_t width = (origWidth + 3) & ~3;
-                   const uint32_t height = (origHeight + 3) & ~3;
-                   requiredSize = (std::max(8U, width) * std::max(8U, height) * 4 + 7) / 8;
-                   assert(requiredSize >= totalBlocks * bytesPerBlock);
-                }
-
-                outBufSize = requiredSize;
-                outBufBlocks = requiredSize / bytesPerBlock;
+        bool TranscoderSession::transcodeAllLevels(basisu::vector<uint8_t> &out, basisu::vector<uint32_t> &outLevelOffsets,
+                                                    uint32_t layerIndex, transcoder_texture_format format) {
+            if (!initialized) {
+                return false;
             }
 
-            out.resize(outBufSize);
+            // This value is hardcoded for now as cube-textures aren't support ATM.
+            int faceIndex = 0;
+            uint32_t totalLevels = transcoder.get_levels();
 
-            status = transcoder.transcode_image_level(
-                levelIndex, layerIndex, 0,
-                out.data(), outBufBlocks,
-                static_cast<basist::transcoder_texture_format>(format),
-                decodeFlags);
+            // First pass: compute every level's output size (cheap, header-only) so we can allocate
+            // "out" once for the whole mip chain instead of once per level.
+            basisu::vector<uint32_t> levelBlocksOrPixels(totalLevels);
+            outLevelOffsets.resize(totalLevels + 1);
+            uint32_t totalSize = 0;
+            for (uint32_t level = 0; level < totalLevels; level++) {
+                ktx2_image_level_info levelInfo = {};
+                if (!transcoder.get_image_level_info(levelInfo, level, layerIndex, faceIndex)) {
+                    basisuUtils::logError(LOG_TAG, "Failed to read image level info from KTX2 data.");
+                    return false;
+                }
+                outLevelOffsets[level] = totalSize;
+                totalSize += computeTranscodedLevelSize(format, levelInfo.m_orig_width, levelInfo.m_orig_height, levelInfo.m_total_blocks, levelBlocksOrPixels[level]);
+            }
+            outLevelOffsets[totalLevels] = totalSize;
 
-            return status;
+            out.resize(totalSize);
+
+            if (!transcodingStarted) {
+                if (!transcoder.start_transcoding()) {
+                    basisuUtils::logError(LOG_TAG, "Failed to init transcoding for KTX2 data.");
+                    return false;
+                }
+                transcodingStarted = true;
+            }
+
+            for (uint32_t level = 0; level < totalLevels; level++) {
+                uint8_t *levelOut = out.data() + outLevelOffsets[level];
+                if (!transcoder.transcode_image_level(level, layerIndex, 0, levelOut, levelBlocksOrPixels[level], format, 0)) {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
     } // namespace ktx2

@@ -122,6 +122,41 @@ public class Ktx2FileTranscoder implements Closeable {
         return wrapIntoBuffer(env, transcodedData);
     */
 
+    /**
+     * Decodes every mipmap level of the image to any of the supported output texture formats,
+     * packed into a single buffer (one native allocation for the whole chain instead of one per
+     * level - see {@link TranscodedMipChain}).
+     */
+    public TranscodedMipChain transcodeAllLevels(int layerIndex, BasisuTranscoderTextureFormat textureFormat) {
+        int totalLevels = getFileInfo().getTotalMipmapLevels();
+        int[] levelOffsets = new int[totalLevels + 1];
+        ByteBuffer data = jniTranscodeAllLevels(addr, layerIndex, textureFormat.getId(), levelOffsets);
+        if (data == null) {
+            throw new BasisuWrapperException("Error during KTX2 image transcoding.");
+        }
+        return new TranscodedMipChain(data, levelOffsets);
+    }
+    private native ByteBuffer jniTranscodeAllLevels(long addr, int layerIndex, int textureFormatId, int[] outLevelOffsets); /*MANUAL
+        basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
+        basisu::vector<uint8_t> transcodedData;
+        basisu::vector<uint32_t> levelOffsets;
+
+        if (!getWrapped(addr)->transcodeAllLevels(transcodedData, levelOffsets, layerIndex, format)) {
+            basisuUtils::throwException(env, "Error during KTX2 image transcoding.");
+            return 0;
+        }
+
+        // "MANUAL" methods don't get jnigen's automatic array unwrapping, unlike the non-MANUAL
+        // methods elsewhere in this class - Get/ReleaseIntArrayElements has to be done by hand here.
+        jint* buf = env->GetIntArrayElements(outLevelOffsets, NULL);
+        for (size_t i = 0; i < levelOffsets.size(); i++) {
+            buf[i] = (jint)levelOffsets[i];
+        }
+        env->ReleaseIntArrayElements(outLevelOffsets, buf, 0);
+
+        return wrapIntoBuffer(env, transcodedData);
+    */
+
     private static native long jniOpen(Buffer dataBuffer, int dataSize); /*MANUAL
         uint8_t* data = (uint8_t*)env->GetDirectBufferAddress(dataBuffer);
         basisuWrapper::ktx2::TranscoderSession* session = new basisuWrapper::ktx2::TranscoderSession(data, (uint32_t)dataSize);

@@ -150,4 +150,17 @@ public class BasisuData implements Disposable {
     public ByteBuffer transcode(int imageIndex, int mipmapLevel, BasisuTranscoderTextureFormat textureFormat) {
         return fileTranscoder.transcode(imageIndex, mipmapLevel, textureFormat);
     }
+
+    /**
+     * Transcodes every mipmap level of the Basis image to the target texture format, packed into
+     * a single buffer (one native allocation for the whole chain instead of one per level).
+     * @param imageIndex the image index in the Basis file
+     * @param textureFormat the target format to transcode to
+     * @return the transcoded mip chain.
+     * Do not forget to use {@link BasisuWrapper#disposeNativeBuffer(ByteBuffer)} on {@link TranscodedMipChain#data}
+     * when the buffer is no longer required.
+     */
+    public TranscodedMipChain transcodeAllLevels(int imageIndex, BasisuTranscoderTextureFormat textureFormat) {
+        return fileTranscoder.transcodeAllLevels(imageIndex, textureFormat);
+    }
 }

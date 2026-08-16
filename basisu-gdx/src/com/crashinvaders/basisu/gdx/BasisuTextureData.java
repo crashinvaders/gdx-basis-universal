@@ -33,9 +33,11 @@ public class BasisuTextureData implements TextureData {
 
     private BasisuData basisuData;
 
-    /** Holds transcoded data buffer per each mipmap level.
+    /** Holds the width/height of each mipmap level.
      * Index of the array corresponds to the index of mipmap level. */
     private TranscodedLevelData[] transcodedLevels = null;
+    /** Holds the transcoded bytes for every mipmap level, packed into a single buffer. */
+    private TranscodedMipChain mipChain = null;
     private BasisuTranscoderTextureFormat transcodeFormat = null;
 
     private int width = 0;
@@ -153,11 +155,13 @@ public class BasisuTextureData implements TextureData {
         transcodedLevels = new TranscodedLevelData[transcodeLevels];
         for (int level = 0; level < transcodeLevels; level++) {
             BasisuImageLevelInfo levelInfo = basisuData.getImageLevelInfo(imageIndex, level);
-            int width = levelInfo.getOrigWidth();
-            int height = levelInfo.getOrigHeight();
-            ByteBuffer data = basisuData.transcode(imageIndex, level, transcodeFormat);
-            transcodedLevels[level] = new TranscodedLevelData(level, width, height, data);
-            Gdx.app.debug(TAG, (file != null ? "["+file.path()+"] " : "") + "Transcoded [mipmap:" + level + "] [size:" + width + "x" + height + "] [memory:" + MathUtils.round(data.capacity() / 1024.0f) + "kB]");
+            transcodedLevels[level] = new TranscodedLevelData(level, levelInfo.getOrigWidth(), levelInfo.getOrigHeight());
+        }
+
+        mipChain = basisuData.transcodeAllLevels(imageIndex, transcodeFormat);
+        for (int level = 0; level < transcodeLevels; level++) {
+            TranscodedLevelData entry = transcodedLevels[level];
+            Gdx.app.debug(TAG, (file != null ? "["+file.path()+"] " : "") + "Transcoded [mipmap:" + level + "] [size:" + entry.width + "x" + entry.height + "] [memory:" + MathUtils.round(mipChain.getLevelSize(level) / 1024.0f) + "kB]");
         }
 
         this.width = transcodedLevels[0].width;
@@ -177,12 +181,15 @@ public class BasisuTextureData implements TextureData {
 
         for (int level = 0; level < transcodedLevels.length; level++) {
             TranscodedLevelData entry = transcodedLevels[level];
-            ByteBuffer data = entry.data;
+
+            ByteBuffer data = mipChain.data.duplicate();
+            data.position(mipChain.getLevelOffset(level));
+            data.limit(mipChain.getLevelOffset(level) + mipChain.getLevelSize(level));
 
             if (isCompressedFormat) {
                 BasisuGdxGl.glCompressedTexImage2D(target, level, glFormatCode,
                         entry.width, entry.height, 0,
-                        data.capacity(), data);
+                        data.remaining(), data);
             } else {
                 int textureType = BasisuGdxUtils.toUncompressedGlTextureType(transcodeFormat);
                 Gdx.gl.glTexImage2D(target, level, glFormatCode,
@@ -198,10 +205,8 @@ public class BasisuTextureData implements TextureData {
         }
 
         // Cleanup.
-        for (int i = 0; i < transcodedLevels.length; i++) {
-            ByteBuffer data = transcodedLevels[i].data;
-            BasisuWrapper.disposeNativeBuffer(data);
-        }
+        BasisuWrapper.disposeNativeBuffer(mipChain.data);
+        mipChain = null;
         transcodedLevels = null;
         transcodeFormat = null;
 
@@ -251,13 +256,11 @@ public class BasisuTextureData implements TextureData {
         public final int levelIndex;
         public final int width;
         public final int height;
-        public final ByteBuffer data;
 
-        public TranscodedLevelData(int levelIndex, int width, int height, ByteBuffer data) {
+        public TranscodedLevelData(int levelIndex, int width, int height) {
             this.levelIndex = levelIndex;
             this.width = width;
             this.height = height;
-            this.data = data;
         }
     }
 }

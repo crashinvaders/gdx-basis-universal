@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.crashinvaders.basisu.wrapper.BasisuTranscoderTextureFormat;
 import com.crashinvaders.basisu.wrapper.BasisuWrapper;
 import com.crashinvaders.basisu.wrapper.Ktx2ImageLevelInfo;
+import com.crashinvaders.basisu.wrapper.TranscodedMipChain;
 
 import java.nio.ByteBuffer;
 
@@ -34,9 +35,11 @@ public class Ktx2TextureData implements TextureData {
 
     private Ktx2Data ktx2Data;
 
-    /** Holds transcoded data buffer per each mipmap level.
+    /** Holds the width/height of each mipmap level.
      * Index of the array corresponds to the index of mipmap level. */
     private TranscodedLevelData[] transcodedLevels = null;
+    /** Holds the transcoded bytes for every mipmap level, packed into a single buffer. */
+    private TranscodedMipChain mipChain = null;
     private BasisuTranscoderTextureFormat transcodeFormat = null;
 
     private int width = 0;
@@ -131,11 +134,13 @@ public class Ktx2TextureData implements TextureData {
         transcodedLevels = new TranscodedLevelData[transcodeLevels];
         for (int level = 0; level < transcodeLevels; level++) {
             Ktx2ImageLevelInfo levelInfo = ktx2Data.getImageLevelInfo(layerIndex, level);
-            int width = levelInfo.getOrigWidth();
-            int height = levelInfo.getOrigHeight();
-            ByteBuffer data = ktx2Data.transcode(layerIndex, level, transcodeFormat);
-            transcodedLevels[level] = new TranscodedLevelData(level, width, height, data);
-            Gdx.app.debug(TAG, (file != null ? "["+file.path()+"] " : "") + "Transcoded [mipmap:" + level + "] [size:" + width + "x" + height + "] [memory:" + MathUtils.round(data.capacity() / 1024.0f) + "kB]");
+            transcodedLevels[level] = new TranscodedLevelData(level, levelInfo.getOrigWidth(), levelInfo.getOrigHeight());
+        }
+
+        mipChain = ktx2Data.transcodeAllLevels(layerIndex, transcodeFormat);
+        for (int level = 0; level < transcodeLevels; level++) {
+            TranscodedLevelData entry = transcodedLevels[level];
+            Gdx.app.debug(TAG, (file != null ? "["+file.path()+"] " : "") + "Transcoded [mipmap:" + level + "] [size:" + entry.width + "x" + entry.height + "] [memory:" + MathUtils.round(mipChain.getLevelSize(level) / 1024.0f) + "kB]");
         }
 
         ktx2Data.dispose();
@@ -152,12 +157,15 @@ public class Ktx2TextureData implements TextureData {
 
         for (int level = 0; level < transcodedLevels.length; level++) {
             TranscodedLevelData entry = transcodedLevels[level];
-            ByteBuffer data = entry.data;
+
+            ByteBuffer data = mipChain.data.duplicate();
+            data.position(mipChain.getLevelOffset(level));
+            data.limit(mipChain.getLevelOffset(level) + mipChain.getLevelSize(level));
 
             if (isCompressedFormat) {
                 BasisuGdxGl.glCompressedTexImage2D(target, level, glFormatCode,
                         entry.width, entry.height, 0,
-                        data.capacity(), data);
+                        data.remaining(), data);
             } else {
                 int textureType = BasisuGdxUtils.toUncompressedGlTextureType(transcodeFormat);
                 Gdx.gl.glTexImage2D(target, level, glFormatCode,
@@ -173,10 +181,8 @@ public class Ktx2TextureData implements TextureData {
         }
 
         // Cleanup.
-        for (int i = 0; i < transcodedLevels.length; i++) {
-            ByteBuffer data = transcodedLevels[i].data;
-            BasisuWrapper.disposeNativeBuffer(data);
-        }
+        BasisuWrapper.disposeNativeBuffer(mipChain.data);
+        mipChain = null;
         transcodedLevels = null;
         transcodeFormat = null;
 
@@ -226,13 +232,11 @@ public class Ktx2TextureData implements TextureData {
         public final int levelIndex;
         public final int width;
         public final int height;
-        public final ByteBuffer data;
 
-        public TranscodedLevelData(int levelIndex, int width, int height, ByteBuffer data) {
+        public TranscodedLevelData(int levelIndex, int width, int height) {
             this.levelIndex = levelIndex;
             this.width = width;
             this.height = height;
-            this.data = data;
         }
     }
 }

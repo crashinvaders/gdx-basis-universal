@@ -272,6 +272,38 @@ public class BasisuWrapperTest {
     }
 
     /**
+     * Verifies that {@link BasisuFileTranscoder#transcodeAllLevels} produces byte-for-byte the
+     * same output as transcoding each level individually via {@link BasisuFileTranscoder#transcode}.
+     */
+    @Test
+    public void testBasisuFileTranscoderTranscodeAllLevels() {
+        try (BasisuFileTranscoder fileTranscoder = new BasisuFileTranscoder(imageBasisMipmapBuffer)) {
+            int totalLevels;
+            try (BasisuFileInfo fileInfo = fileTranscoder.getFileInfo()) {
+                totalLevels = fileInfo.getImageMipmapLevels()[0];
+            }
+
+            TranscodedMipChain mipChain = fileTranscoder.transcodeAllLevels(0, BasisuTranscoderTextureFormat.RGBA32);
+            assertEquals(totalLevels, mipChain.getLevelCount());
+
+            for (int level = 0; level < totalLevels; level++) {
+                ByteBuffer expected = fileTranscoder.transcode(0, level, BasisuTranscoderTextureFormat.RGBA32);
+
+                ByteBuffer actual = mipChain.data.duplicate();
+                actual.position(mipChain.getLevelOffset(level));
+                actual.limit(mipChain.getLevelOffset(level) + mipChain.getLevelSize(level));
+
+                assertEquals(expected.capacity(), mipChain.getLevelSize(level));
+                assertEquals(expected, actual);
+
+                BasisuWrapper.disposeNativeBuffer(expected);
+            }
+
+            BasisuWrapper.disposeNativeBuffer(mipChain.data);
+        }
+    }
+
+    /**
      * Exercises {@link Ktx2FileTranscoder} as a persistent session, mirroring
      * {@link #testBasisuFileTranscoderSession()}.
      */
@@ -290,6 +322,38 @@ public class BasisuWrapperTest {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Verifies that {@link Ktx2FileTranscoder#transcodeAllLevels} produces byte-for-byte the
+     * same output as transcoding each level individually via {@link Ktx2FileTranscoder#transcode}.
+     */
+    @Test
+    public void testKtx2FileTranscoderTranscodeAllLevels() {
+        try (Ktx2FileTranscoder fileTranscoder = new Ktx2FileTranscoder(imageKtx2Buffer)) {
+            int totalLevels;
+            try (Ktx2FileInfo fileInfo = fileTranscoder.getFileInfo()) {
+                totalLevels = fileInfo.getTotalMipmapLevels();
+            }
+
+            TranscodedMipChain mipChain = fileTranscoder.transcodeAllLevels(0, BasisuTranscoderTextureFormat.ETC2_RGBA);
+            assertEquals(totalLevels, mipChain.getLevelCount());
+
+            for (int level = 0; level < totalLevels; level++) {
+                ByteBuffer expected = fileTranscoder.transcode(0, level, BasisuTranscoderTextureFormat.ETC2_RGBA);
+
+                ByteBuffer actual = mipChain.data.duplicate();
+                actual.position(mipChain.getLevelOffset(level));
+                actual.limit(mipChain.getLevelOffset(level) + mipChain.getLevelSize(level));
+
+                assertEquals(expected.capacity(), mipChain.getLevelSize(level));
+                assertEquals(expected, actual);
+
+                BasisuWrapper.disposeNativeBuffer(expected);
+            }
+
+            BasisuWrapper.disposeNativeBuffer(mipChain.data);
         }
     }
 

@@ -54,6 +54,12 @@ namespace basisuWrapper {
             bool getImageLevelInfo(basisu_image_level_info &imageInfo, uint32_t imageIndex, uint32_t imageLevel);
             bool transcode(basisu::vector<uint8_t> &out, uint32_t imageIndex, uint32_t levelIndex, transcoder_texture_format format);
 
+            // Transcodes every mipmap level of the image into one contiguous buffer (one allocation
+            // for the whole chain instead of one per level). "outLevelOffsets" is filled with
+            // totalLevels+1 byte offsets into "out" - level i occupies [outLevelOffsets[i], outLevelOffsets[i+1]).
+            bool transcodeAllLevels(basisu::vector<uint8_t> &out, basisu::vector<uint32_t> &outLevelOffsets,
+                                     uint32_t imageIndex, transcoder_texture_format format);
+
         private:
             uint8_t *data;
             uint32_t dataSize;
@@ -82,6 +88,10 @@ namespace basisuWrapper {
             bool getFileInfo(basisuWrapper::ktx2_file_info &fileInfo);
             bool getImageLevelInfo(ktx2_image_level_info &imageInfo, uint32_t layerIndex, uint32_t levelIndex);
             bool transcode(basisu::vector<uint8_t> &out, uint32_t layerIndex, uint32_t levelIndex, transcoder_texture_format format);
+
+            // Same idea as basis::TranscoderSession::transcodeAllLevels.
+            bool transcodeAllLevels(basisu::vector<uint8_t> &out, basisu::vector<uint32_t> &outLevelOffsets,
+                                     uint32_t layerIndex, transcoder_texture_format format);
 
         private:
             ktx2_transcoder transcoder;

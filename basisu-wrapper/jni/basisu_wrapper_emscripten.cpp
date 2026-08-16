@@ -28,6 +28,13 @@ val vecToTypedArray(basisu::vector<uint8_t> &vec) {
     return jsValue;
 }
 
+val vecToUint32TypedArray(basisu::vector<uint32_t> &vec) {
+    val jsValue = val::global("Uint32Array").new_(vec.size());
+    val memoryView{typed_memory_view(vec.size(), vec.data())};
+    jsValue.call<void>("set", memoryView);
+    return jsValue;
+}
+
 int main(int, char**) {
     basisuUtils::logInfo(LOG_TAG, "libGDX Basis Universal native library is ready.");
     return 0;
@@ -92,6 +99,24 @@ public:
         return vecToTypedArray(output);
     }
 
+    // Decodes every mipmap level of the image into one contiguous buffer (one allocation for the
+    // whole chain instead of one per level). Returns {data: Uint8Array, levelOffsets: Uint32Array}.
+    val transcodeAllLevels(uint32_t imageIndex, uint32_t textureFormatId) {
+        basisu::vector<uint8_t> output;
+        basisu::vector<uint32_t> levelOffsets;
+        basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
+
+        if (!session.transcodeAllLevels(output, levelOffsets, imageIndex, format)) {
+            basisuUtils::logError(LOG_TAG, "Error during Basis image transcoding!");
+            basisuUtils::throwException(nullptr, "Error during basis image transcoding!");
+        }
+
+        val result = val::object();
+        result.set("data", vecToTypedArray(output));
+        result.set("levelOffsets", vecToUint32TypedArray(levelOffsets));
+        return result;
+    }
+
 private:
     basisu::vector<uint8_t> data;
     basisuWrapper::basis::TranscoderSession session;
@@ -128,6 +153,23 @@ public:
         }
 
         return vecToTypedArray(output);
+    }
+
+    // Same idea as BasisFileTranscoder::transcodeAllLevels.
+    val transcodeAllLevels(uint32_t layerIndex, uint32_t textureFormatId) {
+        basisu::vector<uint8_t> output;
+        basisu::vector<uint32_t> levelOffsets;
+        basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
+
+        if (!session.transcodeAllLevels(output, levelOffsets, layerIndex, format)) {
+            basisuUtils::logError(LOG_TAG, "Error during KTX2 image transcoding!");
+            basisuUtils::throwException(nullptr, "Error during KTX2 image transcoding!");
+        }
+
+        val result = val::object();
+        result.set("data", vecToTypedArray(output));
+        result.set("levelOffsets", vecToUint32TypedArray(levelOffsets));
+        return result;
     }
 
 private:
@@ -252,6 +294,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
         .function("getImageInfo", &BasisFileTranscoder::getImageInfo)
         .function("getImageLevelInfo", &BasisFileTranscoder::getImageLevelInfo)
         .function("transcode", &BasisFileTranscoder::transcode)
+        .function("transcodeAllLevels", &BasisFileTranscoder::transcodeAllLevels)
         ;
 
     class_<Ktx2FileTranscoder>("Ktx2FileTranscoder")
@@ -259,6 +302,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
         .function("getFileInfo", &Ktx2FileTranscoder::getFileInfo)
         .function("getImageLevelInfo", &Ktx2FileTranscoder::getImageLevelInfo)
         .function("transcode", &Ktx2FileTranscoder::transcode)
+        .function("transcodeAllLevels", &Ktx2FileTranscoder::transcodeAllLevels)
         ;
 }
 

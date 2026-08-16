@@ -2,6 +2,7 @@ package com.crashinvaders.basisu.wrapper;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.typedarrays.shared.ArrayBufferView;
+import com.google.gwt.typedarrays.shared.Uint32Array;
 import com.google.gwt.typedarrays.shared.Uint8Array;
 
 import java.io.Closeable;
@@ -52,5 +53,30 @@ public class Ktx2FileTranscoder implements Closeable {
     }
     private static native Uint8Array transcodeNative(JavaScriptObject handle, int layerIndex, int levelIndex, int textureFormat) /*-{
         return handle.transcode(layerIndex, levelIndex, textureFormat);
+    }-*/;
+
+    /**
+     * Decodes every mipmap level of the image, packed into a single buffer (see {@link TranscodedMipChain}).
+     */
+    public TranscodedMipChain transcodeAllLevels(int layerIndex, BasisuTranscoderTextureFormat textureFormat) {
+        JavaScriptObject result = transcodeAllLevelsNative(handleJs, layerIndex, textureFormat.getId());
+        Uint8Array dataArray = getResultDataNative(result);
+        Uint32Array offsetsArray = getResultLevelOffsetsNative(result);
+
+        int[] levelOffsets = new int[offsetsArray.length()];
+        for (int i = 0; i < levelOffsets.length; i++) {
+            levelOffsets[i] = (int) offsetsArray.get(i);
+        }
+
+        return new TranscodedMipChain(BasisuWrapper.fromTypedArray(dataArray), levelOffsets);
+    }
+    private static native JavaScriptObject transcodeAllLevelsNative(JavaScriptObject handle, int layerIndex, int textureFormat) /*-{
+        return handle.transcodeAllLevels(layerIndex, textureFormat);
+    }-*/;
+    private static native Uint8Array getResultDataNative(JavaScriptObject result) /*-{
+        return result.data;
+    }-*/;
+    private static native Uint32Array getResultLevelOffsetsNative(JavaScriptObject result) /*-{
+        return result.levelOffsets;
     }-*/;
 }
