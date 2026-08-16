@@ -71,37 +71,100 @@ public class BasisuFileTranscoder implements Closeable {
 
     /** @return a description of the basis file and low-level information about each slice. */
     public BasisuFileInfo getFileInfo() {
-        BasisuFileInfo fileInfo = new BasisuFileInfo();
-        if (!jniGetFileInfo(addr, fileInfo.addr)) {
+        int[] values = new int[BasisuFileInfo.FIELD_COUNT];
+        int[] imageMipmapLevels = jniGetFileInfo(addr, values);
+        if (imageMipmapLevels == null) {
             throw new BasisuWrapperException("Failed to obtain Basis file info.");
         }
-        return fileInfo;
+        return new BasisuFileInfo(values, imageMipmapLevels);
     }
-    private native boolean jniGetFileInfo(long addr, long fileInfoAddr); /*
-        return getWrapped(addr)->getFileInfo(*(basist::basisu_file_info*)fileInfoAddr);
+    // Returns the variable-length mipmap level count array as the return value, while the fixed
+    // set of scalar fields is packed into "outValues" - one native call populates the whole object.
+    private native int[] jniGetFileInfo(long addr, int[] outValues); /*
+        basist::basisu_file_info fileInfo;
+        if (!getWrapped(addr)->getFileInfo(fileInfo)) {
+            return NULL;
+        }
+
+        outValues[0] = (jint)fileInfo.m_version;
+        outValues[1] = (jint)fileInfo.m_total_header_size;
+        outValues[2] = (jint)fileInfo.m_total_selectors;
+        outValues[3] = (jint)fileInfo.m_selector_codebook_size;
+        outValues[4] = (jint)fileInfo.m_total_endpoints;
+        outValues[5] = (jint)fileInfo.m_endpoint_codebook_size;
+        outValues[6] = (jint)fileInfo.m_tables_size;
+        outValues[7] = (jint)fileInfo.m_slices_size;
+        outValues[8] = (jint)fileInfo.m_us_per_frame;
+        outValues[9] = (jint)fileInfo.m_total_images;
+        outValues[10] = (jint)fileInfo.m_userdata0;
+        outValues[11] = (jint)fileInfo.m_userdata1;
+        outValues[12] = fileInfo.m_y_flipped ? 1 : 0;
+        outValues[13] = fileInfo.m_etc1s ? 1 : 0;
+        outValues[14] = fileInfo.m_has_alpha_slices ? 1 : 0;
+        outValues[15] = (jint)fileInfo.m_tex_type;
+        outValues[16] = (jint)fileInfo.m_tex_format;
+
+        basisu::vector<uint32_t>& levels = fileInfo.m_image_mipmap_levels;
+        jintArray result = env->NewIntArray((jsize)levels.size());
+        env->SetIntArrayRegion(result, 0, (jsize)levels.size(), (jint*)levels.data());
+        return result;
     */
 
     /** @return information about the specified image. */
     public BasisuImageInfo getImageInfo(int imageIndex) {
-        BasisuImageInfo imageInfo = new BasisuImageInfo();
-        if (!jniGetImageInfo(addr, imageInfo.addr, imageIndex)) {
+        int[] values = new int[BasisuImageInfo.FIELD_COUNT];
+        if (!jniGetImageInfo(addr, imageIndex, values)) {
             throw new BasisuWrapperException("Failed to obtain Basis image info.");
         }
-        return imageInfo;
+        return new BasisuImageInfo(values);
     }
-    private native boolean jniGetImageInfo(long addr, long imageInfoAddr, int imageIndex); /*
-        return getWrapped(addr)->getImageInfo(*(basist::basisu_image_info*)imageInfoAddr, imageIndex);
+    private native boolean jniGetImageInfo(long addr, int imageIndex, int[] outValues); /*
+        basist::basisu_image_info imageInfo;
+        if (!getWrapped(addr)->getImageInfo(imageInfo, imageIndex)) {
+            return false;
+        }
+
+        outValues[0] = (jint)imageInfo.m_image_index;
+        outValues[1] = (jint)imageInfo.m_total_levels;
+        outValues[2] = (jint)imageInfo.m_orig_width;
+        outValues[3] = (jint)imageInfo.m_orig_height;
+        outValues[4] = (jint)imageInfo.m_width;
+        outValues[5] = (jint)imageInfo.m_height;
+        outValues[6] = (jint)imageInfo.m_num_blocks_x;
+        outValues[7] = (jint)imageInfo.m_num_blocks_y;
+        outValues[8] = (jint)imageInfo.m_total_blocks;
+        outValues[9] = (jint)imageInfo.m_first_slice_index;
+        outValues[10] = imageInfo.m_alpha_flag ? 1 : 0;
+        outValues[11] = imageInfo.m_iframe_flag ? 1 : 0;
+        return true;
     */
 
     public BasisuImageLevelInfo getImageLevelInfo(int imageIndex, int imageLevel) {
-        BasisuImageLevelInfo levelInfo = new BasisuImageLevelInfo();
-        if (!jniGetImageLevelInfo(addr, levelInfo.addr, imageIndex, imageLevel)) {
+        int[] values = new int[BasisuImageLevelInfo.FIELD_COUNT];
+        if (!jniGetImageLevelInfo(addr, imageIndex, imageLevel, values)) {
             throw new BasisuWrapperException("Failed to obtain Basis image level info.");
         }
-        return levelInfo;
+        return new BasisuImageLevelInfo(values);
     }
-    private native boolean jniGetImageLevelInfo(long addr, long imageInfoAddr, int imageIndex, int imageLevel); /*
-        return getWrapped(addr)->getImageLevelInfo(*(basist::basisu_image_level_info*)imageInfoAddr, imageIndex, imageLevel);
+    private native boolean jniGetImageLevelInfo(long addr, int imageIndex, int imageLevel, int[] outValues); /*
+        basist::basisu_image_level_info levelInfo;
+        if (!getWrapped(addr)->getImageLevelInfo(levelInfo, imageIndex, imageLevel)) {
+            return false;
+        }
+
+        outValues[0] = (jint)levelInfo.m_image_index;
+        outValues[1] = (jint)levelInfo.m_level_index;
+        outValues[2] = (jint)levelInfo.m_orig_width;
+        outValues[3] = (jint)levelInfo.m_orig_height;
+        outValues[4] = (jint)levelInfo.m_width;
+        outValues[5] = (jint)levelInfo.m_height;
+        outValues[6] = (jint)levelInfo.m_num_blocks_x;
+        outValues[7] = (jint)levelInfo.m_num_blocks_y;
+        outValues[8] = (jint)levelInfo.m_total_blocks;
+        outValues[9] = (jint)levelInfo.m_first_slice_index;
+        outValues[10] = levelInfo.m_alpha_flag ? 1 : 0;
+        outValues[11] = levelInfo.m_iframe_flag ? 1 : 0;
+        return true;
     */
 
     /**

@@ -5,38 +5,55 @@ import java.io.Closeable;
 import static com.crashinvaders.basisu.wrapper.UniqueIdUtils.findOrThrow;
 
 /**
- * Direct mapping of <code>basist::transcoder_texture_format</code> struct.
- *
+ * Direct mapping of <code>basist::basisu_file_info</code> struct.
  * <p/>
- * High-level composite texture formats supported by the transcoder.
- * Each of these texture formats directly correspond to OpenGL/D3D/Vulkan etc. texture formats.
- *
- * <p/>
- * Notes:
- * <ul>
- *  <li>If you specify a texture format that supports alpha, but the .basis file doesn't have alpha, the transcoder will automatically output a fully opaque (255) alpha channel.</li>
- *  <li>The PVRTC1 texture formats only support power of 2 dimension .basis files, but this may be relaxed in a future version.</li>
- *  <li>The PVRTC1 transcoders are real-time encoders, so don't expect the highest quality. We may add a slower encoder with improved quality.</li>
- *  <li>These enums must be kept in sync with Javascript code that calls the transcoder.</li>
- * </ul>
- *
- * <p/>
- * CLOSEABLE: Instances of this class internally manage native resources
- * and need to be closed using {@link #close()} when no longer needed.
+ * Populated in a single native call (see {@link #FIELD_COUNT}) instead of one native call per
+ * field, so all getters below are plain Java field reads with no further native-code round trips.
  */
 public class BasisuFileInfo implements Closeable {
-	/*JNI
-        #include "basisu_transcoder.h"
 
-        static basist::basisu_file_info* getWrapped(jlong addr) {
-            return (basist::basisu_file_info*)addr;
-        }
-	 */
+    static final int FIELD_COUNT = 17;
 
-    long addr = 0;
+    private boolean closed;
 
-    BasisuFileInfo() {
-        this.addr = jniCreate();
+    private final int version;
+    private final int totalHeaderSize;
+    private final int totalSelectors;
+    private final int selectorCodebookSize;
+    private final int totalEndpoints;
+    private final int endpointCodebookSize;
+    private final int tablesSize;
+    private final int slicesSize;
+    private final int usPerFrame;
+    private final int totalImages;
+    private final int userdata0;
+    private final int userdata1;
+    private final boolean yFlipped;
+    private final boolean etc1s;
+    private final boolean hasAlphaSlices;
+    private final BasisuTextureType textureType;
+    private final BasisuTextureFormat textureFormat;
+    private final int[] imageMipmapLevels;
+
+    BasisuFileInfo(int[] values, int[] imageMipmapLevels) {
+        this.version = values[0];
+        this.totalHeaderSize = values[1];
+        this.totalSelectors = values[2];
+        this.selectorCodebookSize = values[3];
+        this.totalEndpoints = values[4];
+        this.endpointCodebookSize = values[5];
+        this.tablesSize = values[6];
+        this.slicesSize = values[7];
+        this.usPerFrame = values[8];
+        this.totalImages = values[9];
+        this.userdata0 = values[10];
+        this.userdata1 = values[11];
+        this.yFlipped = values[12] != 0;
+        this.etc1s = values[13] != 0;
+        this.hasAlphaSlices = values[14] != 0;
+        this.textureType = findOrThrow(BasisuTextureType.values(), values[15]);
+        this.textureFormat = findOrThrow(BasisuTextureFormat.values(), values[16]);
+        this.imageMipmapLevels = imageMipmapLevels;
     }
 
     BasisuFileInfo(Object ignored) {
@@ -45,134 +62,56 @@ public class BasisuFileInfo implements Closeable {
 
     @Override
     public void close() {
-        if (addr == 0) {
+        if (closed) {
             throw new IllegalStateException("Object was already closed!");
         }
-        jniDispose(addr);
-        addr = 0;
+        closed = true;
     }
-
-//    @Override
-//    protected void finalize() throws Throwable {
-//        if (addr != 0) {
-//            System.err.println(this + " object was GC'ed but never closed!");
-//            close();
-//        }
-//        super.finalize();
-//    }
 
     public BasisuTextureType getTextureType() {
-        int textureTypeId = jniGetTextureType(addr);
-        return findOrThrow(BasisuTextureType.values(), textureTypeId);
+        return textureType;
     }
-    private native int jniGetTextureType(long addr); /*
-        return (int)getWrapped(addr)->m_tex_type;
-    */
 
     public BasisuTextureFormat getTextureFormat() {
-        int textureFormatId = jniGetTextureFormat(addr);
-        return findOrThrow(BasisuTextureFormat.values(), textureFormatId);
+        return textureFormat;
     }
-    private native int jniGetTextureFormat(long addr); /*
-        return (int)getWrapped(addr)->m_tex_format;
-    */
-
-    public int getVersion() { return jniGetVersion(addr); }
-    private native int jniGetVersion(long addr); /*
-        return getWrapped(addr)->m_version;
-    */
-
-    public int getTotalHeaderSize() { return jniGetTotalHeaderSize(addr); }
-    private native int jniGetTotalHeaderSize(long addr); /*
-        return getWrapped(addr)->m_total_header_size;
-    */
-
-    public int getTotalSelectors() { return jniGetTotalSelectors(addr); }
-    private native int jniGetTotalSelectors(long addr); /*
-        return getWrapped(addr)->m_total_selectors;
-    */
-
-    public int getSelectorCodebookSize() { return jniGetSelectorCodebookSize(addr); }
-    private native int jniGetSelectorCodebookSize(long addr); /*
-        return getWrapped(addr)->m_selector_codebook_size;
-    */
-
-    public int getTotalEndpoints() { return jniGetTotalEndpoints(addr); }
-    private native int jniGetTotalEndpoints(long addr); /*
-        return getWrapped(addr)->m_total_endpoints;
-    */
-
-    public int getEndpointCodebookSize() { return jniGetEndpointCodebookSize(addr); }
-    private native int jniGetEndpointCodebookSize(long addr); /*
-        return getWrapped(addr)->m_endpoint_codebook_size;
-    */
-
-    public int getTablesSize() { return jniGetTablesSize(addr); }
-    private native int jniGetTablesSize(long addr); /*
-        return getWrapped(addr)->m_tables_size;
-    */
-
-    public int getSlicesSize() { return jniGetSlicesSize(addr); }
-    private native int jniGetSlicesSize(long addr); /*
-        return getWrapped(addr)->m_slices_size;
-    */
-
-    public int getUsPerFrame() { return jniGetUsPerFrame(addr); }
-    private native int jniGetUsPerFrame(long addr); /*
-        return getWrapped(addr)->m_us_per_frame;
-    */
-
-    /** Total number of images. */
-    public int getTotalImages() { return jniGetTotalImages(addr); }
-    private native int jniGetTotalImages(long addr); /*
-        return getWrapped(addr)->m_total_images;
-    */
 
     /** The number of mipmap levels for each image. */
-    public int[] getImageMipmapLevels() { return jniGetImageMipmapLevels(addr); }
-    private native int[] jniGetImageMipmapLevels(long addr); /*
-        basisu::vector<uint32_t> imageLevels = getWrapped(addr)->m_image_mipmap_levels;
+    public int[] getImageMipmapLevels() {
+        return imageMipmapLevels;
+    }
 
-        jintArray intArray = env->NewIntArray(imageLevels.size());
-        env->SetIntArrayRegion(intArray, (jsize)0, (jsize)imageLevels.size(), (jint*)imageLevels.data());
-        return intArray;
-    */
+    public int getVersion() { return version; }
 
-    public int getUserdata0() { return jniGetUserdata0(addr); }
-    private native int jniGetUserdata0(long addr); /*
-        return getWrapped(addr)->m_userdata0;
-    */
+    public int getTotalHeaderSize() { return totalHeaderSize; }
 
-    public int getUserdata1() { return jniGetUserdata1(addr); }
-    private native int jniGetUserdata1(long addr); /*
-        return getWrapped(addr)->m_userdata1;
-    */
+    public int getTotalSelectors() { return totalSelectors; }
+
+    public int getSelectorCodebookSize() { return selectorCodebookSize; }
+
+    public int getTotalEndpoints() { return totalEndpoints; }
+
+    public int getEndpointCodebookSize() { return endpointCodebookSize; }
+
+    public int getTablesSize() { return tablesSize; }
+
+    public int getSlicesSize() { return slicesSize; }
+
+    public int getUsPerFrame() { return usPerFrame; }
+
+    /** Total number of images. */
+    public int getTotalImages() { return totalImages; }
+
+    public int getUserdata0() { return userdata0; }
+
+    public int getUserdata1() { return userdata1; }
 
     /** True if the image was Y flipped. */
-    public boolean isFlippedY() { return jniIsFlippedY(addr); }
-    private native boolean jniIsFlippedY(long addr); /*
-        return getWrapped(addr)->m_y_flipped;
-    */
+    public boolean isFlippedY() { return yFlipped; }
 
     /** True if the file is ETC1. */
-    public boolean isEtc1s() { return jniIsEtc1s(addr); }
-    private native boolean jniIsEtc1s(long addr); /*
-        return getWrapped(addr)->m_etc1s;
-    */
+    public boolean isEtc1s() { return etc1s; }
 
     /** True if the texture has alpha slices (for ETC1S: even slices RGB, odd slices alpha). */
-    public boolean hasAlphaSlices() { return jniHasAlphaSlices(addr); }
-    private native boolean jniHasAlphaSlices(long addr); /*
-        return getWrapped(addr)->m_has_alpha_slices;
-    */
-
-    private static native long jniCreate(); /*
-       basist::basisu_file_info* fileInfo = new basist::basisu_file_info();
-       return reinterpret_cast<intptr_t>(fileInfo);
-    */
-
-    private static native void jniDispose(long addr); /*
-		basist::basisu_file_info* fileInfo = (basist::basisu_file_info*)addr;
-		delete fileInfo;
-	*/
+    public boolean hasAlphaSlices() { return hasAlphaSlices; }
 }

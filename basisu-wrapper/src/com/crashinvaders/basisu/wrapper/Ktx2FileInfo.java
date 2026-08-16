@@ -7,24 +7,29 @@ import static com.crashinvaders.basisu.wrapper.UniqueIdUtils.findOrThrow;
 /**
  * Direct mapping of <code>basisUniversal::ktx2_file_info</code> struct.
  * <p/>
- * CLOSEABLE: Instances of this class internally manage native resources
- * and need to be closed using {@link #close()} when no longer needed.
+ * Populated in a single native call (see {@link #FIELD_COUNT}) instead of one native call per
+ * field, so all getters below are plain Java field reads with no further native-code round trips.
  */
 public class Ktx2FileInfo implements Closeable {
-	/*JNI
-        #include "basisu_wrapper.h"
 
-        using namespace basisuWrapper;
+    static final int FIELD_COUNT = 6;
 
-        static ktx2_file_info* getWrapped(jlong addr) {
-            return (ktx2_file_info*)addr;
-        }
-	 */
+    private boolean closed;
 
-    long addr;
+    private final int totalLayers;
+    private final int totalMipmapLevels;
+    private final int imageWidth;
+    private final int imageHeight;
+    private final boolean hasAlpha;
+    private final BasisuTextureFormat textureFormat;
 
-    Ktx2FileInfo() {
-        this.addr = jniCreate();
+    Ktx2FileInfo(int[] values) {
+        this.totalLayers = values[0];
+        this.totalMipmapLevels = values[1];
+        this.imageWidth = values[2];
+        this.imageHeight = values[3];
+        this.hasAlpha = values[4] != 0;
+        this.textureFormat = findOrThrow(BasisuTextureFormat.values(), values[5]);
     }
 
     Ktx2FileInfo(Object ignored) {
@@ -33,72 +38,21 @@ public class Ktx2FileInfo implements Closeable {
 
     @Override
     public void close() {
-        if (addr == 0) {
+        if (closed) {
             throw new IllegalStateException("Object was already closed!");
         }
-        jniDispose(addr);
-        addr = 0;
+        closed = true;
     }
 
-//    @Override
-//    protected void finalize() throws Throwable {
-//        if (addr != 0) {
-//            System.err.println(this + " object was GC'ed but never closed!");
-//            close();
-//        }
-//        super.finalize();
-//    }
+    public int getTotalLayers() { return totalLayers; }
 
-    public int getTotalLayers() {
-        return getTotalLayersNative(addr);
-    }
-    private native int getTotalLayersNative(long addr); /*
-        return getWrapped(addr)->layers;
-    */
+    public int getTotalMipmapLevels() { return totalMipmapLevels; }
 
-    public int getTotalMipmapLevels() {
-        return getTotalMipmapLevelsNative(addr);
-    }
-    private native int getTotalMipmapLevelsNative(long addr); /*
-        return getWrapped(addr)->mipmapLevels;
-    */
+    public int getImageWidth() { return imageWidth; }
 
-    public int getImageWidth() {
-        return getImageWidthNative(addr);
-    }
-    private native int getImageWidthNative(long addr); /*
-        return getWrapped(addr)->width;
-    */
+    public int getImageHeight() { return imageHeight; }
 
-    public int getImageHeight() {
-        return getImageHeightNative(addr);
-    }
-    private native int getImageHeightNative(long addr); /*
-        return getWrapped(addr)->height;
-    */
+    public boolean hasAlpha() { return hasAlpha; }
 
-    public boolean hasAlpha() {
-        return hasAlphaNative(addr);
-    }
-    private native boolean hasAlphaNative(long addr); /*
-        return getWrapped(addr)->hasAlpha;
-    */
-
-    public BasisuTextureFormat getTextureFormat() {
-        int textureFormatId = getTextureFormatNative(addr);
-        return findOrThrow(BasisuTextureFormat.values(), textureFormatId);
-    }
-    private native int getTextureFormatNative(long addr); /*
-        return (int)getWrapped(addr)->textureFormat;
-    */
-
-    private static native long jniCreate(); /*
-        ktx2_file_info* fileInfo = new ktx2_file_info();
-        return reinterpret_cast<intptr_t>(fileInfo);
-    */
-
-    private static native void jniDispose(long addr); /*
-		ktx2_file_info* fileInfo = (ktx2_file_info*)addr;
-		delete fileInfo;
-	*/
+    public BasisuTextureFormat getTextureFormat() { return textureFormat; }
 }

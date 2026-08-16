@@ -4,8 +4,6 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import static com.crashinvaders.basisu.wrapper.UniqueIdUtils.findOrThrow;
-
 /**
  * The wrapper over the native Basis Universal transcoder functionality.
  */
@@ -96,68 +94,144 @@ public class BasisuWrapper {
      * @return a description of the basis file and low-level information about each slice.
      */
     public static BasisuFileInfo basisGetFileInfo(Buffer dataBuffer) {
-        BasisuFileInfo fileInfo = new BasisuFileInfo();
-        basisGetFileInfoNative(dataBuffer, dataBuffer.capacity(), fileInfo.addr);
-        return fileInfo;
+        int[] values = new int[BasisuFileInfo.FIELD_COUNT];
+        int[] imageMipmapLevels = basisGetFileInfoNative(dataBuffer, dataBuffer.capacity(), values);
+        return new BasisuFileInfo(values, imageMipmapLevels);
     }
-    private static native void basisGetFileInfoNative(Buffer dataBuffer, int dataSize, long fileInfoAddr); /*
-        basist::basisu_file_info* fileInfo = (basist::basisu_file_info*)fileInfoAddr;
-        if (!basisuWrapper::basis::getFileInfo(*fileInfo, (uint8_t*)dataBuffer, dataSize)) {
+    // Returns the variable-length mipmap level count array as the return value, while the fixed
+    // set of scalar fields is packed into "outValues" - one native call populates the whole object.
+    private static native int[] basisGetFileInfoNative(Buffer dataBuffer, int dataSize, int[] outValues); /*
+        basist::basisu_file_info fileInfo;
+        if (!basisuWrapper::basis::getFileInfo(fileInfo, (uint8_t*)dataBuffer, dataSize)) {
             basisuUtils::throwException(env, "Failed to obtain Basis file info.");
+            return NULL;
         }
+
+        outValues[0] = (jint)fileInfo.m_version;
+        outValues[1] = (jint)fileInfo.m_total_header_size;
+        outValues[2] = (jint)fileInfo.m_total_selectors;
+        outValues[3] = (jint)fileInfo.m_selector_codebook_size;
+        outValues[4] = (jint)fileInfo.m_total_endpoints;
+        outValues[5] = (jint)fileInfo.m_endpoint_codebook_size;
+        outValues[6] = (jint)fileInfo.m_tables_size;
+        outValues[7] = (jint)fileInfo.m_slices_size;
+        outValues[8] = (jint)fileInfo.m_us_per_frame;
+        outValues[9] = (jint)fileInfo.m_total_images;
+        outValues[10] = (jint)fileInfo.m_userdata0;
+        outValues[11] = (jint)fileInfo.m_userdata1;
+        outValues[12] = fileInfo.m_y_flipped ? 1 : 0;
+        outValues[13] = fileInfo.m_etc1s ? 1 : 0;
+        outValues[14] = fileInfo.m_has_alpha_slices ? 1 : 0;
+        outValues[15] = (jint)fileInfo.m_tex_type;
+        outValues[16] = (jint)fileInfo.m_tex_format;
+
+        basisu::vector<uint32_t>& levels = fileInfo.m_image_mipmap_levels;
+        jintArray result = env->NewIntArray((jsize)levels.size());
+        env->SetIntArrayRegion(result, 0, (jsize)levels.size(), (jint*)levels.data());
+        return result;
     */
 
     /**
      * @return information about the specified image.
      */
     public static BasisuImageInfo basisGetImageInfo(Buffer dataBuffer, int imageIndex) {
-        BasisuImageInfo imageInfo = new BasisuImageInfo();
-        basisGetImageInfoNative(dataBuffer, dataBuffer.capacity(), imageInfo.addr, imageIndex);
-        return imageInfo;
+        int[] values = new int[BasisuImageInfo.FIELD_COUNT];
+        basisGetImageInfoNative(dataBuffer, dataBuffer.capacity(), imageIndex, values);
+        return new BasisuImageInfo(values);
     }
-    private static native void basisGetImageInfoNative(Buffer dataBuffer, int dataSize, long imageInfoAddr, int imageIndex); /*
-        basist::basisu_image_info* imageInfo = (basist::basisu_image_info*)imageInfoAddr;
-        if (!basisuWrapper::basis::getImageInfo(*imageInfo, (uint8_t*)dataBuffer, dataSize, imageIndex)) {
+    private static native void basisGetImageInfoNative(Buffer dataBuffer, int dataSize, int imageIndex, int[] outValues); /*
+        basist::basisu_image_info imageInfo;
+        if (!basisuWrapper::basis::getImageInfo(imageInfo, (uint8_t*)dataBuffer, dataSize, imageIndex)) {
             basisuUtils::throwException(env, "Failed to obtain Basis image info.");
+            return;
         }
+
+        outValues[0] = (jint)imageInfo.m_image_index;
+        outValues[1] = (jint)imageInfo.m_total_levels;
+        outValues[2] = (jint)imageInfo.m_orig_width;
+        outValues[3] = (jint)imageInfo.m_orig_height;
+        outValues[4] = (jint)imageInfo.m_width;
+        outValues[5] = (jint)imageInfo.m_height;
+        outValues[6] = (jint)imageInfo.m_num_blocks_x;
+        outValues[7] = (jint)imageInfo.m_num_blocks_y;
+        outValues[8] = (jint)imageInfo.m_total_blocks;
+        outValues[9] = (jint)imageInfo.m_first_slice_index;
+        outValues[10] = imageInfo.m_alpha_flag ? 1 : 0;
+        outValues[11] = imageInfo.m_iframe_flag ? 1 : 0;
     */
 
     public static BasisuImageLevelInfo basisGetImageLevelInfo(Buffer dataBuffer, int imageIndex, int imageLevel) {
-        BasisuImageLevelInfo imageInfo = new BasisuImageLevelInfo();
-        basisGetImageLevelInfoNative(dataBuffer, dataBuffer.capacity(), imageInfo.addr, imageIndex, imageLevel);
-        return imageInfo;
+        int[] values = new int[BasisuImageLevelInfo.FIELD_COUNT];
+        basisGetImageLevelInfoNative(dataBuffer, dataBuffer.capacity(), imageIndex, imageLevel, values);
+        return new BasisuImageLevelInfo(values);
     }
-    private static native void basisGetImageLevelInfoNative(Buffer dataBuffer, int dataSize, long imageInfoAddr, int imageIndex, int imageLevel); /*
-        basist::basisu_image_level_info* imageInfo = (basist::basisu_image_level_info*)imageInfoAddr;
-        if (!basisuWrapper::basis::getImageLevelInfo(*imageInfo, (uint8_t*)dataBuffer, dataSize, imageIndex, imageLevel)) {
+    private static native void basisGetImageLevelInfoNative(Buffer dataBuffer, int dataSize, int imageIndex, int imageLevel, int[] outValues); /*
+        basist::basisu_image_level_info levelInfo;
+        if (!basisuWrapper::basis::getImageLevelInfo(levelInfo, (uint8_t*)dataBuffer, dataSize, imageIndex, imageLevel)) {
             basisuUtils::throwException(env, "Failed to obtain Basis image level info.");
+            return;
         }
+
+        outValues[0] = (jint)levelInfo.m_image_index;
+        outValues[1] = (jint)levelInfo.m_level_index;
+        outValues[2] = (jint)levelInfo.m_orig_width;
+        outValues[3] = (jint)levelInfo.m_orig_height;
+        outValues[4] = (jint)levelInfo.m_width;
+        outValues[5] = (jint)levelInfo.m_height;
+        outValues[6] = (jint)levelInfo.m_num_blocks_x;
+        outValues[7] = (jint)levelInfo.m_num_blocks_y;
+        outValues[8] = (jint)levelInfo.m_total_blocks;
+        outValues[9] = (jint)levelInfo.m_first_slice_index;
+        outValues[10] = levelInfo.m_alpha_flag ? 1 : 0;
+        outValues[11] = levelInfo.m_iframe_flag ? 1 : 0;
     */
 
     /** @return information about the KTX2 file. */
     public static Ktx2FileInfo ktx2GetFileInfo(Buffer dataBuffer) {
-        Ktx2FileInfo fileInfo = new Ktx2FileInfo();
-        ktx2GetFileInfoNative(dataBuffer, dataBuffer.capacity(), fileInfo.addr);
-        return fileInfo;
+        int[] values = new int[Ktx2FileInfo.FIELD_COUNT];
+        ktx2GetFileInfoNative(dataBuffer, dataBuffer.capacity(), values);
+        return new Ktx2FileInfo(values);
     }
-    private static native void ktx2GetFileInfoNative(Buffer dataBuffer, int dataSize, long fileInfoAddr); /*
-        basisuWrapper::ktx2_file_info* fileInfo = (basisuWrapper::ktx2_file_info*)fileInfoAddr;
-        if (!basisuWrapper::ktx2::getFileInfo(*fileInfo, (uint8_t*)dataBuffer, dataSize)) {
+    private static native void ktx2GetFileInfoNative(Buffer dataBuffer, int dataSize, int[] outValues); /*
+        basisuWrapper::ktx2_file_info fileInfo;
+        if (!basisuWrapper::ktx2::getFileInfo(fileInfo, (uint8_t*)dataBuffer, dataSize)) {
             basisuUtils::throwException(env, "Failed to obtain KTX2 file info.");
+            return;
         }
+
+        outValues[0] = (jint)fileInfo.layers;
+        outValues[1] = (jint)fileInfo.mipmapLevels;
+        outValues[2] = (jint)fileInfo.width;
+        outValues[3] = (jint)fileInfo.height;
+        outValues[4] = fileInfo.hasAlpha ? 1 : 0;
+        outValues[5] = (jint)fileInfo.textureFormat;
     */
 
     /** @return information about the specified image level. */
     public static Ktx2ImageLevelInfo ktx2GetImageLevelInfo(Buffer dataBuffer, int imageIndex, int imageLevel) {
-        Ktx2ImageLevelInfo imageInfo = new Ktx2ImageLevelInfo();
-        ktx2GetImageLevelInfoNative(dataBuffer, dataBuffer.capacity(), imageIndex, imageLevel, imageInfo.addr);
-        return imageInfo;
+        int[] values = new int[Ktx2ImageLevelInfo.FIELD_COUNT];
+        ktx2GetImageLevelInfoNative(dataBuffer, dataBuffer.capacity(), imageIndex, imageLevel, values);
+        return new Ktx2ImageLevelInfo(values);
     }
-    private static native void ktx2GetImageLevelInfoNative(Buffer dataBuffer, int dataSize, int imageIndex, int imageLevel, long imageInfoAddr); /*
-        basist::ktx2_image_level_info* imageInfo = (basist::ktx2_image_level_info*)imageInfoAddr;
-        if (!basisuWrapper::ktx2::getImageLevelInfo(*imageInfo, (uint8_t*)dataBuffer, dataSize, imageIndex, imageLevel)) {
+    private static native void ktx2GetImageLevelInfoNative(Buffer dataBuffer, int dataSize, int imageIndex, int imageLevel, int[] outValues); /*
+        basist::ktx2_image_level_info levelInfo;
+        if (!basisuWrapper::ktx2::getImageLevelInfo(levelInfo, (uint8_t*)dataBuffer, dataSize, imageIndex, imageLevel)) {
             basisuUtils::throwException(env, "Failed to obtain KTX2 image level info.");
+            return;
         }
+
+        outValues[0] = (jint)levelInfo.m_level_index;
+        outValues[1] = (jint)levelInfo.m_layer_index;
+        outValues[2] = (jint)levelInfo.m_face_index;
+        outValues[3] = (jint)levelInfo.m_orig_width;
+        outValues[4] = (jint)levelInfo.m_orig_height;
+        outValues[5] = (jint)levelInfo.m_width;
+        outValues[6] = (jint)levelInfo.m_height;
+        outValues[7] = (jint)levelInfo.m_num_blocks_x;
+        outValues[8] = (jint)levelInfo.m_num_blocks_y;
+        outValues[9] = (jint)levelInfo.m_total_blocks;
+        outValues[10] = levelInfo.m_alpha_flag ? 1 : 0;
+        outValues[11] = levelInfo.m_iframe_flag ? 1 : 0;
     */
 
     public static ByteBuffer ktx2Transcode(Buffer dataBuffer, int layerIndex, int levelIndex, BasisuTranscoderTextureFormat textureFormat) {

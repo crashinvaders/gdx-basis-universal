@@ -57,26 +57,54 @@ public class Ktx2FileTranscoder implements Closeable {
 
     /** @return information about the KTX2 file. */
     public Ktx2FileInfo getFileInfo() {
-        Ktx2FileInfo fileInfo = new Ktx2FileInfo();
-        if (!jniGetFileInfo(addr, fileInfo.addr)) {
+        int[] values = new int[Ktx2FileInfo.FIELD_COUNT];
+        if (!jniGetFileInfo(addr, values)) {
             throw new BasisuWrapperException("Failed to obtain KTX2 file info.");
         }
-        return fileInfo;
+        return new Ktx2FileInfo(values);
     }
-    private native boolean jniGetFileInfo(long addr, long fileInfoAddr); /*
-        return getWrapped(addr)->getFileInfo(*(basisuWrapper::ktx2_file_info*)fileInfoAddr);
+    private native boolean jniGetFileInfo(long addr, int[] outValues); /*
+        basisuWrapper::ktx2_file_info fileInfo;
+        if (!getWrapped(addr)->getFileInfo(fileInfo)) {
+            return false;
+        }
+
+        outValues[0] = (jint)fileInfo.layers;
+        outValues[1] = (jint)fileInfo.mipmapLevels;
+        outValues[2] = (jint)fileInfo.width;
+        outValues[3] = (jint)fileInfo.height;
+        outValues[4] = fileInfo.hasAlpha ? 1 : 0;
+        outValues[5] = (jint)fileInfo.textureFormat;
+        return true;
     */
 
     /** @return information about the specified image level. */
     public Ktx2ImageLevelInfo getImageLevelInfo(int layerIndex, int imageLevel) {
-        Ktx2ImageLevelInfo imageInfo = new Ktx2ImageLevelInfo();
-        if (!jniGetImageLevelInfo(addr, imageInfo.addr, layerIndex, imageLevel)) {
+        int[] values = new int[Ktx2ImageLevelInfo.FIELD_COUNT];
+        if (!jniGetImageLevelInfo(addr, layerIndex, imageLevel, values)) {
             throw new BasisuWrapperException("Failed to obtain KTX2 image level info.");
         }
-        return imageInfo;
+        return new Ktx2ImageLevelInfo(values);
     }
-    private native boolean jniGetImageLevelInfo(long addr, long imageInfoAddr, int layerIndex, int imageLevel); /*
-        return getWrapped(addr)->getImageLevelInfo(*(basist::ktx2_image_level_info*)imageInfoAddr, layerIndex, imageLevel);
+    private native boolean jniGetImageLevelInfo(long addr, int layerIndex, int imageLevel, int[] outValues); /*
+        basist::ktx2_image_level_info levelInfo;
+        if (!getWrapped(addr)->getImageLevelInfo(levelInfo, layerIndex, imageLevel)) {
+            return false;
+        }
+
+        outValues[0] = (jint)levelInfo.m_level_index;
+        outValues[1] = (jint)levelInfo.m_layer_index;
+        outValues[2] = (jint)levelInfo.m_face_index;
+        outValues[3] = (jint)levelInfo.m_orig_width;
+        outValues[4] = (jint)levelInfo.m_orig_height;
+        outValues[5] = (jint)levelInfo.m_width;
+        outValues[6] = (jint)levelInfo.m_height;
+        outValues[7] = (jint)levelInfo.m_num_blocks_x;
+        outValues[8] = (jint)levelInfo.m_num_blocks_y;
+        outValues[9] = (jint)levelInfo.m_total_blocks;
+        outValues[10] = levelInfo.m_alpha_flag ? 1 : 0;
+        outValues[11] = levelInfo.m_iframe_flag ? 1 : 0;
+        return true;
     */
 
     public ByteBuffer transcode(int layerIndex, int levelIndex, BasisuTranscoderTextureFormat textureFormat) {
