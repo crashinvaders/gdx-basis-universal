@@ -228,7 +228,7 @@ public class BasisuGdxUtils {
      * so don't forget to free it using {@link BufferUtils#disposeUnsafeByteBuffer(ByteBuffer)}.
      */
     public static ByteBuffer readFileIntoBuffer(FileHandle file) {
-        byte[] buffer = new byte[1024 * 10];
+        byte[] buffer = new byte[64 * 1024];
         DataInputStream in = null;
         try {
             in = new DataInputStream(new BufferedInputStream(file.read()));
