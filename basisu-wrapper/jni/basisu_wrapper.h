@@ -39,6 +39,28 @@ namespace basisuWrapper {
         bool transcode(basisu::vector<uint8_t> &out, uint8_t *data, uint32_t dataSize,
                        uint32_t imageIndex, uint32_t levelIndex, transcoder_texture_format format);
 
+        // Keeps a single basisu_transcoder alive across multiple info/transcode calls for the
+        // same file, so the ETC1S global codebooks are decoded (start_transcoding()) at most once
+        // per file instead of once per transcode() call (e.g. once per mipmap level).
+        class TranscoderSession {
+        public:
+            TranscoderSession(uint8_t *data, uint32_t dataSize);
+            ~TranscoderSession();
+
+            bool validateHeader();
+            bool validateChecksum(bool fullValidation);
+            bool getFileInfo(basisu_file_info &fileInfo);
+            bool getImageInfo(basisu_image_info &imageInfo, uint32_t imageIndex);
+            bool getImageLevelInfo(basisu_image_level_info &imageInfo, uint32_t imageIndex, uint32_t imageLevel);
+            bool transcode(basisu::vector<uint8_t> &out, uint32_t imageIndex, uint32_t levelIndex, transcoder_texture_format format);
+
+        private:
+            uint8_t *data;
+            uint32_t dataSize;
+            basisu_transcoder transcoder;
+            bool transcodingStarted;
+        };
+
     } // namespace basis
 
     namespace ktx2 {
@@ -49,6 +71,23 @@ namespace basisuWrapper {
 
         bool transcode(basisu::vector<uint8_t> &out, uint8_t *data, uint32_t dataSize,
                        uint32_t layerIndex, uint32_t levelIndex, transcoder_texture_format format);
+
+        // Same idea as basis::TranscoderSession: init() (header parse) and start_transcoding()
+        // (ETC1S global data decompression) are both run at most once per file.
+        class TranscoderSession {
+        public:
+            TranscoderSession(uint8_t *data, uint32_t dataSize);
+            ~TranscoderSession();
+
+            bool getFileInfo(basisuWrapper::ktx2_file_info &fileInfo);
+            bool getImageLevelInfo(ktx2_image_level_info &imageInfo, uint32_t layerIndex, uint32_t levelIndex);
+            bool transcode(basisu::vector<uint8_t> &out, uint32_t layerIndex, uint32_t levelIndex, transcoder_texture_format format);
+
+        private:
+            ktx2_transcoder transcoder;
+            bool initialized;
+            bool transcodingStarted;
+        };
 
     } // namespace ktx
 

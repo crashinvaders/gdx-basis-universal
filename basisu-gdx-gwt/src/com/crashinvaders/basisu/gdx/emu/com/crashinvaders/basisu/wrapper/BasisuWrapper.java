@@ -125,7 +125,7 @@ public class BasisuWrapper {
     private static native JavaScriptObject basisFileOf(ArrayBufferView data) /*-{
         var handle = data.__basisuBasisFile;
         if (!handle) {
-            handle = new $wnd.basisuModule.BasisFile(data);
+            handle = new $wnd.basisuModule.BasisFileTranscoder(data);
             data.__basisuBasisFile = handle;
         }
         return handle;
@@ -134,7 +134,7 @@ public class BasisuWrapper {
     private static native JavaScriptObject ktx2FileOf(ArrayBufferView data) /*-{
         var handle = data.__basisuKtx2File;
         if (!handle) {
-            handle = new $wnd.basisuModule.Ktx2File(data);
+            handle = new $wnd.basisuModule.Ktx2FileTranscoder(data);
             data.__basisuKtx2File = handle;
         }
         return handle;
@@ -158,11 +158,11 @@ public class BasisuWrapper {
 
 
     //region JSNI utils.
-    private static ArrayBufferView toTypedArray(Buffer data) {
+    static ArrayBufferView toTypedArray(Buffer data) {
         return ((HasArrayBufferView)data).getTypedArray();
     }
 
-    private static ByteBuffer fromTypedArray(Uint8Array array) {
+    static ByteBuffer fromTypedArray(Uint8Array array) {
         return BasisuGwtBufferUtil.createDirectByteBuffer(array.buffer());
     }
     //endregion

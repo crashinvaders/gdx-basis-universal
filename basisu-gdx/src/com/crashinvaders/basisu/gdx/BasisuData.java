@@ -14,6 +14,7 @@ import java.nio.ByteBuffer;
 public class BasisuData implements Disposable {
 
     private final ByteBuffer encodedData;
+    private final BasisuFileTranscoder fileTranscoder;
     private final BasisuFileInfo fileInfo;
 
     /**
@@ -41,12 +42,13 @@ public class BasisuData implements Disposable {
         BasisuNativeLibLoader.loadIfNeeded();
 
         this.encodedData = encodedData;
+        this.fileTranscoder = new BasisuFileTranscoder(encodedData);
 
-        if (!BasisuWrapper.basisValidateHeader(encodedData)) {
+        if (!fileTranscoder.validateHeader()) {
             throw new BasisuGdxException("Cannot validate header of the basis universal data.");
         }
 
-        this.fileInfo = BasisuWrapper.basisGetFileInfo(encodedData);
+        this.fileInfo = fileTranscoder.getFileInfo();
     }
 
     @Override
@@ -67,7 +69,7 @@ public class BasisuData implements Disposable {
             imageLevelInfoIndex.clear();
         }
 
-        BasisuWrapper.releaseEncodedData(encodedData);
+        fileTranscoder.close();
 
         //TODO Replace with BufferUtils.newUnsafeByteBuffer(fileSize) once it's compatible with GWT compiler.
         if (BasisuBufferUtils.isUnsafeByteBuffer(encodedData)) {
@@ -105,7 +107,7 @@ public class BasisuData implements Disposable {
         }
         BasisuImageInfo imageInfo = imageInfoIndex.get(imageIndex);
         if (imageInfo == null) {
-            imageInfo = BasisuWrapper.basisGetImageInfo(encodedData, imageIndex);
+            imageInfo = fileTranscoder.getImageInfo(imageIndex);
             imageInfoIndex.put(imageIndex, imageInfo);
         }
         return imageInfo;
@@ -129,7 +131,7 @@ public class BasisuData implements Disposable {
 
         BasisuImageLevelInfo imageInfo = imageLevelInfoIndex.get(index);
         if (imageInfo == null) {
-            imageInfo = BasisuWrapper.basisGetImageLevelInfo(encodedData, imageIndex, imageLevel);
+            imageInfo = fileTranscoder.getImageLevelInfo(imageIndex, imageLevel);
             imageLevelInfoIndex.put(index, imageInfo);
         }
         return imageInfo;
@@ -146,6 +148,6 @@ public class BasisuData implements Disposable {
      * Do not forget to use {@link BasisuWrapper#disposeNativeBuffer(ByteBuffer)} when the buffer is no longer required.
      */
     public ByteBuffer transcode(int imageIndex, int mipmapLevel, BasisuTranscoderTextureFormat textureFormat) {
-        return BasisuWrapper.basisTranscode(encodedData, imageIndex, mipmapLevel, textureFormat);
+        return fileTranscoder.transcode(imageIndex, mipmapLevel, textureFormat);
     }
 }

@@ -239,6 +239,67 @@ public class BasisuWrapperTest {
      * This is a valid test as desktops should be able to transcode to any supported texture format
      * listed in BasisuTranscoderTextureFormat enum.
      */
+    /**
+     * Exercises {@link BasisuFileTranscoder} as a persistent session reused across every mipmap
+     * level of the same image, instead of BasisuWrapper's stateless per-call methods.
+     */
+    @Test
+    public void testBasisuFileTranscoderSession() {
+        try (BasisuFileTranscoder fileTranscoder = new BasisuFileTranscoder(imageBasisMipmapBuffer)) {
+            assertTrue(fileTranscoder.validateHeader());
+            assertTrue(fileTranscoder.validateChecksum(true));
+
+            try (BasisuFileInfo fileInfo = fileTranscoder.getFileInfo()) {
+                int totalLevels = fileInfo.getImageMipmapLevels()[0];
+                assertTrue(totalLevels > 1);
+
+                for (int level = 0; level < totalLevels; level++) {
+                    try (BasisuImageLevelInfo levelInfo = fileTranscoder.getImageLevelInfo(0, level)) {
+                        ByteBuffer rgba8888 = fileTranscoder.transcode(0, level, BasisuTranscoderTextureFormat.RGBA32);
+                        assertEquals(levelInfo.getOrigWidth() * levelInfo.getOrigHeight() * 4, rgba8888.capacity());
+                        BasisuWrapper.disposeNativeBuffer(rgba8888);
+                    }
+                }
+            }
+        }
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testBasisuFileTranscoderDoubleClose() {
+        BasisuFileTranscoder fileTranscoder = new BasisuFileTranscoder(imageBasisBuffer);
+        fileTranscoder.close();
+        fileTranscoder.close();
+    }
+
+    /**
+     * Exercises {@link Ktx2FileTranscoder} as a persistent session, mirroring
+     * {@link #testBasisuFileTranscoderSession()}.
+     */
+    @Test
+    public void testKtx2FileTranscoderSession() {
+        try (Ktx2FileTranscoder fileTranscoder = new Ktx2FileTranscoder(imageKtx2Buffer)) {
+            try (Ktx2FileInfo fileInfo = fileTranscoder.getFileInfo()) {
+                int totalLevels = fileInfo.getTotalMipmapLevels();
+                assertTrue(totalLevels >= 1);
+
+                for (int level = 0; level < totalLevels; level++) {
+                    try (Ktx2ImageLevelInfo levelInfo = fileTranscoder.getImageLevelInfo(0, level)) {
+                        ByteBuffer etc2Rgba = fileTranscoder.transcode(0, level, BasisuTranscoderTextureFormat.ETC2_RGBA);
+                        assertEquals(levelInfo.getTotalBlocks() * 16, etc2Rgba.capacity());
+                        BasisuWrapper.disposeNativeBuffer(etc2Rgba);
+                    }
+                }
+            }
+        }
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testKtx2FileTranscoderDoubleClose() {
+        Ktx2FileTranscoder fileTranscoder = new Ktx2FileTranscoder(imageKtx2Buffer);
+        fileTranscoder.close();
+        fileTranscoder.close();
+    }
+
     @Test
     public void testKtx2TranscodeAll() {
         try (Ktx2ImageLevelInfo imageInfo = BasisuWrapper.ktx2GetImageLevelInfo(imageKtx2Buffer, 0, 0)) {

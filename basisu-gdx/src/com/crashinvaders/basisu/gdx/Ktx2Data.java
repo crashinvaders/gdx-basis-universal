@@ -14,6 +14,7 @@ import java.nio.ByteBuffer;
 public class Ktx2Data implements Disposable {
 
     private final ByteBuffer encodedData;
+    private final Ktx2FileTranscoder fileTranscoder;
     private final Ktx2FileInfo fileInfo;
 
     /**
@@ -37,10 +38,11 @@ public class Ktx2Data implements Disposable {
         BasisuNativeLibLoader.loadIfNeeded();
 
         this.encodedData = encodedData;
+        this.fileTranscoder = new Ktx2FileTranscoder(encodedData);
 
         // KTX2 codec doesn't provide a simple validation method.
         // We assume we're good if we can read the file info.
-        fileInfo = BasisuWrapper.ktx2GetFileInfo(encodedData);
+        fileInfo = fileTranscoder.getFileInfo();
     }
 
     @Override
@@ -54,7 +56,7 @@ public class Ktx2Data implements Disposable {
 
         fileInfo.close();
 
-        BasisuWrapper.releaseEncodedData(encodedData);
+        fileTranscoder.close();
 
         //TODO Replace with BufferUtils.newUnsafeByteBuffer(fileSize) once it's compatible with GWT compiler.
         if (BasisuBufferUtils.isUnsafeByteBuffer(encodedData)) {
@@ -109,7 +111,7 @@ public class Ktx2Data implements Disposable {
         }
         Ktx2ImageLevelInfo imageInfo = mipmapLevelMap.get(mipmapLevel);
         if (imageInfo == null) {
-            imageInfo = BasisuWrapper.ktx2GetImageLevelInfo(encodedData, imageIndex, mipmapLevel);
+            imageInfo = fileTranscoder.getImageLevelInfo(imageIndex, mipmapLevel);
             mipmapLevelMap.put(mipmapLevel, imageInfo);
         }
         return imageInfo;
@@ -126,6 +128,6 @@ public class Ktx2Data implements Disposable {
      * Do not forget to use {@link BasisuWrapper#disposeNativeBuffer(ByteBuffer)} when the buffer is no longer required.
      */
     public ByteBuffer transcode(int imageIndex, int mipmapLevel, BasisuTranscoderTextureFormat textureFormat) {
-        return BasisuWrapper.ktx2Transcode(encodedData, imageIndex, mipmapLevel, textureFormat);
+        return fileTranscoder.transcode(imageIndex, mipmapLevel, textureFormat);
     }
 }

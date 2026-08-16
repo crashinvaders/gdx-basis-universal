@@ -42,21 +42,23 @@ bool isTranscoderTexFormatSupported_wrap(uint32_t transcoderTexFormatId, uint32_
 
 // Holds the encoded file bytes in Wasm memory once (copied in on construction) so repeated
 // info/transcode calls reuse the same buffer instead of re-uploading it from JS every time.
-class BasisFile {
+// The underlying TranscoderSession additionally keeps the transcoder itself alive across calls,
+// so the ETC1S global codebooks are decoded at most once per file, not once per transcode() call.
+class BasisFileTranscoder {
 public:
-    explicit BasisFile(const val &jsData) : data(vecFromTypedArray(jsData)) {}
+    explicit BasisFileTranscoder(const val &jsData) : data(vecFromTypedArray(jsData)), session(data.data(), data.size()) {}
 
     bool validateHeader() {
-        return basisuWrapper::basis::validateHeader(data.data(), data.size());
+        return session.validateHeader();
     }
 
     bool validateChecksum(bool fullValidation) {
-        return basisuWrapper::basis::validateChecksum(data.data(), data.size(), fullValidation);
+        return session.validateChecksum(fullValidation);
     }
 
     basist::basisu_file_info getFileInfo() {
         basist::basisu_file_info fileInfo;
-        if (!basisuWrapper::basis::getFileInfo(fileInfo, data.data(), data.size())) {
+        if (!session.getFileInfo(fileInfo)) {
             basisuUtils::throwException(nullptr, "Failed to obtain Basis file info.");
         }
         return fileInfo;
@@ -64,7 +66,7 @@ public:
 
     basist::basisu_image_info getImageInfo(uint32_t imageIndex) {
         basist::basisu_image_info imageInfo;
-        if (!basisuWrapper::basis::getImageInfo(imageInfo, data.data(), data.size(), imageIndex)) {
+        if (!session.getImageInfo(imageInfo, imageIndex)) {
             basisuUtils::throwException(nullptr, "Failed to obtain Basis image info.");
         }
         return imageInfo;
@@ -72,7 +74,7 @@ public:
 
     basist::basisu_image_level_info getImageLevelInfo(uint32_t imageIndex, uint32_t imageLevel) {
         basist::basisu_image_level_info levelInfo;
-        if (!basisuWrapper::basis::getImageLevelInfo(levelInfo, data.data(), data.size(), imageIndex, imageLevel)) {
+        if (!session.getImageLevelInfo(levelInfo, imageIndex, imageLevel)) {
             basisuUtils::throwException(nullptr, "Failed to obtain Basis image level info.");
         }
         return levelInfo;
@@ -82,7 +84,7 @@ public:
         basisu::vector<uint8_t> output;
         basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
 
-        if (!basisuWrapper::basis::transcode(output, data.data(), data.size(), imageIndex, levelIndex, format)) {
+        if (!session.transcode(output, imageIndex, levelIndex, format)) {
             basisuUtils::logError(LOG_TAG, "Error during Basis image transcoding!");
             basisuUtils::throwException(nullptr, "Error during basis image transcoding!");
         }
@@ -92,16 +94,17 @@ public:
 
 private:
     basisu::vector<uint8_t> data;
+    basisuWrapper::basis::TranscoderSession session;
 };
 
-// Same idea as BasisFile, but for KTX2 containers.
-class Ktx2File {
+// Same idea as BasisFileTranscoder, but for KTX2 containers.
+class Ktx2FileTranscoder {
 public:
-    explicit Ktx2File(const val &jsData) : data(vecFromTypedArray(jsData)) {}
+    explicit Ktx2FileTranscoder(const val &jsData) : data(vecFromTypedArray(jsData)), session(data.data(), data.size()) {}
 
     basisuWrapper::ktx2_file_info getFileInfo() {
         basisuWrapper::ktx2_file_info fileInfo;
-        if (!basisuWrapper::ktx2::getFileInfo(fileInfo, data.data(), data.size())) {
+        if (!session.getFileInfo(fileInfo)) {
             basisuUtils::throwException(nullptr, "Failed to obtain KTX2 file info.");
         }
         return fileInfo;
@@ -109,7 +112,7 @@ public:
 
     basist::ktx2_image_level_info getImageLevelInfo(uint32_t layerIndex, uint32_t levelIndex) {
         basist::ktx2_image_level_info imageInfo;
-        if (!basisuWrapper::ktx2::getImageLevelInfo(imageInfo, data.data(), data.size(), layerIndex, levelIndex)) {
+        if (!session.getImageLevelInfo(imageInfo, layerIndex, levelIndex)) {
             basisuUtils::throwException(nullptr, "Failed to obtain KTX2 image level info.");
         }
         return imageInfo;
@@ -119,7 +122,7 @@ public:
         basisu::vector<uint8_t> output;
         basist::transcoder_texture_format format = static_cast<basist::transcoder_texture_format>(textureFormatId);
 
-        if (!basisuWrapper::ktx2::transcode(output, data.data(), data.size(), layerIndex, levelIndex, format)) {
+        if (!session.transcode(output, layerIndex, levelIndex, format)) {
             basisuUtils::logError(LOG_TAG, "Error during KTX2 image transcoding!");
             basisuUtils::throwException(nullptr, "Error during KTX2 image transcoding!");
         }
@@ -129,6 +132,7 @@ public:
 
 private:
     basisu::vector<uint8_t> data;
+    basisuWrapper::ktx2::TranscoderSession session;
 };
 
 //uint8_t basisFileInfo_texFormat(basist::basisu_file_info &fileInfo) {
@@ -240,21 +244,21 @@ EMSCRIPTEN_BINDINGS(my_module) {
     function("isTranscoderTexFormatSupported", &isTranscoderTexFormatSupported_wrap);
 
     // Data buffer is uploaded once (constructor), then reused by all method calls below.
-    class_<BasisFile>("BasisFile")
+    class_<BasisFileTranscoder>("BasisFileTranscoder")
         .constructor<const val&>()
-        .function("validateHeader", &BasisFile::validateHeader)
-        .function("validateChecksum", &BasisFile::validateChecksum)
-        .function("getFileInfo", &BasisFile::getFileInfo)
-        .function("getImageInfo", &BasisFile::getImageInfo)
-        .function("getImageLevelInfo", &BasisFile::getImageLevelInfo)
-        .function("transcode", &BasisFile::transcode)
+        .function("validateHeader", &BasisFileTranscoder::validateHeader)
+        .function("validateChecksum", &BasisFileTranscoder::validateChecksum)
+        .function("getFileInfo", &BasisFileTranscoder::getFileInfo)
+        .function("getImageInfo", &BasisFileTranscoder::getImageInfo)
+        .function("getImageLevelInfo", &BasisFileTranscoder::getImageLevelInfo)
+        .function("transcode", &BasisFileTranscoder::transcode)
         ;
 
-    class_<Ktx2File>("Ktx2File")
+    class_<Ktx2FileTranscoder>("Ktx2FileTranscoder")
         .constructor<const val&>()
-        .function("getFileInfo", &Ktx2File::getFileInfo)
-        .function("getImageLevelInfo", &Ktx2File::getImageLevelInfo)
-        .function("transcode", &Ktx2File::transcode)
+        .function("getFileInfo", &Ktx2FileTranscoder::getFileInfo)
+        .function("getImageLevelInfo", &Ktx2FileTranscoder::getImageLevelInfo)
+        .function("transcode", &Ktx2FileTranscoder::transcode)
         ;
 }
 
