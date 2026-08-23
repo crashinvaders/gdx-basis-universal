@@ -16,10 +16,10 @@ elif ! git -C gh-pages rev-parse --git-dir >/dev/null 2>&1; then
     exit 1
 fi
 
-./gradlew demo:web:dist
+./gradlew demo:web-gwt:dist
 
 rm -rf gh-pages/assets gh-pages/html gh-pages/icon32.png gh-pages/index.html
-cp -r demo/web/build/dist/assets demo/web/build/dist/html demo/web/build/dist/icon32.png demo/web/build/dist/index.html gh-pages/
+cp -r demo/web-gwt/build/dist/assets demo/web-gwt/build/dist/html demo/web-gwt/build/dist/icon32.png demo/web-gwt/build/dist/index.html gh-pages/
 
 cd gh-pages
 git add -A

@@ -24,7 +24,7 @@ robovm-build
 !/basisu-wrapper/jni/CMakeLists.txt
 
 /demo/android/libs
-/demo/web/war
+/demo/web-gwt/war
 
 /gh-pages
 

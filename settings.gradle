@@ -5,7 +5,7 @@ include ':demo:core'
 include ':demo:desktop'
 include ':demo:ios-metalangle'
 include ':demo:ios-opengl'
-include ':demo:web'
+include ':demo:web-gwt'
 include ':demo:web-teavm'
 include ':demo'
 
