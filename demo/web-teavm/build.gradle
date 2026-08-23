@@ -1,0 +1,52 @@
+import org.teavm.gradle.api.OptimizationLevel
+
+plugins {
+    id 'com.github.xpenatan.gdx-teavm' version "$gdxTeavmVersion"
+}
+
+java {
+    // gdx-teavm's backend-web/teavm-jso artifacts require JDK 17+.
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+sourceSets.main.java.srcDirs += ['src']
+
+dependencies {
+    implementation project(':demo:core')
+    implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
+    implementation "com.github.xpenatan.gdx-teavm:backend-web:$gdxTeavmVersion"
+
+    if (useGdxBasisuMavenArtifacts) {
+        implementation "com.crashinvaders.basisu:basisu-gdx-teavm:$gdxBasisuVersion"
+        implementation "com.crashinvaders.basisu:basisu-gdx:$gdxBasisuVersion"
+        implementation "com.crashinvaders.basisu:basisu-wrapper:$gdxBasisuVersion"
+    } else {
+        implementation project(':basisu-gdx-teavm')
+    }
+}
+
+gdxTeaVM {
+    assets.from(file('../assets'))
+    // The Basis Universal Emscripten/Wasm glue (js + wasm), shared with the GWT backend.
+    assets.from(file("${project(':basisu-wrapper').projectDir}/libs/web"))
+
+    js {
+        mainClass.set('com.crashinvaders.basisu.demo.teavm.WebLauncher')
+        optimization.set(OptimizationLevel.NONE)
+        obfuscated.set(false)
+        devServer {
+            enabled.set(true)
+            autoReload.set(true)
+        }
+    }
+    wasm {
+        mainClass.set('com.crashinvaders.basisu.demo.teavm.WebLauncher')
+        optimization.set(OptimizationLevel.NONE)
+        obfuscated.set(false)
+        devServer {
+            enabled.set(true)
+            autoReload.set(true)
+        }
+    }
+}

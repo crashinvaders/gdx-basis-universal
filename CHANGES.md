@@ -1,4 +1,5 @@
 ### Next Release
+- TeaVM support.
 - Reduce redundant data copies in the web (Wasm) backend by reusing native file handles.
 
 ### 1.1.2

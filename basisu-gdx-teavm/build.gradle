@@ -1,0 +1,22 @@
+apply plugin: 'java-library'
+
+java {
+    // gdx-teavm's backend-web/teavm-jso artifacts require JDK 17+.
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+// The Emscripten-built JS/Wasm glue is shared with the GWT backend (basisu-gdx-gwt) - reuse it
+// as-is instead of duplicating the binaries in this module.
+sourceSets.main.resources.srcDirs += ["${project(':basisu-wrapper').projectDir}/libs/web"]
+
+dependencies {
+    api project(':basisu-wrapper')
+    api project(':basisu-gdx')
+
+    compileOnly "com.badlogicgames.gdx:gdx:$gdxVersion"
+    compileOnly "com.github.xpenatan.gdx-teavm:backend-web:$gdxTeavmVersion"
+    compileOnly "org.teavm:teavm-jso:$teavmVersion"
+    compileOnly "org.teavm:teavm-jso-apis:$teavmVersion"
+    compileOnly "org.teavm:teavm-extension-spi:$teavmVersion"
+}
