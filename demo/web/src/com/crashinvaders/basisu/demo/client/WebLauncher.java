@@ -7,6 +7,7 @@ import com.badlogic.gdx.backends.gwt.GwtApplicationConfiguration;
 import com.crashinvaders.basisu.demo.App;
 import com.crashinvaders.basisu.demo.AppParams;
 import com.crashinvaders.basisu.demo.PlatformLauncher;
+import com.crashinvaders.basisu.gdx.gwt.BasisuGwt;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
@@ -15,6 +16,11 @@ public class WebLauncher extends GwtApplication implements PlatformLauncher {
 
     private static final int PADDING = 0;
     private GwtApplicationConfiguration cfg;
+
+    @Override
+    public void onModuleLoad() {
+        BasisuGwt.initialize(() -> super.onModuleLoad());
+    }
 
     @Override
     public GwtApplicationConfiguration getConfig() {
