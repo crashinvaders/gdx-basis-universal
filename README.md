@@ -51,7 +51,7 @@ There could be some other options (even potentially encoding in the browser), bu
 
 ## Using the library
 
-Once added as a Maven dependency to libGDX project modules, the library is pretty easy to deal with - no global initialization calls are required in the code, except for the gdx-teavm backend (see [its section below](#web-module-teavm-backend)).
+Once added as a Maven dependency to libGDX project modules, the library is pretty easy to deal with - no global initialization calls are required in the code, except for the web backends (see the [GWT](#web-module-gwt-backend) and [TeaVM](#web-module-teavm-backend) sections below).
 
 All the official libGDX backends are fully supported, plus the third-party [gdx-teavm](https://github.com/xpenatan/gdx-teavm) backend.
 
@@ -108,7 +108,7 @@ dependencies {
 dependencies {
     implementation "com.crashinvaders.basisu:basisu-wrapper:$gdxBasisuVersion:natives-ios"
 
-    // This is highly recomended, otherwise you're stuck with only PVRTC1 textures.
+    // This is highly recommended, otherwise you're stuck with only PVRTC1 textures.
     implementation "com.badlogicgames.gdx:gdx-backend-robovm-metalangle:$gdxVersion"
 }
 ```
@@ -128,7 +128,7 @@ dependencies {
 }
 ```
 
-Don't forget to add a GWT module entry to your `GdxDefinition.gwt.xml` file.
+Add the module entry to your `GdxDefinition.gwt.xml`:
 
 ```xml
 <module>
@@ -136,7 +136,14 @@ Don't forget to add a GWT module entry to your `GdxDefinition.gwt.xml` file.
 </module>
 ```
 
-In case you have an issue with your GWT setup, check on [the troubleshooting section](#gwt-module-troubleshooting), it might be helpful.
+Override `onModuleLoad()` in your `GwtApplication` launcher, wrapping it with `BasisuGwt.initialize()`:
+
+```java
+@Override
+public void onModuleLoad() {
+    BasisuGwt.initialize(() -> super.onModuleLoad());
+}
+```
 
 #### Web module ([TeaVM](https://github.com/xpenatan/gdx-teavm) backend)
 
@@ -193,6 +200,7 @@ Here's the list of the limitations you should be aware of when using this librar
 
 - __[Android]__ Due to NDK specs, __Android 5.0 (API 21) is the minimum supported version__.
 - __[GWT/gdx-teavm]__ WebAssembly is available pretty much on every modern browser ([compatibility chart](https://caniuse.com/wasm)). Just for reference, the support is enabled by default as of __Firefox 52__, __Chrome 57__, __Opera 44__, and __Edge 16__.
+- __[GWT]__ Requires calling `BasisuGwt.initialize(...)` in your `onModuleLoad()` override - see [its section above](#web-module-gwt-backend).
 - __[gdx-teavm]__ Requires calling `BasisuTeaVM.initialize(config)` in your `WebLauncher` - see [its section above](#web-module-teavm-backend).
 - __[iOS]__ Due to OpenGL deprecation, working with compressed textures is troublesome. Please read [this section](#ios-module-robovm-backend).
 
@@ -301,6 +309,6 @@ Long story short, if run your game in a browser and see this an error looking li
 ```
 GwtApplication: exception: com.badlogic.gdx.utils.GdxRuntimeException: Could not submit AsyncTask: (TypeError) : Cannot read properties of undefined (reading 'ktx2GetFileInfo')
 ```
-The chances are you're missing a library's JS module in your GWT app. To fix this, check if your `index.html` contain the line `<script type="text/javascript" src="html/gdx-basis-universal.js"></script>`. If not, add it manually and it should do the trick.
+Most likely you forgot to call `BasisuGwt.initialize(...)` in your `onModuleLoad()` override (see the [GWT section](#web-module-gwt-backend)) - `BasisuNativeLibLoader` throws a clearer error for this now, but old builds/stale caches can still hit the confusing message above. If you did wire it up, try a clean rebuild and clear your browser cache first - GWT's incremental compiler cache is known to serve stale output here.
 
 Read more about the module and the native library building notes on [the module's page](basisu-wrapper).

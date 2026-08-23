@@ -1,4 +1,5 @@
 ### Next Release
+- **Breaking:** GWT no longer needs a manual `<script>` tag in `index.html`. Call `BasisuGwt.initialize(...)` from your `onModuleLoad()` override instead - see README.
 - TeaVM support.
 - Reduce redundant data copies in the web (Wasm) backend by reusing native file handles.
 
