@@ -43,7 +43,7 @@ task fatJar(type: Jar) {
 // the duplicatesStrategy matters starting in Gradle 7.0; this setting works.
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
     dependsOn classes, configurations.runtimeClasspath
-    from configurations.runtimeClasspath.collect {it.isDirectory() ? it : zipTree(it) } with jar
+    from { configurations.runtimeClasspath.collect {it.isDirectory() ? it : zipTree(it) } } with jar
 // these "exclude" lines remove some unnecessary duplicate files in the output JAR.
     exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
     dependencies {
