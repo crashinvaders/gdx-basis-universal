@@ -153,14 +153,12 @@ dependencies {
 }
 ```
 
-In your `WebLauncher`'s `main()`, call `BasisuTeaVM.initialize(config)` right after building the `WebApplicationConfiguration`, before constructing `WebApplication`:
+In your `WebLauncher`'s `main()`, wrap your `new WebApplication(...)` call with `BasisuTeaVM.initialize(config, ...)`:
 
 ```java
 WebApplicationConfiguration config = new WebApplicationConfiguration("canvas");
 // ...
-BasisuTeaVM.initialize(config); // <-- This line!
-// ...
-new WebApplication(new MyApp(), config);
+BasisuTeaVM.initialize(config, () -> new WebApplication(new MyApp(), config));
 ```
 
 ### Example code
@@ -201,7 +199,7 @@ Here's the list of the limitations you should be aware of when using this librar
 - __[Android]__ Due to NDK specs, __Android 5.0 (API 21) is the minimum supported version__.
 - __[GWT/gdx-teavm]__ WebAssembly is available pretty much on every modern browser ([compatibility chart](https://caniuse.com/wasm)). Just for reference, the support is enabled by default as of __Firefox 52__, __Chrome 57__, __Opera 44__, and __Edge 16__.
 - __[GWT]__ Requires calling `BasisuGwt.initialize(...)` in your `onModuleLoad()` override - see [its section above](#web-module-gwt-backend).
-- __[gdx-teavm]__ Requires calling `BasisuTeaVM.initialize(config)` in your `WebLauncher` - see [its section above](#web-module-teavm-backend).
+- __[gdx-teavm]__ Requires wrapping `new WebApplication(...)` with `BasisuTeaVM.initialize(config, ...)` in your `WebLauncher` - see [its section above](#web-module-teavm-backend).
 - __[iOS]__ Due to OpenGL deprecation, working with compressed textures is troublesome. Please read [this section](#ios-module-robovm-backend).
 
 ## Basis Universal feature support notes

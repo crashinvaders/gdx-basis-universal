@@ -18,9 +18,6 @@ public class WebLauncher implements PlatformLauncher {
         config.height = 0;
         config.showDownloadLogs = true;
 
-        // Required - BasisuNativeLibLoader throws if this is skipped.
-        BasisuTeaVM.initialize(config);
-
         AppParams params = new AppParams();
 
         String screenParam = getUrlParameter("screen");
@@ -39,7 +36,10 @@ public class WebLauncher implements PlatformLauncher {
             }
         };
 
-        new WebApplication(new App(new WebLauncher(), params), preloadListener, config);
+        // Required - BasisuNativeLibLoader throws if this is skipped. WebApplication is constructed
+        // only once the Basis Universal glue script is actually ready.
+        BasisuTeaVM.initialize(config, () ->
+                new WebApplication(new App(new WebLauncher(), params), preloadListener, config));
     }
 
     /** Location#getSearch() returns the raw "?key=value&..." query string - no URLSearchParams in teavm-jso-apis. */
