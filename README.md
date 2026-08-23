@@ -51,9 +51,9 @@ There could be some other options (even potentially encoding in the browser), bu
 
 ## Using the library
 
-Once added as a Maven dependency to libGDX project modules, the library is pretty easy to deal with, no global initialization calls are required in the code.
+Once added as a Maven dependency to libGDX project modules, the library is pretty easy to deal with - no global initialization calls are required in the code, except for the gdx-teavm backend (see [its section below](#web-module-teavm-backend)).
 
-All the official libGDX backends are fully supported.
+All the official libGDX backends are fully supported, plus the third-party [gdx-teavm](https://github.com/xpenatan/gdx-teavm) backend.
 
 ### Connecting dependencies (Gradle)
 
@@ -138,6 +138,24 @@ Don't forget to add a GWT module entry to your `GdxDefinition.gwt.xml` file.
 
 In case you have an issue with your GWT setup, check on [the troubleshooting section](#gwt-module-troubleshooting), it might be helpful.
 
+#### Web module ([TeaVM](https://github.com/xpenatan/gdx-teavm) backend)
+
+```gradle
+dependencies {
+    implementation "com.crashinvaders.basisu:basisu-gdx-teavm:$gdxBasisuVersion"
+}
+```
+
+In your `WebLauncher`'s `main()`, call `BasisuTeaVM.initialize(config)` right after building the `WebApplicationConfiguration`, before constructing `WebApplication`:
+
+```java
+WebApplicationConfiguration config = new WebApplicationConfiguration("canvas");
+// ...
+BasisuTeaVM.initialize(config); // <-- This line!
+// ...
+new WebApplication(new MyApp(), config);
+```
+
 ### Example code
 
 The library provides transparent support for `KTX2`/`Basis` format textures using `Ktx2TextureData`/`BasisuTextureData` classes respectively. Each acts very similar to libGDX's implementation of `ETC1TextureData`. The only difference is that libGDX doesn't know how to load `.ktx2`/`.basis` texture files out of the box, so you have to explicitly use the proper texture data class when creating a texture.
@@ -174,7 +192,8 @@ TextureAtlas myAtlas = assetManager.get("MyAtlas.atlas", TextureAtlas.class);
 Here's the list of the limitations you should be aware of when using this library (on top of regular libGDX backend limitations).
 
 - __[Android]__ Due to NDK specs, __Android 5.0 (API 21) is the minimum supported version__.
-- __[GWT]__ WebAssembly is available pretty much on every modern browser ([compatibility chart](https://caniuse.com/wasm)). Just for reference, the support is enabled by default as of __Firefox 52__, __Chrome 57__, __Opera 44__, and __Edge 16__.
+- __[GWT/gdx-teavm]__ WebAssembly is available pretty much on every modern browser ([compatibility chart](https://caniuse.com/wasm)). Just for reference, the support is enabled by default as of __Firefox 52__, __Chrome 57__, __Opera 44__, and __Edge 16__.
+- __[gdx-teavm]__ Requires calling `BasisuTeaVM.initialize(config)` in your `WebLauncher` - see [its section above](#web-module-teavm-backend).
 - __[iOS]__ Due to OpenGL deprecation, working with compressed textures is troublesome. Please read [this section](#ios-module-robovm-backend).
 
 ## Basis Universal feature support notes
