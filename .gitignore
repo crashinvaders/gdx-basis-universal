@@ -31,4 +31,5 @@ robovm-build
 # Eclipse
 .project
 .classpath
+.factorypath
 .settings

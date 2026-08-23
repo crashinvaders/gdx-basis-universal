@@ -31,7 +31,7 @@ allprojects {
 
     ext {
         projectGroup = 'com.crashinvaders.basisu'
-        versionName = '1.1.3'
+        versionName = '1.2.0'
         isSnapshot = true
         version = "$versionName${isSnapshot ? '-SNAPSHOT' : ''}"
     }
@@ -54,7 +54,7 @@ void resolveProperty(String propertyName, String envVariableName) {
 resolveProperty('githubUsername', 'GITHUB_USERNAME')
 resolveProperty('githubAccessToken', 'GITHUB_ACCESS_TOKEN')
 
-def basisuLibProjects = [project(':basisu-wrapper'), project(':basisu-gdx'), project(':basisu-gdx-gwt')]
+def basisuLibProjects = [project(':basisu-wrapper'), project(':basisu-gdx'), project(':basisu-gdx-gwt'), project(':basisu-gdx-teavm')]
 
 configure(basisuLibProjects) {
     apply plugin: 'java-library'

@@ -28,8 +28,6 @@ dependencies {
 
 gdxTeaVM {
     assets.from(file('../assets'))
-    // The Basis Universal Emscripten/Wasm glue (js + wasm), shared with the GWT backend.
-    assets.from(file("${project(':basisu-wrapper').projectDir}/libs/web"))
 
     js {
         mainClass.set('com.crashinvaders.basisu.demo.teavm.WebLauncher')
@@ -49,4 +47,10 @@ gdxTeaVM {
             autoReload.set(true)
         }
     }
+}
+
+tasks.register('run') {
+    group 'application'
+    description = 'Run the JavaScript web app via the gdx-teavm dev server.'
+    dependsOn 'gdx_teavm_web_js_run'
 }
